@@ -179,13 +179,18 @@ def accounts_list():
         accounts = Accounts.query.order_by(Accounts.AccountID.desc()).all()
     except:
         flash('Error loading accounts. Please try again.', 'error')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('accounts_list'))
     return render_template('accounts/accounts_list.html', accounts=accounts)
 
 # Accounts import
 @app.route('/accounts/accounts_import/', methods=['GET', 'POST'])
 def accounts_import():
     return render_template('accounts_import.html')
+
+# Import accounts
+@app.route('/accounts/import_accounts/', methods=['GET', 'POST'])
+def import_accounts():
+    return render_template('accounts/import_accounts.html')
 
 # New Account
 @app.route('/accounts/new_account/', methods=['GET', 'POST'])
@@ -266,7 +271,6 @@ def delete_account(id):
     except:
         flash('Error deleting account.', 'error')
         return redirect(url_for('accounts_list'))
-
 
 
 

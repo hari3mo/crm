@@ -47,7 +47,7 @@
     {% endfor %}
     <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
         <a class="navbar-brand me-lg-5" href="{{ url_for('index') }}">
-            <img class="navbar-brand-dark" src="{{ url_for('static', filename='img/logo_white.png') }}" alt="ERP logo" /> <img class="navbar-brand-light" src="{{ url_for('static', filename='img/logo_white.png') }}" alt="ERP logo" />
+            <img class="navbar-brand-dark" src="{{ url_for('static', filename='img/logo.png') }}" alt="ERP logo" /> <img class="navbar-brand-light" src="{{ url_for('static', filename='img/logo.png') }}" alt="ERP logo" />
         </a>
         <div class="d-flex align-items-center">
             <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
         </div>
     </nav>
     
-            <nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
+    <nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
       <div class="sidebar-inner px-4 pt-3">
         <div class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
           <div class="d-flex align-items-center">
@@ -80,11 +80,12 @@
               </a>
           </div>
         </div>
+        <!-- Sidebar -->
         <ul class="nav flex-column pt-3 pt-md-0">
           <li class="nav-item">
             <a href="{{ url_for('index') }}" class="nav-link d-flex align-items-center">
               <span class="sidebar-icon">
-                <img src="{{ url_for('static', filename='img/icon.png') }}" height="20" width="20" alt="Volt Logo">
+                <img src="{{ url_for('static', filename='img/icon.png') }}" height="20" width="20" alt="ERP Logo">
               </span>
               <span class="mt-1 ms-1 sidebar-text">ERPCRM</span>
             </a>
@@ -125,8 +126,8 @@
             role="list" id="submenu-app" aria-expanded="false">
             <ul class="flex-column nav">
               <li class="nav-item ">
-                <a class="nav-link" href="../../pages/tables/bootstrap-tables.html">
-                  <span class="sidebar-text">Accounts Import</span>
+                <a class="nav-link" href="{{ url_for('import_accounts') }}">
+                  <span class="sidebar-text">Import Accounts</span>
                 </a>
               </li>
             </ul>
