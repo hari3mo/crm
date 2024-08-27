@@ -182,15 +182,11 @@ def accounts_list():
         return redirect(url_for('accounts_list'))
     return render_template('accounts/accounts_list.html', accounts=accounts)
 
-# Accounts import
-@app.route('/accounts/accounts_import/', methods=['GET', 'POST'])
-def accounts_import():
-    return render_template('accounts_import.html')
-
 # Import accounts
 @app.route('/accounts/import_accounts/', methods=['GET', 'POST'])
 def import_accounts():
-    return render_template('accounts/import_accounts.html')
+    form = FileForm()
+    return render_template('accounts/import_accounts.html', form=form)
 
 # New Account
 @app.route('/accounts/new_account/', methods=['GET', 'POST'])

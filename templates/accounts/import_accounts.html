@@ -24,4 +24,20 @@
 </div>
 
 
+<div class="card border-0 shadow">
+    <div class="card-body">
+        <form method="POST", enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+        
+            <div class="mb-3">
+                {{ form.file(class="form-control") }}
+                <br>
+                {{ form.submit(class="btn btn-info animate-up-2") }}
+            </div>
+        
+        </form>
+    </div>
+</div>
+
+
 {% endblock %}
