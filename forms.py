@@ -12,7 +12,7 @@ class AccountForm(FlaskForm):
     company_name = StringField('Company Name:*', validators=[DataRequired()])
     company_revenue = IntegerField('Revenue:*', validators=[DataRequired()])
     employee_head_count = IntegerField('Head Count:*', validators=[DataRequired()])
-    company_specialties = StringField('Company Specialties:')
+    company_specialties = TextAreaField('Company Specialties:')
     company_industry = StringField('Company Industry:')
     company_type = StringField('Company Type:')
     country = StringField('Country:*', validators=[DataRequired()])

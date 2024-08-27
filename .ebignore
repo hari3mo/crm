@@ -1,0 +1,7 @@
+__pycache__
+env
+db.py
+misc/
+migrations/
+ERPCRMDB.session.sql
+notebooks/

@@ -175,7 +175,11 @@ def index():
 @app.route('/accounts/accounts_list/')
 def accounts_list():
     accounts = None
-    accounts = Accounts.query.order_by(Accounts.AccountID.desc()).all()
+    try:
+        accounts = Accounts.query.order_by(Accounts.AccountID.desc()).all()
+    except:
+        flash('Error loading accounts. Please try again.', 'error')
+        return redirect(url_for('dashboard'))
     return render_template('accounts/accounts_list.html', accounts=accounts)
 
 # Accounts import
@@ -187,7 +191,83 @@ def accounts_import():
 @app.route('/accounts/new_account/', methods=['GET', 'POST'])
 def new_account():
     form = AccountForm()
+    try:
+        if form.validate_on_submit():
+            id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
+            
+            if id is None:
+                id = 1000
+            else:
+                id = id.AccountID + 10
+                
+            account = Accounts(AccountID=id,
+                            CompanyName=form.company_name.data, 
+                            CompanyRevenue=form.company_revenue.data, 
+                            EmployeeHeadCount=form.employee_head_count.data,
+                            CompanySpecialties=form.company_specialties.data, 
+                            CompanyIndustry=form.company_industry.data,
+                            CompanyType = form.company_type.data, 
+                            Country=form.country.data, 
+                            City=form.city.data, 
+                            Timezone=form.timezone.data,
+                            ClientID=100000)
+            
+            db.session.add(account)
+            db.session.commit()
+            
+            flash('Account added successfully.', 'success')
+            return redirect(url_for('accounts_list'))
+        
+    except:
+        flash('Error adding account. Please try again.', 'error')
+        return redirect(url_for('new_account'))
+           
     return render_template('accounts/new_account.html', form=form)
+
+# Update account
+@app.route('/accounts/update_account/<int:id>', methods=['GET', 'POST'])
+def account(id):
+    form = AccountForm()
+    account = Accounts.query.get_or_404(id)
+    form.company_specialties.data = account.CompanySpecialties
+    if form.validate_on_submit():
+
+        account.CompanyName = form.company_name.data
+        account.CompanyRevenue = form.company_revenue.data
+        account.EmployeeHeadCount = form.employee_head_count.data
+        account.CompanySpecialties = form.company_specialties.data
+        account.CompanyType = form.company_type.data
+        account.Country = form.country.data
+        account.City = form.city.data
+        account.Timezone = form.timezone.data
+        
+        try:
+            db.session.commit()
+            flash('Account updated successfully.', 'success')
+            return redirect(url_for('account', id=id))
+        
+        except:
+            flash('Account update failed.', 'error')
+            return redirect(url_for('account', id=id))
+
+        
+    return render_template('accounts/account.html', form=form, account=account, id=id)    
+
+# Delete account
+@app.route('/accounts/delete_account/<int:id>')
+def delete_account(id):
+    account = Accounts.query.get_or_404(id)
+    try:
+        db.session.delete(account)
+        db.session.commit()
+        flash('Account deleted successfully.', 'success')
+        return redirect(url_for('accounts_list'))
+    
+    except:
+        flash('Error deleting account.', 'error')
+        return redirect(url_for('accounts_list'))
+
+
 
 
 if __name__ == "__main__":

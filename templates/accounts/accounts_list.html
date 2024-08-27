@@ -38,7 +38,8 @@
                 table-layout: fixed;
                 width: 100%;
             }
-
+            
+            
             </style>
 
             
@@ -48,22 +49,26 @@
                     <table class="table table-centered table-nowrap mb-0 rounded table-fixed">
                         <thead class="thead-light">
                             <tr>
-                                <th class="border-0 rounded-start" style="width: 15%;">Company Name</th>
+                                <th class="border-0 rounded-start">Company Name</th>
                                 <th class="border-0">Company Revenue (millions)</th>
                                 <th class="border-0">Employee Head Count</th>
-                                <th class="border-0" style="width: 15%;">Company Industry</th>
-                                <th class="border-0" style='width: 25%;'>Company Specialties</th>
+                                <th class="border-0">Company Industry</th>
+                                <th class="border-0">Company Specialties</th>
                                 <th class="border-0">Company Type</th>
                                 <th class="border-0">Country</th>
                                 <th class="border-0">City</th>
-                                <th class="border-0 rounded-end">Timezone</th>
+                                <th class="border-0 rounded-end timezone-column">Timezone</th>
                             </tr>
                         </thead>
                         <tbody>
                             <!-- Item -->
                             {% for account in accounts %}
                             <tr>
-                                <td class="fw-bold">{{ account.CompanyName }}</td>
+                                <td class="fw-bold">
+                                    <a class="link-info" href="{{ url_for('account', id=account.AccountID) }}">
+                                        {{ account.CompanyName }}
+                                    </a>
+                                </td>
                                 <td>{{ account.CompanyRevenue }}</td>
                                 <td>{{ account.EmployeeHeadCount }}</td>
                                 <td>{{ account.CompanyIndustry }}</td>

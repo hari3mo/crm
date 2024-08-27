@@ -17,6 +17,15 @@
 */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
+
+.flashed-message {
+    position: fixed;
+    top: 5px; /* Adjust as needed */
+    left: 265px; /* Adjust based on sidebar width */
+    z-index: 1050; /* Ensure it is above other elements */
+    width: calc(100% - 272px); /* Adjust based on sidebar width */
+}
+
 .datepicker {
     display: none;
 }
