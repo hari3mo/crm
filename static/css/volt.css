@@ -29,10 +29,10 @@
 
 .flashed-message {
     position: fixed;
-    top: 5px; /* Adjust as needed */
-    left: 265px; /* Adjust based on sidebar width */
+    top: 6px; /* Adjust as needed */
+    left: 267px; /* Adjust based on sidebar width */
     z-index: 1050; /* Ensure it is above other elements */
-    width: calc(100% - 272px); /* Adjust based on sidebar width */
+    width: calc(100% - 277px); /* Adjust based on sidebar width */
 }
 
 .datepicker {

@@ -178,7 +178,7 @@ def accounts_list():
     try:
         accounts = Accounts.query.order_by(Accounts.AccountID.desc()).all()
     except:
-        flash('Error loading accounts. Please try again.', 'error')
+        flash('Error loading accounts. Please try again.', 'danger')
         return redirect(url_for('accounts_list'))
     return render_template('accounts/accounts_list.html', accounts=accounts)
 
@@ -186,6 +186,66 @@ def accounts_list():
 @app.route('/accounts/import_accounts/', methods=['GET', 'POST'])
 def import_accounts():
     form = FileForm()
+    filename = None
+    if form.validate_on_submit():        
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        if filename.split('.')[-1] != 'csv':
+            flash('Import failed. Please upload a .csv file.', 'danger')
+            return redirect(url_for('import_accounts'))
+        
+        try:        
+            # Rename function
+            while os.path.exists(filepath):
+                filename = filename.split('.')[0] + ' copy.csv'
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+            
+            file.save(filepath)
+            
+            df = pd.read_csv('static/files/{filename}'.format(filename=filename))
+            # Replace NaN with None
+            df = df.replace({np.nan: None})
+            
+            df = df.rename(columns={df.columns[0]: 'CompanyName',
+                                    df.columns[1]: 'CompanyRevenue',
+                                    df.columns[2]: 'EmployeeHeadCount',
+                                    df.columns[3]: 'CompanyIndustry',
+                                    df.columns[4]: 'CompanySpecialties',
+                                    df.columns[5]: 'CompanyType',
+                                    df.columns[6]: 'Country',
+                                    df.columns[7]: 'City',
+                                    df.columns[8]: 'Timezone'})
+            
+            # Grab max id
+            id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
+        
+            if id is None:
+                    id = 1000
+            else:
+                id = id.AccountID + 10
+                
+            for index, row in df.iterrows():
+                dct = row.to_dict()
+                dct.update({'AccountID': id, 'ClientID': 100000})
+                id += 10
+                account = Accounts(**dct)
+                db.session.add(account)
+                
+            db.session.commit()
+            os.remove(filepath)        
+            flash('Import successful.', 'success')
+            return redirect(url_for('accounts_list'))    
+                
+        except:
+            db.session.rollback()
+            flash('Import failed. Please ensure .csv file is ordered as \
+                follows: Company Name, Company Revenue, Employee Head Count, \
+                Company Industry, Company Specialties, Company Type, Country, \
+                City, Timezone.', 'danger')
+            return redirect(url_for('import_accounts'))
+        
     return render_template('accounts/import_accounts.html', form=form)
 
 # New Account
@@ -220,7 +280,7 @@ def new_account():
             return redirect(url_for('accounts_list'))
         
     except:
-        flash('Error adding account. Please try again.', 'error')
+        flash('Error adding account.', 'danger')
         return redirect(url_for('new_account'))
            
     return render_template('accounts/new_account.html', form=form)
@@ -248,7 +308,7 @@ def account(id):
             return redirect(url_for('account', id=id))
         
         except:
-            flash('Account update failed.', 'error')
+            flash('Account update failed.', 'danger')
             return redirect(url_for('account', id=id))
 
         
@@ -265,7 +325,7 @@ def delete_account(id):
         return redirect(url_for('accounts_list'))
     
     except:
-        flash('Error deleting account.', 'error')
+        flash('Error deleting account.', 'danger')
         return redirect(url_for('accounts_list'))
 
 
