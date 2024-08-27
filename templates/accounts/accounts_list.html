@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Accounts List{% endblock %}
+
+{% block content %}
+
+            <div class="py-4">
+                <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                    <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('index') }}">
+                                <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Accounts</li>
+                        <li class="breadcrumb-item active" aria-current="page">Accounts List</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between w-100 flex-wrap">
+                    <div class="mb-3 mb-lg-0">
+                        <h1 class="h4">Accounts List</h1>
+                    </div>
+                   
+                </div>
+            </div>
+
+            <style>
+
+          
+              .table-fixed th, .table-fixed td {
+                text-overflow: ellipsis;
+                white-space: normal;
+                word-wrap: break-word;
+                overflow: hidden;
+              }
+
+              .table-fixed {
+                table-layout: fixed;
+                width: 100%;
+            }
+
+            </style>
+
+            
+          <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-centered table-nowrap mb-0 rounded table-fixed">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="border-0 rounded-start" style="width: 15%;">Company Name</th>
+                                <th class="border-0">Company Revenue (millions)</th>
+                                <th class="border-0">Employee Head Count</th>
+                                <th class="border-0" style="width: 15%;">Company Industry</th>
+                                <th class="border-0" style='width: 25%;'>Company Specialties</th>
+                                <th class="border-0">Company Type</th>
+                                <th class="border-0">Country</th>
+                                <th class="border-0">City</th>
+                                <th class="border-0 rounded-end">Timezone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Item -->
+                            {% for account in accounts %}
+                            <tr>
+                                <td class="fw-bold">{{ account.CompanyName }}</td>
+                                <td>{{ account.CompanyRevenue }}</td>
+                                <td>{{ account.EmployeeHeadCount }}</td>
+                                <td>{{ account.CompanyIndustry }}</td>
+                                <td>{{ account.CompanySpecialties }}</td>
+                                <td>{{ account.CompanyType }}</td>
+                                <td>{{ account.Country }}</td>
+                                <td>{{ account.City }}</td>
+                                <td>{{ account.Timezone }}</td>
+                            </tr>
+                            {% endfor %}
+                            <!-- End of Item -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+{% endblock %}
