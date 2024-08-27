@@ -10,7 +10,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 # Account form
 class AccountForm(FlaskForm):
     company_name = StringField('Company Name:*', validators=[DataRequired()])
-    company_revenue = IntegerField('Revenue:*', validators=[DataRequired()])
+    company_revenue = IntegerField('Revenue (millions):*', validators=[DataRequired()])
     employee_head_count = IntegerField('Head Count:*', validators=[DataRequired()])
     company_specialties = TextAreaField('Company Specialties:')
     company_industry = StringField('Company Industry:')
