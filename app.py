@@ -32,7 +32,7 @@ app = Flask(__name__)
 load_dotenv()
 
 # MySQL database connection
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('MYSQL_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('MYSQL_URI')
 
 # Secret key
 app.config['SECRET_KEY'] = '9b2a012a1a1c425a8c86'
@@ -41,16 +41,14 @@ app.config['SECRET_KEY'] = '9b2a012a1a1c425a8c86'
 app.config['UPLOAD_FOLDER'] = 'static/files'
 
 # Remember me duration
-app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=5)
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=3)
+
 # Set session timeout duration
 app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Initialize database
 db = SQLAlchemy(app)
 migrate = Migrate(app, db) 
-
-# Set session timeout duration
-app.permanent_session_lifetime = timedelta(minutes=30) 
 
 # Initiallize login manager
 login_manager = LoginManager()
@@ -214,7 +212,7 @@ def login():
                 admin = Admins.query.filter_by(User=current_user.Email).first()
                 session['admin'] = True if admin else False
                 # session['image'] = str(current_user.Client.Image)
-                flash('Logged in successfully.', 'success')
+                flash('Successfully logged in.', 'success')
                 return redirect(url_for('index'))
             else:
                 flash('Incorrect password.', 'danger')
@@ -238,7 +236,7 @@ def signup():
 @login_required
 def logout():
     logout_user()
-    flash('Logged out successfully.', 'success')
+    flash('Successfully logged out.', 'success')
     return redirect(url_for('login'))
 
 

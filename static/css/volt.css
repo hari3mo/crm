@@ -31,10 +31,7 @@
 }
 
 .flashed-message {
-    position: fixed;
     top: 10px;
-    z-index: 1050;
-    width: 100%; 
 }
 
 .datepicker {
