@@ -32,9 +32,9 @@
 
 .flashed-message {
     position: fixed;
-    top: 5px; /* Adjust as needed */
-    z-index: 1050; /* Ensure it is above other elements */
-    width: 100%; /* Adjust based on sidebar width */
+    top: 10px;
+    z-index: 1050;
+    width: 100%; 
 }
 
 .datepicker {

@@ -37,6 +37,8 @@ app.config['SECRET_KEY'] = '9b2a012a1a1c425a8c86'
 # Uploads folder
 app.config['UPLOAD_FOLDER'] = 'static/files'
 
+# Remember me duration
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=5)
 # Set session timeout duration
 app.permanent_session_lifetime = timedelta(minutes=30)
 
@@ -51,11 +53,12 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message_category = "danger"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Users.query.filter_by(UserID=user_id).first()
-    # return Users.query.get(int(user_id))
+    return Users.query.get(int(user_id))
+    # return Users.query.filter_by(UserID=user_id).first()
 
 ##############################################################################
 
@@ -192,8 +195,11 @@ def login():
         # User exists
         if user:
             admin = None
+            remember =None 
+            remember = form.remember.data
+            remember = True if remember else False
             if user.verify_password(form.password.data):
-                login_user(user)
+                login_user(user, remember=remember)
                 # Check if user is an admin
                 admin = Admins.query.filter_by(User=current_user.Email).first()
                 session['admin'] = True if admin else False
@@ -201,26 +207,41 @@ def login():
                 flash('Logged in successfully.', 'success')
                 return redirect(url_for('index'))
             else:
-                flash('Incorrect password.', 'error')
+                flash('Incorrect password.', 'danger')
                 return redirect(url_for('login'))
         else:
-            flash('User does not exist.', 'error')
+            flash('User does not exist.', 'danger')
             return redirect(url_for('login'))
-        
-    for fieldName, errorMessages in form.errors.items():
-        for err in errorMessages:
-            flash(err, 'error')
             
     return render_template('login.html', form=form)
 
+# Sign up
+@app.route('/signup/', methods=['POST', 'GET'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = UserForm()
+    return render_template('signup.html', form=form)
+
+# Logout function
+@app.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    flash('Logged out successfully.', 'success')
+    return redirect(url_for('login'))
 
 
 @app.route('/')
+@login_required
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return render_template('index.html')
+    return redirect(url_for('login'))
 
 # Accounts list
 @app.route('/accounts/list/')
+@login_required
 def accounts_list():
     accounts = None
     try:
@@ -232,6 +253,7 @@ def accounts_list():
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
+@login_required
 def import_accounts():
     form = FileForm()
     filename = None
@@ -298,6 +320,7 @@ def import_accounts():
 
 # New Account
 @app.route('/accounts/new/', methods=['GET', 'POST'])
+@login_required
 def new_account():
     form = AccountForm()
     try:
@@ -335,6 +358,7 @@ def new_account():
 
 # Update account
 @app.route('/accounts/update_account/<int:id>', methods=['GET', 'POST'])
+@login_required
 def account(id):
     form = AccountForm()
     account = Accounts.query.get_or_404(id)
@@ -364,6 +388,7 @@ def account(id):
 
 # Delete account
 @app.route('/accounts/delete_account/<int:id>')
+@login_required
 def delete_account(id):
     account = Accounts.query.get_or_404(id)
     try:
@@ -378,6 +403,7 @@ def delete_account(id):
 
 # Clear accounts
 @app.route('/accounts/clear/')
+@login_required
 def clear_accounts():
     # try:
     Accounts.query.delete()
@@ -389,6 +415,10 @@ def clear_accounts():
     #     return redirect(url_for('accounts_list'))
     
 
+# Invalid URL
+@app.errorhandler(404)
+def page_not_foredid(e):
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)
