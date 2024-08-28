@@ -83,12 +83,19 @@
                         {{ form.timezone(class="form-control", value=account.Timezone) }}
                     </div>
                 </div>
-                <div class="mt-3">
-                    {{ form.submit(class="btn btn-info animate-up-2", value='Update') }}
-                    <a href="{{ url_for('accounts_list')}}" class="btn btn-primary animate-up-2">Lead</a>
-                    <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2">Opportunity</a>
-                    <a href="{{ url_for('delete_account', id=account.AccountID)}}" class="btn btn-danger animate-up-2">Delete</a>
-                    <a href="{{ url_for('accounts_list')}}" class="btn btn-gray-500 animate-up-2">Discard</a>
+                <div class="mt-3 row">
+                    <div class="col d-flex justify-content-start">
+                        {{ form.submit(class="btn btn-primary animate-up-2 me-1", value='Update') }}
+                   <!--
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Lead</a>
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Opportunity</a>
+            
+                    -->
+                        </div>
+                    <div class="col d-flex justify-content-end">
+                        <a href="{{ url_for('delete_account', id=account.AccountID)}}" class="btn btn-danger animate-up-2 me-1">Delete</a>
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-gray-500 animate-up-2 me-1">Discard</a>
+                    </div>
                 </div>
             </form>
         </div>

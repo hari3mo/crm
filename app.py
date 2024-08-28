@@ -28,8 +28,11 @@ from forms import LoginForm, SearchForm, UserForm, PasswordForm, FileForm, \
 
 app = Flask(__name__) 
 
+# Load environment variables
+load_dotenv()
+
 # MySQL database connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://erpcrm:Erpcrmpass1!@erpcrmdb.cfg0ok8iismy.us-west-1.rds.amazonaws.com:3306/erpcrmdb' 
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('MYSQL_URI')
 
 # Secret key
 app.config['SECRET_KEY'] = '9b2a012a1a1c425a8c86'
@@ -53,11 +56,15 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message_category = "danger"
+login_manager.login_message = "Please sign in to acceess ERPCRM."
+login_manager.login_message_category = "primary"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Users.query.get(int(user_id))
+    try:
+        return Users.query.get(int(user_id))
+    except:
+        return redirect(url_for('login'))
     # return Users.query.filter_by(UserID=user_id).first()
 
 ##############################################################################
@@ -183,6 +190,9 @@ class Admins(db.Model):
 
 # Routes
 
+# Admin
+
+
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
@@ -238,6 +248,9 @@ def index():
     if current_user.is_authenticated:
         return render_template('index.html')
     return redirect(url_for('login'))
+
+# Analytics
+
 
 # Accounts list
 @app.route('/accounts/list/')
@@ -411,7 +424,6 @@ def clear_accounts():
     flash('Accounts cleared successfully.', 'success')
     return redirect(url_for('accounts_list'))
     # except:
-    #     flash('Error clearing accounts.', 'danger')
     #     return redirect(url_for('accounts_list'))
     
 
