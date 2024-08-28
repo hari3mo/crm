@@ -37,14 +37,6 @@
 </head>
 
 <body>
-    <!-- Flashed message -->
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show flashed-message" role="alert">
-      <span class="fas fa-bullhorn me-1"></span>
-      {{ message }}
-      <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
     <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
         <a class="navbar-brand me-lg-5" href="{{ url_for('index') }}">
             <img class="navbar-brand-dark" src="{{ url_for('static', filename='img/logo.png') }}" alt="ERP logo"/> <img class="navbar-brand-light" src="{{ url_for('static', filename='img/logo.png') }}" alt="ERP logo" />
@@ -250,7 +242,14 @@
     </nav>
 
     <main class="content">
-
+        <!-- Flashed message -->
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show flashed-message" role="alert">
+      <span class="fas fa-bullhorn me-1"></span>
+      {{ message }}
+      <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
     <nav class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-2 pb-0">
         <div class="container-fluid px-0">
           <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
@@ -419,6 +418,7 @@
 
     {% block content %}
     {% endblock %}
+    
     <footer class="bg-white rounded shadow p-5 mb-4 mt-4">
         <div class="row">
             <div class="col-12 col-md-4 col-xl-6 mb-4 mb-md-0">

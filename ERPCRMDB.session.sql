@@ -80,3 +80,6 @@ WHERE (ClientID=100000)
 
 --@block
 DELETE FROM Admins WHERE User = 'ahad.ahmad@erp-center.com'
+
+--@block
+DELETE FROM Accounts

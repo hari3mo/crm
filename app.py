@@ -44,6 +44,19 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db) 
 
+# Set session timeout duration
+app.permanent_session_lifetime = timedelta(minutes=30) 
+
+# Initiallize login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.filter_by(UserID=user_id).first()
+    # return Users.query.get(int(user_id))
+
 ##############################################################################
 
 # Models
@@ -167,12 +180,47 @@ class Admins(db.Model):
 
 # Routes
 
+# Login
+@app.route('/login/', methods=['POST', 'GET'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = None
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(Email=form.email.data).first()
+        # User exists
+        if user:
+            admin = None
+            if user.verify_password(form.password.data):
+                login_user(user)
+                # Check if user is an admin
+                admin = Admins.query.filter_by(User=current_user.Email).first()
+                session['admin'] = True if admin else False
+                # session['image'] = str(current_user.Client.Image)
+                flash('Logged in successfully.', 'success')
+                return redirect(url_for('index'))
+            else:
+                flash('Incorrect password.', 'error')
+                return redirect(url_for('login'))
+        else:
+            flash('User does not exist.', 'error')
+            return redirect(url_for('login'))
+        
+    for fieldName, errorMessages in form.errors.items():
+        for err in errorMessages:
+            flash(err, 'error')
+            
+    return render_template('login.html', form=form)
+
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 # Accounts list
-@app.route('/accounts/accounts_list/')
+@app.route('/accounts/list/')
 def accounts_list():
     accounts = None
     try:
@@ -183,7 +231,7 @@ def accounts_list():
     return render_template('accounts/accounts_list.html', accounts=accounts)
 
 # Import accounts
-@app.route('/accounts/import_accounts/', methods=['GET', 'POST'])
+@app.route('/accounts/import/', methods=['GET', 'POST'])
 def import_accounts():
     form = FileForm()
     filename = None
@@ -235,7 +283,7 @@ def import_accounts():
                 
             db.session.commit()
             os.remove(filepath)        
-            flash('Import successful.', 'success')
+            flash('Accounts import successful.', 'success')
             return redirect(url_for('accounts_list'))    
                 
         except:
@@ -249,7 +297,7 @@ def import_accounts():
     return render_template('accounts/import_accounts.html', form=form)
 
 # New Account
-@app.route('/accounts/new_account/', methods=['GET', 'POST'])
+@app.route('/accounts/new/', methods=['GET', 'POST'])
 def new_account():
     form = AccountForm()
     try:
@@ -328,6 +376,18 @@ def delete_account(id):
         flash('Error deleting account.', 'danger')
         return redirect(url_for('accounts_list'))
 
+# Clear accounts
+@app.route('/accounts/clear/')
+def clear_accounts():
+    # try:
+    Accounts.query.delete()
+    db.session.commit()
+    flash('Accounts cleared successfully.', 'success')
+    return redirect(url_for('accounts_list'))
+    # except:
+    #     flash('Error clearing accounts.', 'danger')
+    #     return redirect(url_for('accounts_list'))
+    
 
 
 if __name__ == "__main__":

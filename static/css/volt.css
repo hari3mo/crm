@@ -23,16 +23,18 @@
     width: 200px; 
 } */
 
+
+
+
 .company-specialties {
     height: 100px; /* Adjust height as needed */
 }
 
 .flashed-message {
     position: fixed;
-    top: 6px; /* Adjust as needed */
-    left: 267px; /* Adjust based on sidebar width */
+    top: 5px; /* Adjust as needed */
     z-index: 1050; /* Ensure it is above other elements */
-    width: calc(100% - 277px); /* Adjust based on sidebar width */
+    width: 100%; /* Adjust based on sidebar width */
 }
 
 .datepicker {
