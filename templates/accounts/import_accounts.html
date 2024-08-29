@@ -12,7 +12,7 @@
                 </a>
             </li>
             <li class="breadcrumb-item"><a href="{{ url_for('accounts_list') }}">Accounts</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Import Accounts</li>
+            <li class="breadcrumb-item active" aria-current="page">Import</li>
         </ol>
     </nav>
     <div class="d-flex justify-content-between w-100 flex-wrap">
@@ -32,7 +32,7 @@
             <div class="mb-3">
                 {{ form.file(class="form-control") }}
                 <br>
-                {{ form.submit(class="btn btn-primary animate-up-2") }}
+                {{ form.submit(class="btn btn-info animate-up-2") }}
             </div>
         
         </form>

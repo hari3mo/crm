@@ -12,7 +12,7 @@
                 </a>
             </li>
             <li class="breadcrumb-item"><a href="{{ url_for('accounts_list') }}">Accounts</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Update Account</li>
+            <li class="breadcrumb-item active" aria-current="page">Update</li>
         </ol>
     </nav>
     <div class="d-flex justify-content-between w-100 flex-wrap">
@@ -85,7 +85,7 @@
                 </div>
                 <div class="mt-3 row">
                     <div class="col d-flex justify-content-start">
-                        {{ form.submit(class="btn btn-primary animate-up-2 me-1", value='Update') }}
+                        {{ form.submit(class="btn btn-secondary animate-up-2 me-1", value='Update') }}
                    <!--
                         <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Lead</a>
                         <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Opportunity</a>
@@ -94,7 +94,7 @@
                         </div>
                     <div class="col d-flex justify-content-end">
                         <a href="{{ url_for('delete_account', id=account.AccountID)}}" class="btn btn-danger animate-up-2 me-1">Delete</a>
-                        <a href="{{ url_for('accounts_list')}}" class="btn btn-gray-500 animate-up-2 me-1">Discard</a>
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-primary animate-up-2 me-1">Discard</a>
                     </div>
                 </div>
             </form>

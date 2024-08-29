@@ -74,7 +74,7 @@ ALTER TABLE Leads
 ADD PRIMARY KEY (LeadID)
 
 --@block
-UPDATE Clients
+UPDATE Users
 SET License = '9b2a012a1a1c425a8c86'
 WHERE (ClientID=100000)
 

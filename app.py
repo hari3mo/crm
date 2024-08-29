@@ -54,7 +54,7 @@ migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = "Please sign in to acceess ERPCRM."
+login_manager.login_message = "Please sign in to access ERPCRM."
 login_manager.login_message_category = "primary"
 
 @login_manager.user_loader
@@ -80,7 +80,12 @@ def login():
     user = None
     form = LoginForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(Email=form.email.data).first()
+        
+        try:
+            user = Users.query.filter_by(Email=form.email.data).first()
+        except:
+            return redirect(url_for('index'))
+        
         # User exists
         if user:
             admin = None
@@ -190,7 +195,7 @@ def import_accounts():
                 
             for index, row in df.iterrows():
                 dct = row.to_dict()
-                dct.update({'AccountID': id, 'ClientID': 100000})
+                dct.update({'AccountID': id, 'ClientID': current_user.ClientID})
                 id += 10
                 account = Accounts(**dct)
                 db.session.add(account)
@@ -234,7 +239,7 @@ def new_account():
                             Country=form.country.data, 
                             City=form.city.data, 
                             Timezone=form.timezone.data,
-                            ClientID=100000)
+                            ClientID=current_user.ClientID)
             
             db.session.add(account)
             db.session.commit()
