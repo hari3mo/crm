@@ -363,10 +363,11 @@ def import_leads():
             
             file.save(filepath)
             
-        except:
-            flash('Failed to save file.', 'danger')
+        except Exception as e:
+            flash(f'Failed to save file. {e}', 'danger')
             return redirect(url_for('index'))
         
+            
         try:
             df = pd.read_csv('static/files/{filename}'.format(filename=filename))
             
