@@ -79,6 +79,4 @@ SET License = '9b2a012a1a1c425a8c86'
 WHERE (ClientID=100000)
 
 
---@block
-DELETE FROM Leads
 

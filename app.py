@@ -411,6 +411,7 @@ def new_account():
     form = AccountForm()
     try:
         if form.validate_on_submit():
+            # Grab max id
             id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
             
             if id is None:
@@ -442,8 +443,59 @@ def new_account():
            
     return render_template('accounts/new_account.html', form=form)
 
+# New lead
+@app.route('/leads/new/', methods=['GET', 'POST'])
+def new_lead():
+    form = LeadForm()
+    if form.validate_on_submit():
+        account = None
+        
+        if form.company.data.isnumeric():
+            account = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+                .filter_by(AccountID=form.company.data).first()
+        else:
+            account = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+                .filter_by(CompanyName=form.company.data).first()        
+        
+        if account:
+            # Grab max id
+            id = Leads.query.order_by(Leads.LeadID.desc()).first()
+            
+            if id is None:
+                id = 10000
+            else:
+                id = id.LeadID + 100
+                
+            if account:
+                lead = Leads(LeadID=id,
+                            AccountID=account.AccountID,
+                            ClientID=current_user.ClientID,
+                            Position=form.position.data,
+                            FirstName=form.first_name.data,
+                            LastName=form.last_name.data,
+                            Email=form.email.data,
+                            CompanyName=account.CompanyName)
+                
+                db.session.add(lead)
+                db.session.commit()
+                flash('Lead added successfully.', 'success')
+                return redirect(url_for('leads_list'))
+        
+        else:
+            flash('Account not found.', 'danger')
+            return redirect(url_for('new_lead'))
+    
+    return render_template('leads/new_lead.html', form=form)
+
+# Update lead
+@app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
+def lead(id):
+    lead = Leads.query.get_or_404(id)
+    form = LeadUpdateForm()
+    return render_template('leads/lead.html', lead=lead, form=form)
+
 # Update account
-@app.route('/accounts/update_account/<int:id>', methods=['GET', 'POST'])
+@app.route('/accounts/update/<int:id>', methods=['GET', 'POST'])
 @login_required
 def account(id):
     form = AccountForm()
@@ -473,7 +525,7 @@ def account(id):
     return render_template('accounts/account.html', form=form, account=account, id=id)    
 
 # Delete account
-@app.route('/accounts/delete_account/<int:id>')
+@app.route('/accounts/delete/<int:id>')
 @login_required
 def delete_account(id):
     account = Accounts.query.get_or_404(id)
@@ -486,6 +538,21 @@ def delete_account(id):
     except:
         flash('Error deleting account.', 'danger')
         return redirect(url_for('accounts_list'))
+    
+# Delete lead
+@app.route('/leads/delete/<int:id>')
+@login_required
+def delete_lead(id):
+    lead = Leads.query.get_or_404(id)
+    try:
+        db.session.delete(lead)
+        db.session.commit()
+        flash('Lead deleted successfully.', 'success')
+        return redirect(url_for('leads_list'))
+    
+    except:
+        flash('Error deleting lead.', 'danger')
+        return redirect(url_for('leads_list'))
 
 # Clear accounts
 @app.route('/accounts/clear/')

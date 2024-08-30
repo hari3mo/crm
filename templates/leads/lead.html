@@ -13,12 +13,12 @@
                 </a>
             </li>
             <li class="breadcrumb-item"><a href="{{ url_for('leads_list') }}">Leads</a></li>
-            <li class="breadcrumb-item active" aria-current="page">New</li>
+            <li class="breadcrumb-item active" aria-current="page">Update</li>
         </ol>
     </nav>
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
-            <h1 class="h4">New Lead</h1>
+            <h1 class="h4">Lead: {{ lead.LeadID }}</h1>
         </div>
        
     </div>
@@ -27,42 +27,45 @@
 <div class="row justify-content-center">
     <div class="col-12 col-xl-8">
         <div class="card card-body border-0 shadow mb-4">
-            <h2 class="h5 mb-4">Details</h2>
-            <form method='POST'>
+            <h2 class="h5 mb-4"><a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
+            <form action="{{ url_for('lead', id=lead.LeadID) }}"method='POST'>
                 {{ form.hidden_tag() }}
                 <div class="row">
-
                     <div class="col-sm-3 mb-3">
                         <div class="form-group">
                             {{ form.first_name.label(class="form-label" )}}
-                            {{ form.first_name(class="form-control") }}   
+                            {{ form.first_name(class="form-control", value=lead.FirstName) }}   
                         </div>
                     </div>
                     <div class="col-sm-3 mb-3">
                         {{ form.last_name.label(class="form-label" )}}
-                        {{ form.last_name(class="form-control") }}
+                        {{ form.last_name(class="form-control", value=lead.LastName) }}
                     </div>
                     <div class="col-sm-6 mb-3">
                         {{ form.email.label(class="form-label" )}}
-                        {{ form.email(class="form-control") }}
+                        {{ form.email(class="form-control", value=lead.Email) }}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-6 mb-3">
-                        <div class="form-group">
-                            {{ form.company.label(class="form-label" )}}
-                            {{ form.company(class="form-control", placeholder="Name or ID") }}   
-                        </div>
-                    </div>
-                    <div class="col-sm-6 mb-3">
+                    <div class="col-sm-12 mb-3">
                         {{ form.position.label(class="form-label" )}}
-                        {{ form.position(class="form-control") }}
+                        {{ form.position(class="form-control", value=lead.Position) }}
                     </div>
                 </div>
-
-                    <div class="mt-3">
-                        {{ form.submit(class="btn btn-info animate-up-2") }}
+                <div class="mt-3 row">
+                    <div class="col d-flex justify-content-start">
+                        {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update') }}
+                   <!--
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Lead</a>
+                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Opportunity</a>
+            
+                    -->
+                        </div>
+                    <div class="col d-flex justify-content-end">
+                        <a href="{{ url_for('delete_lead', id=lead.LeadID) }}" class="btn btn-danger animate-up-2 me-1">Delete</a>
+                        <!-- <a href="{{ url_for('leads_list')}}" class="btn btn-primary animate-up-2 me-1">Discard</a> -->
                     </div>
+                </div>
 
             </form>
         </div>

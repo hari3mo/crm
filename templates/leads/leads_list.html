@@ -102,21 +102,21 @@
             </a>
             -->
             <a href="{{ url_for('import_leads') }}">
-                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center" type="button">
+                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center justify-content-between" type="button">
+                    <span class="me-2">Import</span>
                     <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
                         <title>Import</title>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
                     </svg>
-                    <span class="ms-2">Import</span>
                 </button>
             </a>
-            <a href="{{ url_for('new_account') }}">
-                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center" type="button">
+            <a href="{{ url_for('new_lead') }}">
+                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center justify-content-between" type="button">
+                    <span class="me-2">New</span>
                     <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
                         <title>New</title>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
                     </svg>
-                    <span class="ms-2">New</span>
                 </button>
             </a>
         </div>
@@ -175,7 +175,7 @@
                     {% for lead in leads %}
                     <tr>
                         <td class="fw-bold">
-                            <a class="link-info" href="#">
+                            <a class="link-info" href="{{ url_for('lead', id=lead.LeadID )}}">
                                 {{ lead.FirstName if lead.FirstName }} {{ lead.LastName if lead.LastName }}
                             </a>
                         </td>
