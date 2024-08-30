@@ -349,58 +349,58 @@ def import_leads():
         file = form.file.data
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        try:
-            if filename.split('.')[-1] != 'csv':
-                flash('Import failed. Please upload a .csv file.')
-                return redirect(url_for('import_leads'))
-                
-            # Rename function
-            while os.path.exists(filepath):
-                filename = filename.split('.')[0] + ' copy.csv'
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
-            
-            file.save(filepath)
-            
-            df = pd.read_csv('static/files/{filename}'.format(filename=filename))
-            
-            df = df.rename(columns={df.columns[0]: 'CompanyName',
-                                    df.columns[1]: 'Position',
-                                    df.columns[2]: 'FirstName',
-                                    df.columns[3]: 'LastName',
-                                    df.columns[4]: 'Email'})
-            
-            accounts_df = pd.read_sql(db.session.query(Accounts).filter(Accounts.ClientID == current_user.ClientID).statement, con=engine)
-            df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
-            # Replace NaN with None
-            df = df.replace({np.nan: None})
-            
-            # Grab max id
-            id = Leads.query.order_by(Leads.LeadID.desc()).first()
-        
-            if id is None:
-                    id = 10000
-            else:
-                id = id.LeadID + 50
-            
-            for index, row in df.iterrows():
-                dct = row.to_dict()
-                dct.update({'LeadID': id})
-                id += 100
-                lead = Leads(**dct)
-                db.session.add(lead)
-            
-            db.session.commit() 
-            os.remove(filepath)        
-            flash('Import successful.', 'success')
-            return redirect(url_for('leads_list'))    
-            
-        except:
-            db.session.rollback()
-            flash('Import failed. Please ensure .csv file is ordered as \
-                follows: Company Name, Position, First Name, Last Name, \
-                    Email', 'danger')
+
+        # try:
+        if filename.split('.')[-1] != 'csv':
+            flash('Import failed. Please upload a .csv file.')
             return redirect(url_for('import_leads'))
+            
+        # Rename function
+        while os.path.exists(filepath):
+            filename = filename.split('.')[0] + ' copy.csv'
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+        
+        file.save(filepath)
+        
+        df = pd.read_csv('static/files/{filename}'.format(filename=filename))
+        
+        df = df.rename(columns={df.columns[0]: 'CompanyName',
+                                df.columns[1]: 'Position',
+                                df.columns[2]: 'FirstName',
+                                df.columns[3]: 'LastName',
+                                df.columns[4]: 'Email'})
+        
+        accounts_df = pd.read_sql(db.session.query(Accounts).filter(Accounts.ClientID == current_user.ClientID).statement, con=engine)
+        df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
+        # Replace NaN with None
+        df = df.replace({np.nan: None})
+        
+        # Grab max id
+        id = Leads.query.order_by(Leads.LeadID.desc()).first()
+    
+        if id is None:
+                id = 10000
+        else:
+            id = id.LeadID + 50
+        
+        for index, row in df.iterrows():
+            dct = row.to_dict()
+            dct.update({'LeadID': id})
+            id += 100
+            lead = Leads(**dct)
+            db.session.add(lead)
+        
+        db.session.commit() 
+        os.remove(filepath)        
+        flash('Import successful.', 'success')
+        return redirect(url_for('leads_list'))    
+            
+        # except:
+        #     db.session.rollback()
+        #     flash('Import failed. Please ensure .csv file is ordered as \
+        #         follows: Company Name, Position, First Name, Last Name, \
+        #             Email', 'danger')
+        #     return redirect(url_for('import_leads'))
         
     return render_template('leads/import_leads.html', form=form)
 
