@@ -381,7 +381,7 @@ def import_leads():
             if id is None:
                     id = 10000
             else:
-                id = id.LeadID + 100
+                id = id.LeadID + 50
             
             for index, row in df.iterrows():
                 dct = row.to_dict()
@@ -464,7 +464,7 @@ def new_lead():
             if id is None:
                 id = 10000
             else:
-                id = id.LeadID + 100
+                id = id.LeadID + 50
                 
             if account:
                 lead = Leads(LeadID=id,
