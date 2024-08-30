@@ -1,6 +1,6 @@
 .vscode/
 env/
 __pycache__/
-static/files/*
+static/files/*.csv
 .DS_Store
 .env
