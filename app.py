@@ -379,7 +379,7 @@ def import_leads():
             id = Leads.query.order_by(Leads.LeadID.desc()).first()
         
             if id is None:
-                    id = 1000
+                    id = 10000
             else:
                 id = id.LeadID + 100
             
@@ -548,8 +548,8 @@ class Accounts(db.Model):
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     
     # References
-    Lead = db.relationship('Leads', backref='Account')
-    Opportunity = db.relationship('Opportunities', backref='Account')
+    Leads = db.relationship('Leads', backref='Account')
+    Opportunities = db.relationship('Opportunities', backref='Account')
     
 # Leads model
 class Leads(db.Model):
@@ -564,7 +564,7 @@ class Leads(db.Model):
     CompanyName =  db.Column(db.String(100), nullable=False)
     
     # References
-    Opportunity = db.relationship('Opportunities', backref='Lead')
+    Opportunities = db.relationship('Opportunities', backref='Lead')
 
 
 # Opportunities model    
