@@ -345,13 +345,12 @@ def import_accounts():
 def import_leads():
     form = FileForm()
     filename = None
-    if form.validate_on_submit():
-        try:        
-            file = form.file.data
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if form.validate_on_submit():     
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-            # try:
+        try:
             if filename.split('.')[-1] != 'csv':
                 flash('Import failed. Please upload a .csv file.')
                 return redirect(url_for('import_leads'))
@@ -363,12 +362,6 @@ def import_leads():
             
             file.save(filepath)
             
-        except Exception as e:
-            flash(f'Failed to save file. {e}', 'danger')
-            return redirect(url_for('index'))
-        
-            
-        try:
             df = pd.read_csv('static/files/{filename}'.format(filename=filename))
             
             df = df.rename(columns={df.columns[0]: 'CompanyName',
@@ -396,25 +389,20 @@ def import_leads():
                 id += 100
                 lead = Leads(**dct)
                 db.session.add(lead)
-        except:
-            flash('Failed during pandas.', 'danger')
-            return redirect(url_for('index'))
+
             
-        try:
             db.session.commit() 
             os.remove(filepath)        
             flash('Import successful.', 'success')
             return redirect(url_for('leads_list'))    
-        except:
-            flash('Failed during commit.', 'danger')
-            return redirect(url_for('index'))
+
             
-        # except:
-        #     db.session.rollback()
-        #     flash('Import failed. Please ensure .csv file is ordered as \
-        #         follows: Company Name, Position, First Name, Last Name, \
-        #             Email', 'danger')
-        #     return redirect(url_for('import_leads'))
+        except:
+            db.session.rollback()
+            flash('Import failed. Please ensure .csv file is ordered as \
+                follows: Company Name, Position, First Name, Last Name, \
+                    Email', 'danger')
+            return redirect(url_for('import_leads'))
         
     return render_template('leads/import_leads.html', form=form)
 
