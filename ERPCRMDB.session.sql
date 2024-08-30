@@ -78,8 +78,7 @@ UPDATE Users
 SET License = '9b2a012a1a1c425a8c86'
 WHERE (ClientID=100000)
 
---@block
-DELETE FROM Admins WHERE User = 'ahad.ahmad@erp-center.com'
 
 --@block
-DELETE FROM Accounts
+DELETE FROM Leads
+

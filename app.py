@@ -48,14 +48,15 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Initialize database
 db = SQLAlchemy(app)
-migrate = Migrate(app, db) 
+migrate = Migrate(app, db)
+engine = create_engine(os.getenv('MYSQL_URI')).connect() 
 
 # Initiallize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = "Please sign in to access ERPCRM."
-login_manager.login_message_category = "primary"
+login_manager.login_message = ""
+login_manager.login_message_category = "danger"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -80,12 +81,10 @@ def login():
     user = None
     form = LoginForm()
     if form.validate_on_submit():
-        
         try:
             user = Users.query.filter_by(Email=form.email.data).first()
         except:
             return redirect(url_for('index'))
-        
         # User exists
         if user:
             admin = None
@@ -106,7 +105,10 @@ def login():
         else:
             flash('User does not exist.', 'danger')
             return redirect(url_for('login'))
-            
+        
+    for fieldName, errorMessages in form.errors.items():
+        for err in errorMessages:
+            flash(err, 'danger')       
     return render_template('login.html', form=form)
 
 # Sign up
@@ -115,6 +117,51 @@ def signup():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = UserForm()
+    user = None
+    client = None
+    if form.validate_on_submit():
+        user = Users.query.filter_by(Email=form.email.data).first()
+        # User already exists
+        if user is None:
+            client = Clients.query.filter_by(License=form.license.data).first()
+            # Invalid license key
+            if client:
+                # Hash password
+                hashed_password = generate_password_hash(form.password.data, 'scrypt')
+                        
+                # Grab max id
+                id = None
+                id = Users.query.order_by(Users.UserID.desc()).first()
+            
+                if id is None:
+                        id = 100
+                else:
+                    id = id.UserID + 1
+                
+                new_user = Users(UserID=id,
+                                FirstName=form.first_name.data,
+                                LastName=form.last_name.data,
+                                Email=form.email.data,
+                                License=client.License,
+                                PasswordHash=hashed_password,
+                                ClientID=client.ClientID)
+                
+                db.session.add(new_user)
+                db.session.commit()
+                flash('User created successfully. Please log in.', 'success')
+                return redirect(url_for('login'))
+            
+            else:
+                flash('Invalid license key.', 'danger')
+                return redirect(url_for('signup'))
+        else:
+            flash('User already exists.', 'danger')
+            return redirect(url_for('signup'))
+    
+    for fieldName, errorMessages in form.errors.items():
+        for err in errorMessages:
+            flash(err, 'danger')
+            
     return render_template('signup.html', form=form)
 
 # Logout function
@@ -141,12 +188,90 @@ def index():
 @login_required
 def accounts_list():
     accounts = None
-    try:
-        accounts = Accounts.query.order_by(Accounts.AccountID.desc()).all()
-    except:
-        flash('Error loading accounts. Please try again.', 'danger')
-        return redirect(url_for('accounts_list'))
-    return render_template('accounts/accounts_list.html', accounts=accounts)
+
+    accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)
+    
+    # Sort options    
+    sort = request.args.get('sort')
+    order = request.args.get('order')
+    if sort:
+        if sort == 'revenue':
+            if order == 'asc':
+                accounts = accounts.order_by(Accounts.CompanyRevenue)
+            else:
+                accounts = accounts.order_by(Accounts.CompanyRevenue.desc())
+        if sort == 'head_count':
+            if order == 'asc':
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount)
+            else:
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount.desc())
+    else:
+        accounts = accounts.order_by(Accounts.AccountID.desc())
+    
+    # Filter query
+    industries = db.session.query(Accounts.CompanyIndustry).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.CompanyIndustry.isnot(None)).all()
+    industries = sorted([str(industry).strip('(').strip(')').strip(',').strip("'").strip('"') for industry in industries])
+    industry = request.args.get('industry')
+    if industry:
+        accounts = accounts.filter_by(CompanyIndustry=industry)
+    
+    types = db.session.query(Accounts.CompanyType).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.CompanyType.isnot(None)).all()
+    types = sorted([str(type).strip('(').strip(')').strip(',').strip("'").strip('"') for type in types])
+    type = request.args.get('type')
+    if type:
+        accounts = accounts.filter_by(CompanyType=type)
+    
+    countries = db.session.query(Accounts.Country).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.Country.isnot(None)).all()
+    countries = sorted([str(country).strip('(').strip(')').strip(',').strip("'").strip('"') for country in countries])
+    country = request.args.get('country')
+    if country:
+        accounts = accounts.filter_by(Country=country)
+    
+    cities = db.session.query(Accounts.City).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.City.isnot(None)).all()
+    cities = sorted([str(city).strip('(').strip(')').strip(',').strip("'").strip('"') for city in cities])
+    city = request.args.get('city')
+    if city:
+        accounts = accounts.filter_by(City=city)
+    
+    timezones = db.session.query(Accounts.Timezone).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.Timezone.isnot(None)).all()
+    timezones = sorted([str(timezone).strip('(').strip(')').strip(',').strip("'").strip('"') for timezone in timezones])
+    timezone = request.args.get('timezone')
+    if timezone:
+        accounts = accounts.filter_by(Timezone=timezone)
+    
+    
+    return render_template('accounts/accounts_list.html', accounts=accounts,
+        industries=industries, types=types, countries=countries, cities=cities,
+        timezones=timezones)
+
+# Leads list
+@app.route('/leads/list/')
+def leads_list():
+    leads = None
+    leads = Leads.query.filter_by(ClientID=current_user.ClientID)
+    
+    # Filter query
+    positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Leads.Position.isnot(None)).all()
+    positions = sorted([str(position).strip('(').strip(')').strip(',').strip("'").strip('"') for position in positions])
+    position = request.args.get('position')
+    if position:
+        leads = leads.filter_by(Position=position)
+        
+    companies = db.session.query(Leads.CompanyName).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Leads.CompanyName.isnot(None)).all()
+    companies = sorted([str(company).strip('(').strip(')').strip(',').strip("'").strip('"') for company in companies])
+    company = request.args.get('company')
+    if company:
+        leads = leads.filter_by(CompanyName=company)
+    
+    return render_template('leads/leads_list.html', leads=leads, companies=companies,
+                           positions=positions)
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
@@ -214,6 +339,70 @@ def import_accounts():
             return redirect(url_for('import_accounts'))
         
     return render_template('accounts/import_accounts.html', form=form)
+
+# Import leads
+@app.route('/leads/import/', methods=['GET', 'POST'])
+def import_leads():
+    form = FileForm()
+    filename = None
+    if form.validate_on_submit():        
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        try:
+            if filename.split('.')[-1] != 'csv':
+                flash('Import failed. Please upload a .csv file.')
+                return redirect(url_for('import_leads'))
+                
+            # Rename function
+            while os.path.exists(filepath):
+                filename = filename.split('.')[0] + ' copy.csv'
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+            
+            file.save(filepath)
+            
+            df = pd.read_csv('static/files/{filename}'.format(filename=filename))
+            
+            df = df.rename(columns={df.columns[0]: 'CompanyName',
+                                    df.columns[1]: 'Position',
+                                    df.columns[2]: 'FirstName',
+                                    df.columns[3]: 'LastName',
+                                    df.columns[4]: 'Email'})
+            
+            accounts_df = pd.read_sql(db.session.query(Accounts).filter(Accounts.ClientID == current_user.ClientID).statement, con=engine)
+            df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
+            # Replace NaN with None
+            df = df.replace({np.nan: None})
+            
+            # Grab max id
+            id = Leads.query.order_by(Leads.LeadID.desc()).first()
+        
+            if id is None:
+                    id = 1000
+            else:
+                id = id.LeadID + 100
+            
+            for index, row in df.iterrows():
+                dct = row.to_dict()
+                dct.update({'LeadID': id})
+                id += 100
+                lead = Leads(**dct)
+                db.session.add(lead)
+            
+            db.session.commit() 
+            os.remove(filepath)        
+            flash('Import successful.', 'success')
+            return redirect(url_for('leads_list'))    
+            
+        except:
+            db.session.rollback()
+            flash('Import failed. Please ensure .csv file is ordered as \
+                follows: Company Name, Position, First Name, Last Name, \
+                    Email', 'danger')
+            return redirect(url_for('import_leads'))
+        
+    return render_template('leads/import_leads.html', form=form)
 
 # New Account
 @app.route('/accounts/new/', methods=['GET', 'POST'])
@@ -302,14 +491,20 @@ def delete_account(id):
 @app.route('/accounts/clear/')
 @login_required
 def clear_accounts():
-    # try:
     Accounts.query.delete()
     db.session.commit()
     flash('Accounts cleared successfully.', 'success')
     return redirect(url_for('accounts_list'))
-    # except:
-    #     return redirect(url_for('accounts_list'))
-    
+
+# Clear leads
+@app.route('/leads/clear/')
+@login_required
+def clear_leads():
+    Leads.query.delete()
+    db.session.commit()
+    flash('Leads cleared successfully.', 'success')
+    return redirect(url_for('leads_list'))
+
 
 # Invalid URL
 @app.errorhandler(404)

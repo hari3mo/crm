@@ -84,6 +84,9 @@
             font-size: 15px;
         }
 
+        #timezone-menu {
+            right: 25px; /* Adjust this value as needed */
+        }
 
     </style>
     
@@ -98,42 +101,31 @@
                 <button class="btn btn-primary animate-up-2 me-1" styletype="button">New</button>
             </a>
             -->
-            <a href="{{ url_for('import_accounts') }}" class="btn btn-primary animate-up-2 me-1 d-flex align-items-center">
-                <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-                    <title>Import</title>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
-                </svg>
-
-            </a>
-    
-            <a href="{{ url_for('new_account') }}" class="btn btn-primary animate-up-2 me-1 d-flex align-items-center">
-                <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-                    <title>New</title>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-                </svg>
-            </a>
-            <!--
             <a href="{{ url_for('import_accounts') }}">
-                <svg data-slot="icon" fill="none" class="me-1" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="25" height="25">
-                    <title>Import Accounts</title>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
-                </svg>
+                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center" type="button">
+                    <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+                        <title>Import</title>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
+                    </svg>
+                    <span class="ms-2">Import</span>
+                </button>
             </a>
-
             <a href="{{ url_for('new_account') }}">
-                <svg data-slot="icon" fill="none" class="me-1" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="25" height="25">
-                    <title>New Account</title>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-                </svg>
+                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center" type="button">
+                    <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+                        <title>New</title>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+                    </svg>
+                    <span class="ms-2">New</span>
+                </button>
             </a>
-        -->
         </div>
         <div class="col d-flex justify-content-end">
             <a href="{{ url_for('clear_accounts') }}">
-                <button class="btn btn-danger animate-up-2 me-1" type="button">Clear</button>
+                <button class="btn btn-sm btn-danger animate-up-2 me-1" type="button">Clear</button>
             </a>
             <a href="{{ url_for('accounts_list') }}">
-                <button class="btn btn-info animate-up-2 me-1" type="button">Refresh</button>
+                <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
             </a>
         </div>
     </div>
@@ -154,8 +146,8 @@
                             </svg>
                             <div id="revenue-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <li>Ascending</li>
-                                    <li>Descending</li>
+                                    <a href="{{ url_for('accounts_list', sort='revenue', order='asc') }}"><li>Ascending</li></a>
+                                    <a href="{{ url_for('accounts_list', sort='revenue', order='desc') }}"><li>Descending</li></a>
                                 </ul>
                             </div>
 
@@ -168,8 +160,8 @@
                             </svg>
                             <div id="count-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <li>Ascending</li>
-                                    <li>Descending</li>
+                                    <a href="{{ url_for('accounts_list', sort='head_count', order='asc') }}"><li>Ascending</li></a>
+                                    <a href="{{ url_for('accounts_list', sort='head_count', order='desc') }}"><li>Descending</li></a>
                                 </ul>
                             </div>
                         </th>
@@ -178,12 +170,14 @@
                             <svg id="industry-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
                             </svg>
-                            <div id="industry-menu" class="menu apple-select-menu">
+                            <div id="industry-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if industries  %}
                                 <ul>
-                                    <li>Option 1</li>
-                                    <li>Option 2</li>
-                                    <li>Option 3</li>
+                                    {% for industry in industries  %}
+                                    <a href="{{ url_for('accounts_list', industry=industry) }}"><li>{{ industry }}</li></a>
+                                    {% endfor %}
                                 </ul>
+                                {% endif %}
                             </div>
                         </th>
                         <!-- <th class="border-0">Specialties</th> -->
@@ -192,12 +186,14 @@
                             <svg id="type-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
                             </svg>
-                            <div id="type-menu" class="menu apple-select-menu">
+                            <div id="type-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if types %}
                                 <ul>
-                                    <li>Option 1</li>
-                                    <li>Option 2</li>
-                                    <li>Option 3</li>
+                                  {% for type in types %}
+                                  <a href="{{ url_for('accounts_list', type=type) }}"><li>{{ type }}</li></a>
+                                  {% endfor %}
                                 </ul>
+                                {% endif %}
                             </div>
                         </th>
                         <th class="border-0">
@@ -205,12 +201,14 @@
                             <svg id="country-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
                             </svg>
-                            <div id="country-menu" class="menu apple-select-menu">
+                            <div id="country-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if countries %}
                                 <ul>
-                                    <li>Option 1</li>
-                                    <li>Option 2</li>
-                                    <li>Option 3</li>
+                                    {% for country in countries %}
+                                    <a href="{{ url_for('accounts_list', country=country) }}"><li>{{ country }}</li></a>
+                                    {% endfor %}
                                 </ul>
+                                {% endif %}
                             </div>
                         </th>
                         <th class="border-0">
@@ -218,12 +216,14 @@
                             <svg id="city-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
                             </svg>
-                            <div id="city-menu" class="menu apple-select-menu">
+                            <div id="city-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if cities %}
                                 <ul>
-                                    <li>Option 1</li>
-                                    <li>Option 2</li>
-                                    <li>Option 3</li>
+                                    {% for city in cities %}
+                                    <a href="{{ url_for('accounts_list', city=city) }}"><li>{{ city }}</li></a>
+                                    {% endfor %}
                                 </ul>
+                                {% endif %}
                             </div>
                         </th>
                         <th class="border-0 rounded-end">
@@ -231,12 +231,14 @@
                             <svg id="timezone-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
                             </svg>
-                            <div id="timezone-menu" class="menu apple-select-menu">
+                            <div id="timezone-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if timezones %}
                                 <ul>
-                                    <li>Option 1</li>
-                                    <li>Option 2</li>
-                                    <li>Option 3</li>
+                                    {% for timezone in timezones %}
+                                    <a href="{{ url_for('accounts_list', timezone=timezone) }}"><li>{{ timezone }}</li></a>
+                                    {% endfor %}
                                 </ul>
+                                {% endif %}
                             </div>
                         </th>
                        
@@ -248,17 +250,17 @@
                     <tr>
                         <td class="fw-bold">
                             <a class="link-info" href="{{ url_for('account', id=account.AccountID) }}">
-                                {{ account.CompanyName }}
+                                {{ account.CompanyName if account.CompanyName }}
                             </a>
                         </td>
-                        <td>{{ account.CompanyRevenue }}</td>
-                        <td>{{ account.EmployeeHeadCount }}</td>
-                        <td>{{ account.CompanyIndustry }}</td>
+                        <td>{{ account.CompanyRevenue if account.CompanyRevenue }}</td>
+                        <td>{{ account.EmployeeHeadCount if account.EmployeeHeadCount }}</td>
+                        <td>{{ account.CompanyIndustry if account.CompanyIndustry }}</td>
                         <!-- <td>{{ account.CompanySpecialties }}</td> -->
-                        <td>{{ account.CompanyType }}</td>
-                        <td>{{ account.Country }}</td>
-                        <td>{{ account.City }}</td>
-                        <td>{{ account.Timezone }}</td>
+                        <td>{{ account.CompanyType if account.CompanyType }}</td>
+                        <td>{{ account.Country if account.Country }}</td>
+                        <td>{{ account.City if account.City }}</td>
+                        <td>{{ account.Timezone if account.Timezone }}</td>
                     </tr>
                     {% endfor %}
                     <!-- End of Item -->

@@ -25,6 +25,10 @@
 
 
 
+.scrollable-menu {
+    max-height: 350px;
+    overflow-y: auto;
+  }
 
 .company-specialties {
     height: 100px; /* Adjust height as needed */

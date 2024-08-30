@@ -139,12 +139,12 @@
             <div class="multi-level collapse" role="list" id="submenu-leads" aria-expanded="false">
               <ul class="flex-column nav">
                 <li class="nav-item">
-                  <a class="nav-link" href="#">
+                  <a class="nav-link" href="{{ url_for('leads_list') }}">
                     <span class="sidebar-text">Leads List</span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">
+                  <a class="nav-link" href="{{ url_for('import_leads') }}">
                     <span class="sidebar-text">Import Leads</span>
                   </a>
                 </li>

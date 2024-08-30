@@ -39,7 +39,7 @@
 <body>
     <style> 
         .form-bg-image {
-            background-size: cover;
+
             background-position: center;
         }
         
@@ -56,7 +56,6 @@
     </style>
     <main> 
         <!-- Flashed message -->
-        <!--
         {% for category, message in get_flashed_messages(with_categories=true) %}
         <div class="alert alert-{{ category }} alert-dismissible fade show flashed-message" role="alert">
           <span class="fas fa-bullhorn me-1"></span>
@@ -64,7 +63,7 @@
           <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
-        -->
+
         <!-- Section -->
         <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center">
             <div class="container">
@@ -80,16 +79,54 @@
                             <div class="text-center text-md-center mb-4 mt-md-0">
                                 <h1 class="mb-0 h3">Create Account </h1>
                             </div>
-                            <form action="#" class="mt-4">
+                            <form class="mt-4" method="POST">
+                                {{ form.hidden_tag() }}
                                 <!-- Form -->
+                                <div class="form-group mb-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label for="field1">First Name</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text" id="basic-addon1">
+                                                        <svg class="icon icon-xs text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="currentColor">
+                                                            <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
+                                                        </svg>
+                                                    </span>
+                                                    {{ form.first_name(class="form-control", placeholder="First") }}                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label for="field2">Last Name</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text" id="basic-addon2">
+                                                        <svg class="icon icon-xs text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="currentColor">
+                                                            <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
+                                                        </svg>
+                                                    </span>
+                                                    {{ form.last_name(class="form-control", placeholder="Last") }}                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <div class="form-group mb-4">
+                                    <label for="custom_field">Your License</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <svg class="icon icon-xs text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="currentColor">
+                                                <path d="M181.3 32.4c17.4 2.9 29.2 19.4 26.3 36.8L197.8 128l95.1 0 11.5-69.3c2.9-17.4 19.4-29.2 36.8-26.3s29.2 19.4 26.3 36.8L357.8 128l58.2 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-68.9 0L325.8 320l58.2 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-68.9 0-11.5 69.3c-2.9 17.4-19.4 29.2-36.8 26.3s-29.2-19.4-26.3-36.8l9.8-58.7-95.1 0-11.5 69.3c-2.9 17.4-19.4 29.2-36.8 26.3s-29.2-19.4-26.3-36.8L90.2 384 32 384c-17.7 0-32-14.3-32-32s14.3-32 32-32l68.9 0 21.3-128L64 192c-17.7 0-32-14.3-32-32s14.3-32 32-32l68.9 0 11.5-69.3c2.9-17.4 19.4-29.2 36.8-26.3zM187.1 192L165.8 320l95.1 0 21.3-128-95.1 0z"/>
+                                            </svg>
+                                        </span>
+                                        {{ form.license(class="form-control", placeholder="Key") }}
+                                    </div>
+                                </div>
                                 <div class="form-group mb-4">
                                     <label for="email">Your Email</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="basic-addon1">
                                             <svg class="icon icon-xs text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
                                         </span>
-                                        <input type="email" class="form-control" placeholder="example@company.com" id="email" autofocus required>
-                                    </div>  
+                                        {{ form.email(class="form-control", placeholder="user@company.com") }}                                    </div>  
                                 </div>
                                 <!-- End of Form -->
                                 <div class="form-group">
@@ -100,8 +137,7 @@
                                             <span class="input-group-text" id="basic-addon2">
                                                 <svg class="icon icon-xs text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                                             </span>
-                                            <input type="password" placeholder="Password" class="form-control" id="password" required>
-                                        </div>  
+                                            {{ form.password(class="form-control", placeholder="Password") }}                                        </div>  
                                     </div>
                                     <!-- End of Form -->
                                     <!-- Form -->
@@ -111,8 +147,7 @@
                                             <span class="input-group-text" id="basic-addon2">
                                                 <svg class="icon icon-xs text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                                             </span>
-                                            <input type="password" placeholder="Confirm Password" class="form-control" id="confirm_password" required>
-                                        </div>  
+                                            {{ form.confirm_password(class="form-control", placeholder="Confirm Password") }}                                        </div>  
                                     </div>
                                    <!--
                                     <div class="d-flex justify-content-center align-items-center mt-4">
@@ -126,7 +161,7 @@
                                 </div>
                                 <br>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-gray-800">Sign up</button>
+                                    {{ form.submit(class="btn btn-primary") }}
                                 </div>
                             </form>
                         </div>
