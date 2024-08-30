@@ -386,7 +386,7 @@ def import_leads():
             for index, row in df.iterrows():
                 dct = row.to_dict()
                 dct.update({'LeadID': id})
-                id += 100
+                id += 50
                 lead = Leads(**dct)
                 db.session.add(lead)
 
