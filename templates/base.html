@@ -90,35 +90,35 @@
               </span>
             </span>
             <div class="multi-level collapse "
-              role="list" id="submenu-app" aria-expanded="false">
-              <ul class="flex-column nav">
-                <li class="nav-item ">
-                  <a class="nav-link" href="{{ url_for('accounts_list') }}">
-                    <span class="sidebar-text">Accounts List</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div class="multi-level collapse "
             role="list" id="submenu-app" aria-expanded="false">
             <ul class="flex-column nav">
+              <li class="nav-item ">
+                <a class="nav-link" href="{{ url_for('new_account') }}">
+                  <span class="sidebar-text">Account Creation</span>
+                </a>
+              </li>
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url_for('accounts_list') }}">
+                    <span class="sidebar-text">Account Views</span>
+                  </a>
+                </li>
               <li class="nav-item ">
                 <a class="nav-link" href="{{ url_for('import_accounts') }}">
                   <span class="sidebar-text">Import Accounts</span>
                 </a>
               </li>
-            </ul>
-          </div>
-            <div class="multi-level collapse "
-              role="list" id="submenu-app" aria-expanded="false">
-              <ul class="flex-column nav">
-                <li class="nav-item ">
-                  <a class="nav-link" href="{{ url_for('new_account') }}">
-                    <span class="sidebar-text">New Account</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <li class="nav-item ">
+              <a class="nav-link" href="#">
+                <span class="sidebar-text">Activity Tracking</span>
+              </a>
+            </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="#">
+              <span class="sidebar-text">Account Teams</span>
+            </a>
+          </li>
+        </ul>
+      </div>
           </li>
           <li class="nav-item">
             <span class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#submenu-leads">
@@ -139,8 +139,13 @@
             <div class="multi-level collapse" role="list" id="submenu-leads" aria-expanded="false">
               <ul class="flex-column nav">
                 <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('new_lead') }}">
+                    <span class="sidebar-text">Lead Creation</span>
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('leads_list') }}">
-                    <span class="sidebar-text">Leads List</span>
+                    <span class="sidebar-text">Leads Views</span>
                   </a>
                 </li>
                 <li class="nav-item">
@@ -149,8 +154,38 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('new_lead') }}">
-                    <span class="sidebar-text">New Lead</span>
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Lead Assignment</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Lead Conversion</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Lead Scoring</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Lead Nurturing</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Campaign Integration</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Activity Tracking</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Lead Qualification</span>
                   </a>
                 </li>
               </ul>
@@ -176,9 +211,40 @@
               <ul class="flex-column nav">
                 <li class="nav-item">
                   <a class="nav-link" href="#">
-                    <span class="sidebar-text">Opportunities List</span>
+                    <span class="sidebar-text">Opportunity Creation</span>
                   </a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Opportunity Views</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Forecasting</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Opportunity Teams</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Opportunity Tracking</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Opportunity Insights</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Competitors</span>
+                  </a>
+                </li>
+
               </ul>
             </div>
           </li>
@@ -202,9 +268,20 @@
               <ul class="flex-column nav">
                 <li class="nav-item">
                   <a class="nav-link" href="#">
-                    <span class="sidebar-text">Sales List</span>
+                    <span class="sidebar-text">Sale Views</span>
                   </a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Sales Stages</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="sidebar-text">Sales Path</span>
+                  </a>
+                </li>
+
               </ul>
             </div>
           </li>

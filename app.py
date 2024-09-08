@@ -188,25 +188,25 @@ def index():
 @login_required
 def accounts_list():
     accounts = None
-
+    leads = None
     accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)
-    
+     
     # Sort options    
     sort = request.args.get('sort')
     order = request.args.get('order')
     if sort:
         if sort == 'revenue':
             if order == 'asc':
-                accounts = accounts.order_by(Accounts.CompanyRevenue)
+                accounts = accounts.order_by(Accounts.CompanyRevenue).all()
             else:
-                accounts = accounts.order_by(Accounts.CompanyRevenue.desc())
+                accounts = accounts.order_by(Accounts.CompanyRevenue.desc()).all()
         if sort == 'head_count':
             if order == 'asc':
-                accounts = accounts.order_by(Accounts.EmployeeHeadCount)
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount).all()
             else:
-                accounts = accounts.order_by(Accounts.EmployeeHeadCount.desc())
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount.desc()).all()
     else:
-        accounts = accounts.order_by(Accounts.AccountID.desc())
+        accounts = accounts.order_by(Accounts.AccountID.desc()).all()
     
     # Filter query
     industries = db.session.query(Accounts.CompanyIndustry).filter_by(ClientID=current_user.ClientID)\
@@ -502,6 +502,8 @@ def lead(id):
 def account(id):
     form = AccountForm()
     account = Accounts.query.get_or_404(id)
+    # leads  = Leads.query.filter_by(ClientID=current_user.ClientID)\
+    #     .filter_by(AccountID=account.AccountID)
     form.company_specialties.data = account.CompanySpecialties
     if form.validate_on_submit():
 
@@ -524,7 +526,8 @@ def account(id):
             return redirect(url_for('account', id=id))
 
         
-    return render_template('accounts/account.html', form=form, account=account, id=id)    
+    return render_template('accounts/account.html', form=form, account=account,
+            id=id)    
 
 # Delete account
 @app.route('/accounts/delete/<int:id>')
