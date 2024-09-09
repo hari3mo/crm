@@ -76,10 +76,16 @@ def load_user(user_id):
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    if current_user is not None and  current_user.is_authenticated:
-        return redirect(url_for('index'))
+    
+    try:
+        if current_user is not None and current_user.is_authenticated:
+            return redirect(url_for('index'))
+    except:
+        return redirect(url_for('logout'))
+    
     user = None
     form = LoginForm()
+    
     if form.validate_on_submit():
         try:
             user = Users.query.filter_by(Email=form.email.data).first()
@@ -612,6 +618,7 @@ class Clients(db.Model):
 class Accounts(db.Model):
     __tablename__ = 'Accounts'
     AccountID = db.Column(db.Integer, primary_key=True)
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     CompanyName = db.Column(db.String(100), nullable=False)
     CompanyRevenue = db.Column(db.Integer, nullable=False)
     EmployeeHeadCount = db.Column(db.Integer, nullable=False)
@@ -621,7 +628,6 @@ class Accounts(db.Model):
     Country = db.Column(db.String(50), nullable=False)
     City = db.Column(db.String(50))
     Timezone = db.Column(db.String(50))
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     
     # References
     Leads = db.relationship('Leads', backref='Account')
@@ -649,12 +655,12 @@ class Opportunities(db.Model):
     OpportunityID = db.Column(db.Integer, primary_key=True)
     AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign Key to AccountID
     LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Opportunity = db.Column(db.Text)
     Value = db.Column(db.String(255))
     Stage = db.Column(db.String(100))
     CreationDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     CloseDate = db.Column(db.Date)
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
 
     # References
     Sale = db.relationship('Sales', backref='Opportunity')
