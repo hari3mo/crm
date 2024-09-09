@@ -76,7 +76,7 @@ def load_user(user_id):
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    if current_user.is_authenticated:
+    if current_user is not None and  current_user.is_authenticated:
         return redirect(url_for('index'))
     user = None
     form = LoginForm()
@@ -88,7 +88,7 @@ def login():
         # User exists
         if user:
             admin = None
-            remember =None 
+            remember = None 
             remember = form.remember.data
             remember = True if remember else False
             if user.verify_password(form.password.data):
