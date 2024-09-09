@@ -253,7 +253,7 @@ def accounts_list():
 @app.route('/leads/list/')
 def leads_list():
     leads = None
-    leads = Leads.query.filter_by(ClientID=current_user.ClientID)
+    leads = Leads.query.filter_by(ClientID=current_user.ClientID)#.order_by(Leads.LeadID.desc()).all()
     
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
@@ -449,6 +449,10 @@ def new_account():
 @app.route('/leads/new/', methods=['GET', 'POST'])
 def new_lead():
     form = LeadForm()
+    
+    company = request.args.get('account')
+    form.company.data = company if company else None
+    
     if form.validate_on_submit():
         account = None
         

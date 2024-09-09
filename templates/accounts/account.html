@@ -17,11 +17,15 @@
     </nav>
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
-            <h1 class="h4">Account: {{ account.AccountID }}</h1>
+            <h1 class="h4">Account: {{ account.CompanyName }} / {{ account.AccountID }}</h1>
         </div>
-       
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('new_lead', account=account.CompanyName) }}" class="btn btn-primary animate-up-2 me-1">Lead</a>
+            <a href="#" class="btn btn-primary animate-up-2 me-1">Opportunity</a>
+        </div>   
     </div>
 </div>
+
 
 <style>
     .container {
@@ -35,11 +39,13 @@
     .leads-div {
         flex: 1;
     }
+    
 </style>
+
 
 <div class="container d-flex">
     <div class="account-div">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center">    
             <div class="col-12 col-xl-8">
                 <div class="card card-body border-0 shadow mb-4">
                     <h2 class="h5 mb-4">Details</h2>
@@ -104,12 +110,12 @@
                             <div class="col d-flex justify-content-start">
                                 {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update') }}
 
-                                <a href="#" class="btn btn-secondary animate-up-2 me-1">Lead</a>
+                              
                                 <!--
                                 <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Opportunity</a>
                     
                             -->
-                                </div>
+                            </div>
                             <div class="col d-flex justify-content-end">
                                 <a href="{{ url_for('delete_account', id=account.AccountID)}}" class="btn btn-danger animate-up-2 me-1">Delete</a>
                                 <!-- <a href="{{ url_for('accounts_list')}}" class="btn btn-primary animate-up-2 me-1">Discard</a> -->
@@ -117,24 +123,30 @@
                         </div>
                     </form>
                 </div>
+                <!--
+                <div class="d-flex justify-content-center">
+                    <a href="{{ url_for('new_lead', account=account.CompanyName) }}" class="btn btn-primary animate-up-2 me-1">Lead</a>
+                    <a href="#" class="btn btn-primary animate-up-2 me-1">Opportunity</a>
+                </div>
+            -->
             </div>
+            {% if account.Leads %}
             <div class="leads-div">
                 <div class="row justify-content-center">
                     <div class="col-12 col-xl-8">
                         <div class="card card-body border-0 shadow mb-4">
                         <h2 class="h5 mb-4">Leads</h2>
-                        {% if account.Leads %}
                             {% for lead in account.Leads  %}
                             <a class="link-info" href="{{ url_for('lead', id=lead.LeadID) }}">
                                 {{ lead.FirstName }} {{ lead.LastName }}
                                 <br>
                             <a/>
                             {% endfor %}
-                        {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

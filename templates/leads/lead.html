@@ -18,7 +18,7 @@
     </nav>
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
-            <h1 class="h4">Lead: {{ lead.LeadID }}</h1>
+            <h1 class="h4">Lead: {{ lead.FirstName }} {{ lead.LastName }} / {{ lead.LeadID }}</h1>
         </div>
        
     </div>
@@ -27,7 +27,7 @@
 <div class="row justify-content-center">
     <div class="col-12 col-xl-8">
         <div class="card card-body border-0 shadow mb-4">
-            <h2 class="h5 mb-4"><a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
+            <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
             <form action="{{ url_for('lead', id=lead.LeadID) }}"method='POST'>
                 {{ form.hidden_tag() }}
                 <div class="row">
