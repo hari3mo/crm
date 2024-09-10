@@ -10,6 +10,65 @@
 
 {% block content %}
 
+
+<style>
+    
+    .apple-checkbox {
+        position: relative;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+    }
+
+    .apple-checkbox input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background-color: #ffffff;
+        border: 2px solid #d2d2d7;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .apple-checkbox:hover input ~ .checkmark {
+        border-color: #0071e3;
+    }
+
+    .apple-checkbox input:checked ~ .checkmark {
+        background-color: #0071e3;
+        border-color: #0071e3;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 50%;
+        top: 45%;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transition: all 0.2s ease;
+    }
+
+    .apple-checkbox input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+</style>
+
 <div class="py-4">
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
@@ -112,7 +171,12 @@
                         <td>{{ lead.Email if lead.Email }}</td>
                         <td>{{ lead.Position if lead.Position }}</td>
                         <td>{{ lead.CompanyName if lead.CompanyName }}</td>
-                        <td><input type="checkbox"></td>
+                        <td>
+                            <label class="apple-checkbox">
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>    
+                        </td>
                     </tr>
                     {% endfor %}
                     <!-- End of Item -->
