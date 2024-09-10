@@ -376,7 +376,7 @@ def import_leads():
                                     df.columns[3]: 'LastName',
                                     df.columns[4]: 'Email'})
             
-            accounts_df = pd.read_sql(db.session.query(Accounts).filter(Accounts.ClientID == current_user.ClientID).statement, con=engine)
+            accounts_df = pd.read_sql(db.session.query(Accounts).filter_by(ClientID=current_user.ClientID).statement, con=engine)
             df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
             # Replace NaN with None
             df = df.replace({np.nan: None})
@@ -596,7 +596,9 @@ def search_accounts():
     query = request.args.get('query')
     if query:
         results = Accounts.query.filter(Accounts.CompanyName.icontains(query) |\
-            Accounts.Country.icontains(query) | Accounts.City.icontains(query)).limit(100)
+            Accounts.Country.icontains(query) | Accounts.City.icontains(query) |\
+            Accounts.CompanyType.icontains(query) | Accounts.CompanyIndustry.icontains(query) |\
+                Accounts.Timezone.icontains(query)).limit(100)
     else:
         results = []
     return render_template('accounts/search_accounts.html', results=results)
