@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Leads{% endblock %}
+{% block title %}Opportunities{% endblock %}
 
-{% block route %}{{ url_for('leads_list') }}{% endblock %}
+{% block route %}{{ url_for('opportunities_list') }}{% endblock %}
 
-{% block path %}Leads{% endblock %}
+{% block path %}Oppoortunities{% endblock %}
 
 {% block page %}List{% endblock %}
 
@@ -13,7 +13,7 @@
 <div class="py-4">
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
-            <h1 class="h4">Leads</h1>
+            <h1 class="h4">Opportunities</h1>
         </div>
     </div>
 </div>
@@ -84,16 +84,7 @@
 
     <div class="mt-3 row">
         <div class="col d-flex justify-content-start">
-            <a href="{{ url_for('import_leads') }}">
-                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center justify-content-between" type="button">
-                    <span class="me-2">Import</span>
-                    <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-                        <title>Import</title>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
-                    </svg>
-                </button>
-            </a>
-            <a href="{{ url_for('new_lead') }}">
+            <a href="#">
                 <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center justify-content-between" type="button">
                     <span class="me-2">New</span>
                     <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
@@ -111,7 +102,7 @@
                         <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                     </svg>
                     </span>
-                    <input type="text" class="form-control" name="query" hx-get="/search_leads" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search leads" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
+                    <input type="text" class="form-control" name="query" hx-get="/search_opportunities" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search leads" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
             <a href="{{ url_for('clear_leads') }}">
