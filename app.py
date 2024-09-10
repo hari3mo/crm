@@ -178,9 +178,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    if current_user.is_authenticated:
-        return render_template('index.html')
-    return redirect(url_for('login'))
+    return render_template('index.html')
 
 # Analytics
 
@@ -348,6 +346,7 @@ def import_accounts():
 
 # Import leads
 @app.route('/leads/import/', methods=['GET', 'POST'])
+@login_required
 def import_leads():
     form = FileForm()
     filename = None
@@ -503,6 +502,7 @@ def new_lead():
 
 # Update lead
 @app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
+@login_required
 def lead(id):
     lead = Leads.query.get_or_404(id)
     form = LeadUpdateForm()
