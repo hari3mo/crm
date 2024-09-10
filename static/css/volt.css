@@ -22,7 +22,66 @@
 #sidebarMenu {
     width: 200px; 
 } */
- 
+
+.table-fixed th, .table-fixed td {
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow: hidden;
+    }
+
+.table-fixed {
+table-layout: fixed;
+width: 100%;
+}
+
+/* Apple select menu styling */
+.apple-select-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: none;
+    min-width: auto;
+    z-index: 1000;
+}
+
+.apple-select-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.apple-select-menu li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.apple-select-menu li:hover {
+    background-color: #f0f0f5;
+}
+
+/* Show menu on hover */
+/*
+#menu-icon:hover + .apple-select-menu,
+.apple-select-menu:hover {
+    display: block;
+}
+*/
+
+/* Change cursor to pointer on hover */
+svg[data-slot="icon"]:hover {
+    cursor: pointer;
+}
+
+.menu.apple-select-menu ul li {
+    text-transform: capitalize;
+    font-size: 15px;
+}
+
+
 .scrollable-menu {
     max-height: 400px;
     overflow-y: auto;
