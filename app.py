@@ -256,6 +256,7 @@ def accounts_list():
 
 # Leads list
 @app.route('/leads/list/')
+@login_required
 def leads_list():
     leads = None
     leads = Leads.query.filter_by(ClientID=current_user.ClientID)#.order_by(Leads.LeadID.desc()).all()
@@ -264,6 +265,8 @@ def leads_list():
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.Position.isnot(None)).all()
     positions = sorted([str(position).strip('(').strip(')').strip(',').strip("'").strip('"') for position in positions])
+    if '' in positions:
+        positions.remove('')
     position = request.args.get('position')
     if position:
         leads = leads.filter_by(Position=position)
@@ -589,7 +592,14 @@ def clear_leads():
     flash('Leads cleared successfully.', 'success')
     return redirect(url_for('leads_list'))
 
-
+# Search
+@app.route('/search/')
+@login_required
+def search():
+    query = request.args.get('query')
+    if query:
+        Accounts.query.filter()
+    
 # Invalid URL
 @app.errorhandler(404)
 def page_not_foredid(e):
@@ -652,7 +662,7 @@ class Users(db.Model, UserMixin):
 
     @property
     def is_authenticated(self):
-        return True  # Assuming the presence of a valid session tokenp
+        return True  # Assuming the presence of a valid session token
     
 # Accounts model
 class Accounts(db.Model):
@@ -684,7 +694,7 @@ class Leads(db.Model):
     Position = db.Column(db.String(75), nullable=False)
     FirstName = db.Column(db.String(50), nullable=False)
     LastName = db.Column(db.String(50), nullable=False)
-    Email = db.Column(db.String(50), unique=True)
+    Email = db.Column(db.String(50))
     CompanyName =  db.Column(db.String(100), nullable=False)
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))

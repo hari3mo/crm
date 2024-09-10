@@ -81,3 +81,6 @@ WHERE (ClientID=100000)
 --@block
 ALTER TABLE Leads
 ADD FOREIGN KEY (CreatedBy) REFERENCES Users(Email)
+
+--@block
+DROP TABLE alembic_version
