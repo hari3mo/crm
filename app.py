@@ -598,7 +598,8 @@ def clear_leads():
 def search_accounts():
     query = request.args.get('query')
     if query:
-        results = Accounts.query.filter(Accounts.CompanyName.icontains(query)).limit(100)
+        results = Accounts.query.filter(Accounts.CompanyName.icontains(query) |\
+            Accounts.Country.icontains(query) | Accounts.City.icontains(query)).limit(100)
     else:
         results = []
         
