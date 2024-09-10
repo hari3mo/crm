@@ -61,10 +61,10 @@ login_manager.login_message_category = "danger"
 @login_manager.user_loader
 def load_user(user_id):
     try:
-        return Users.query.get(int(user_id))
+        return Users.query.filter_by(UserID=user_id).first()
+        # return Users.query.get(int(user_id))
     except:
         return redirect(url_for('login'))
-    # return Users.query.filter_by(UserID=user_id).first()
 
 ##############################################################################
 
@@ -76,11 +76,8 @@ def load_user(user_id):
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    try:
-        if current_user is not None and current_user.is_authenticated:
-            return redirect(url_for('index'))
-    except:
-        return redirect(url_for('logout'))
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     
     user = None
     form = LoginForm()
@@ -602,8 +599,20 @@ def search_accounts():
             Accounts.Country.icontains(query) | Accounts.City.icontains(query)).limit(100)
     else:
         results = []
-        
     return render_template('accounts/search_accounts.html', results=results)
+
+# Search leads
+@app.route('/search_leads/')
+@login_required
+def search_leads():
+    query = request.args.get('query')
+    if query:
+        results = Leads.query.filter(Leads.CompanyName.icontains(query) | \
+            Leads.FirstName.icontains(query) | Leads.LastName.icontains(query) |\
+                Leads.Position.icontains(query) | Leads.Email.icontains(query)).limit(100)
+    else:
+        results = []
+    return render_template('leads/search_leads.html', results=results)
     
 # Invalid URL
 @app.errorhandler(404)

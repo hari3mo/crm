@@ -1,0 +1,12 @@
+{% for result in results %}
+<tr>
+    <td class="fw-bold">
+        <a class="link-info" href="{{ url_for('lead', id=result.LeadID )}}">
+            {{ result.FirstName if result.FirstName }} {{ result.LastName if result.LastName }}
+        </a>
+    </td>
+    <td>{{ result.Email if result.Email }}</td>
+    <td>{{ result.Position if result.Position }}</td>
+    <td>{{ result.CompanyName if result.CompanyName }}</td>
+</tr>
+{% endfor %}

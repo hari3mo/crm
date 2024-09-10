@@ -2,15 +2,15 @@
 <tr>
     <td class="fw-bold">
         <a class="link-info" href="{{ url_for('account', id=result.AccountID) }}">
-            {{ result.CompanyName }}
+            {{ result.CompanyName if result.CompanyName }}
         </a>
     </td>
-    <td>{{ result.CompanyRevenue }}</td>
-    <td>{{ result.EmployeeHeadCount }}</td>
-    <td>{{ result.CompanyIndustry }}</td>
-    <td>{{ result.CompanyType }}</td>
-    <td>{{ result.Country }}</td>
-    <td>{{ result.City }}</td>
-    <td>{{ result.Timezone }}</td>
+    <td>{{ result.CompanyRevenue if result.CompanyRevenue }}</td>
+    <td>{{ result.EmployeeHeadCount if result.EmployeeHeadCount }}</td>
+    <td>{{ result.CompanyIndustry if result.CompanyIndustry }}</td>
+    <td>{{ result.CompanyType if result.CompanyType }}</td>
+    <td>{{ result.Country if result.Country }}</td>
+    <td>{{ result.City if result.City }}</td>
+    <td>{{ result.Timezone if result.Timezone }}</td>
 </tr>
 {% endfor %}
