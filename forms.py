@@ -83,11 +83,6 @@ class FileForm(FlaskForm):
     file = FileField('File', validators=[FileRequired()])
     submit = SubmitField('Submit')
  
-# Password form
-class PasswordForm(FlaskForm):
-    hashed_password = StringField('Hashed Password:', validators=[DataRequired()])
-    password = StringField('Password:', validators=[DataRequired()])
-    submit = SubmitField('Submit')
 
 # Login form
 class LoginForm(FlaskForm):
@@ -126,8 +121,13 @@ class AdminUpdateForm(FlaskForm):
 class GenerateForm(FlaskForm):
     submit = SubmitField('Submit')
 
+# Password form (testing)
+class PasswordForm(FlaskForm):
+    hashed_password = StringField('Hashed Password:', validators=[DataRequired()])
+    password = StringField('Password:', validators=[DataRequired()])
+    submit = SubmitField('Submit')
     
-# Text field form
+# Text field form (testing)
 class TextForm(FlaskForm):
     text = TextAreaField('Text:')
     submit = SubmitField('Submit')

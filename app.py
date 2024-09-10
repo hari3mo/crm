@@ -19,8 +19,8 @@ import pandas as pd
 import numpy as np
 
 # Forms
-from forms import LoginForm, SearchForm, UserForm, PasswordForm, FileForm, \
-    UserUpdateForm, AccountForm, LeadForm, OpportunityForm, TextForm, \
+from forms import LoginForm, SearchForm, UserForm, FileForm, \
+    UserUpdateForm, AccountForm, LeadForm, OpportunityForm, \
     AdminUpdateForm, GenerateForm, LeadUpdateForm, OpportunityUpdateForm,\
     SaleForm
 
@@ -43,7 +43,7 @@ app.config['UPLOAD_FOLDER'] = 'static/files'
 # Remember me duration
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=3)
 
-# Set session timeout duration
+# Set default session timeout length
 app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Initialize database
@@ -76,7 +76,6 @@ def load_user(user_id):
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    
     try:
         if current_user is not None and current_user.is_authenticated:
             return redirect(url_for('index'))
@@ -326,7 +325,8 @@ def import_accounts():
                 
             for index, row in df.iterrows():
                 dct = row.to_dict()
-                dct.update({'AccountID': id, 'ClientID': current_user.ClientID})
+                dct.update({'AccountID': id, 'ClientID': current_user.ClientID,
+                            'CreatedBy': current_user.Email})
                 id += 10
                 account = Accounts(**dct)
                 db.session.add(account)
@@ -391,7 +391,7 @@ def import_leads():
             
             for index, row in df.iterrows():
                 dct = row.to_dict()
-                dct.update({'LeadID': id})
+                dct.update({'LeadID': id, 'CreatedBy': current_user.Email})
                 id += 50
                 lead = Leads(**dct)
                 db.session.add(lead)
@@ -437,7 +437,8 @@ def new_account():
                             Country=form.country.data, 
                             City=form.city.data, 
                             Timezone=form.timezone.data,
-                            ClientID=current_user.ClientID)
+                            ClientID=current_user.ClientID,
+                            CreatedBy=current_user.Email)
             
             db.session.add(account)
             db.session.commit()
@@ -486,7 +487,8 @@ def new_lead():
                             FirstName=form.first_name.data,
                             LastName=form.last_name.data,
                             Email=form.email.data,
-                            CompanyName=account.CompanyName)
+                            CompanyName=account.CompanyName,
+                            CreatedBy=current_user.Email)
                 
                 db.session.add(lead)
                 db.session.commit()
@@ -603,7 +605,7 @@ class Clients(db.Model):
     ClientID = db.Column(db.Integer, primary_key=True)
     Client = db.Column(db.String(50), nullable=False, unique=True)
     License = db.Column(db.String(20), nullable=False, unique=True)
-    Image = db.Column(db.String(255), unique=True)
+    # Image = db.Column(db.String(255), unique=True)
     ValidFrom = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     ValidTo = db.Column(db.Date)
     
@@ -614,71 +616,11 @@ class Clients(db.Model):
     Opportunity = db.relationship('Opportunities', backref='Client')
     Sale = db.relationship('Sales', backref='Client')
     
-# Accounts model
-class Accounts(db.Model):
-    __tablename__ = 'Accounts'
-    AccountID = db.Column(db.Integer, primary_key=True)
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    CompanyName = db.Column(db.String(100), nullable=False)
-    CompanyRevenue = db.Column(db.Integer, nullable=False)
-    EmployeeHeadCount = db.Column(db.Integer, nullable=False)
-    CompanyIndustry = db.Column(db.String(100))
-    CompanySpecialties = db.Column(db.Text)
-    CompanyType = db.Column(db.String(50))
-    Country = db.Column(db.String(50), nullable=False)
-    City = db.Column(db.String(50))
-    Timezone = db.Column(db.String(50))
-    
-    # References
-    Leads = db.relationship('Leads', backref='Account')
-    Opportunities = db.relationship('Opportunities', backref='Account')
-    
-# Leads model
-class Leads(db.Model):
-    __tablename__ = 'Leads'
-    LeadID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign key to AccountID
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    Position = db.Column(db.String(75), nullable=False)
-    FirstName = db.Column(db.String(50), nullable=False)
-    LastName = db.Column(db.String(50), nullable=False)
-    Email = db.Column(db.String(50), unique=True)
-    CompanyName =  db.Column(db.String(100), nullable=False)
-    
-    # References
-    Opportunities = db.relationship('Opportunities', backref='Lead')
-
-
-# Opportunities model    
-class Opportunities(db.Model):
-    __tablename__ = 'Opportunities'
-    OpportunityID = db.Column(db.Integer, primary_key=True)
-    AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign Key to AccountID
-    LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    Opportunity = db.Column(db.Text)
-    Value = db.Column(db.String(255))
-    Stage = db.Column(db.String(100))
-    CreationDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
-    CloseDate = db.Column(db.Date)
-
-    # References
-    Sale = db.relationship('Sales', backref='Opportunity')
-
-# Sales model
-class Sales(db.Model):
-    __tablename__ = 'Sales'
-    SaleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    SaleAmount = db.Column(db.Integer)
-    SalesRep = db.Column(db.String(50))
-    SaleDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
-
 # Users model
 class Users(db.Model, UserMixin):
     __tablename__ = 'Users'
     UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Email = db.Column(db.String(50), unique=True, nullable=False)
     FirstName = db.Column(db.String(50), nullable=False)
     LastName = db.Column(db.String(50), nullable=False)
@@ -686,7 +628,12 @@ class Users(db.Model, UserMixin):
     License = db.Column(db.String(20), nullable=False)
     ValidFrom = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     ValidTo = db.Column(db.Date)
-    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    
+    # References
+    Account = db.relationship('Accounts', backref='User')
+    Lead = db.relationship('Leads', backref='User')
+    Opportunity = db.relationship('Opportunities', backref='User')
+    Sale = db.relationship('Sales', backref='User')
     
     @property
     def password(self):
@@ -706,6 +653,73 @@ class Users(db.Model, UserMixin):
     @property
     def is_authenticated(self):
         return True  # Assuming the presence of a valid session tokenp
+    
+# Accounts model
+class Accounts(db.Model):
+    __tablename__ = 'Accounts'
+    AccountID = db.Column(db.Integer, primary_key=True)
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    CompanyName = db.Column(db.String(100), nullable=False)
+    CompanyRevenue = db.Column(db.Integer, nullable=False)
+    EmployeeHeadCount = db.Column(db.Integer, nullable=False)
+    CompanyIndustry = db.Column(db.String(100))
+    CompanySpecialties = db.Column(db.Text)
+    CompanyType = db.Column(db.String(50))
+    Country = db.Column(db.String(50), nullable=False)
+    City = db.Column(db.String(50))
+    Timezone = db.Column(db.String(50))
+    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    
+    # References
+    Leads = db.relationship('Leads', backref='Account')
+    Opportunities = db.relationship('Opportunities', backref='Account')
+    
+# Leads model
+class Leads(db.Model):
+    __tablename__ = 'Leads'
+    LeadID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign key to AccountID
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    Position = db.Column(db.String(75), nullable=False)
+    FirstName = db.Column(db.String(50), nullable=False)
+    LastName = db.Column(db.String(50), nullable=False)
+    Email = db.Column(db.String(50), unique=True)
+    CompanyName =  db.Column(db.String(100), nullable=False)
+    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    
+    # References
+    Opportunities = db.relationship('Opportunities', backref='Lead')
+
+
+# Opportunities model    
+class Opportunities(db.Model):
+    __tablename__ = 'Opportunities'
+    OpportunityID = db.Column(db.Integer, primary_key=True)
+    AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign Key to AccountID
+    LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    Opportunity = db.Column(db.Text)
+    Value = db.Column(db.String(255))
+    Stage = db.Column(db.String(100))
+    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    DateClosed = db.Column(db.Date)
+
+    # References
+    Sale = db.relationship('Sales', backref='Opportunity')
+
+# Sales model
+class Sales(db.Model):
+    __tablename__ = 'Sales'
+    SaleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    SaleAmount = db.Column(db.Integer)
+    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    SalesRep = db.Column(db.String(50))
+    SaleDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     
 # Admins model
 class Admins(db.Model):
