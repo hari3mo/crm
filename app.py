@@ -592,13 +592,17 @@ def clear_leads():
     flash('Leads cleared successfully.', 'success')
     return redirect(url_for('leads_list'))
 
-# Search
-@app.route('/search/')
+# Search accounts
+@app.route('/search_accounts/')
 @login_required
-def search():
+def search_accounts():
     query = request.args.get('query')
     if query:
-        Accounts.query.filter()
+        results = Accounts.query.filter(Accounts.CompanyName.icontains(query)).limit(100)
+    else:
+        results = []
+        
+    return render_template('accounts/search_accounts.html', results=results)
     
 # Invalid URL
 @app.errorhandler(404)

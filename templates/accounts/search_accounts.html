@@ -1,0 +1,16 @@
+{% for result in results %}
+<tr>
+    <td class="fw-bold">
+        <a class="link-info" href="{{ url_for('account', id=result.AccountID) }}">
+            {{ result.CompanyName }}
+        </a>
+    </td>
+    <td>{{ result.CompanyRevenue }}</td>
+    <td>{{ result.EmployeeHeadCount }}</td>
+    <td>{{ result.CompanyIndustry }}</td>
+    <td>{{ result.CompanyType }}</td>
+    <td>{{ result.Country }}</td>
+    <td>{{ result.City }}</td>
+    <td>{{ result.Timezone }}</td>
+</tr>
+{% endfor %}
