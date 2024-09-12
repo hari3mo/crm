@@ -80,7 +80,7 @@
                         </div>
 
                         <div class="mt-4 d-flex justify-content-between">
-                            {{ form.submit(class="btn btn-primary animate-up-2 me-1", value='Update Account') }}
+                            {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update Account') }}
                             <a href="{{ url_for('delete_account', id=account.AccountID)}}" class="btn btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to delete this account?');">Delete Account</a>
                         </div>
                     </form>
