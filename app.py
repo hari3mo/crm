@@ -512,10 +512,12 @@ def new_lead():
 @login_required
 def new_opportunity():
     form = OpportunityForm()
-    
     account = None
     account = request.args.get('account')
-    account = Accounts.query.get_or_404(account)
+    account = Accounts.query.filter_by(ClientID=current_user.ClientID).filter_by(AccountID=account).first()
+    if account is None:
+        flash('Account not found.', 'danger')
+        return redirect(url_for('opportunities_list'))
     
     leads = Leads.query.filter_by(AccountID=account.AccountID).all()
     leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
@@ -558,8 +560,12 @@ def new_opportunity():
 @app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
 @login_required
 def lead(id):
-    lead = Leads.query.get_or_404(id)
     form = LeadUpdateForm()
+    lead = None
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    if lead is None:
+        flash('Lead not found.', 'danger')
+        return redirect(url_for('leads_list'))
     return render_template('leads/lead.html', lead=lead, form=form)
 
 # Update account
@@ -567,7 +573,11 @@ def lead(id):
 @login_required
 def account(id):
     form = AccountForm()
-    account = Accounts.query.get_or_404(id)
+    accounts = None
+    account = Accounts.query.filter_by(ClientID=current_user.ClientID).filter_by(AccountID=id).first()
+    if account is None:
+        flash('Account not found.', 'danger')
+        return redirect(url_for('accounts_list'))
     form.company_specialties.data = account.CompanySpecialties
     if form.validate_on_submit():
 
@@ -597,7 +607,11 @@ def account(id):
 @app.route('/accounts/delete/<int:id>')
 @login_required
 def delete_account(id):
-    account = Accounts.query.get_or_404(id)
+    account = None
+    account = Accounts.query.filter_by(ClientID=current_user.ClientID).filter_by(AccountID=id).first()
+    if account is None:
+        flash('Account not found.', 'danger')
+        return redirect(url_for('accounts_list'))
     try:
         db.session.delete(account)
         db.session.commit()
@@ -612,7 +626,11 @@ def delete_account(id):
 @app.route('/leads/delete/<int:id>')
 @login_required
 def delete_lead(id):
-    lead = Leads.query.get_or_404(id)
+    lead = None
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    if lead is None:
+        flash('Lead not found.', 'danger')
+        return redirect(url_for('leads_list'))
     try:
         db.session.delete(lead)
         db.session.commit()
@@ -782,7 +800,7 @@ class Opportunities(db.Model):
     LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Opportunity = db.Column(db.Text)
-    Value = db.Column(db.String(255))
+    Value = db.Column(db.Integer)
     Stage = db.Column(db.String(100))
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))

@@ -60,7 +60,7 @@ class OpportunityForm(FlaskForm):
     account = StringField('Account:', validators=[DataRequired()])
     lead = SelectField('Lead:', coerce=int, validators=[DataRequired()])
     opportunity = TextAreaField('Opportunity:', validators=[DataRequired()])
-    value = StringField('Value:', validators=[DataRequired()])
+    value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
     submit = SubmitField('Submit')
