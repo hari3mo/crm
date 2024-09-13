@@ -321,7 +321,8 @@ def import_accounts():
                                     df.columns[7]: 'City',
                                     df.columns[8]: 'Timezone'})
             
-            df = df.assign(ClientID=current_user.ClientID, CreatedBy=current_user.Email)
+            df = df.assign(ClientID=current_user.ClientID, 
+                           CreatedBy=current_user.Email)
             
             # Grab max id
             id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
@@ -388,7 +389,9 @@ def import_leads():
             df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
             # Replace NaN with None
             df = df.replace({np.nan: None})
-            df = df.assign(CreatedBy=current_user.Email, Status='Open')
+            df = df.assign(CreatedBy=current_user.Email, 
+                           Status='Open',
+                            FollowUp=False)
             
             # Grab max id
             id = Leads.query.order_by(Leads.LeadID.desc()).first()
