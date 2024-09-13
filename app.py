@@ -507,6 +507,53 @@ def new_lead():
     
     return render_template('leads/new_lead.html', form=form)
 
+# New opportunity
+@app.route('/opportunities/new/', methods=['GET', 'POST'])
+@login_required
+def new_opportunity():
+    form = OpportunityForm()
+    
+    account = None
+    account = request.args.get('account')
+    account = Accounts.query.get_or_404(account)
+    
+    leads = Leads.query.filter_by(AccountID=account.AccountID).all()
+    leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
+    
+    form.lead.choices = leads
+    
+    # Grab max id
+    id = None
+    id = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Opportunities.OpportunityID.desc()).first()
+
+    if id is None:
+            id = 1000
+    else:
+        id = id.OpportunityID + 5
+                
+    if form.validate_on_submit():
+        try:
+            opportunity = Opportunities(OpportunityID=id,
+                                        AccountID=account.AccountID,
+                                        LeadID=form.lead.data,
+                                        ClientID=current_user.ClientID,
+                                        Opportunity=form.opportunity.data,
+                                        Value=form.value.data,
+                                        Stage=form.stage.data,
+                                        CreatedBy=current_user.Email)
+            db.session.add(opportunity)
+            db.session.commit()
+
+            flash('Opportunity added successfully.', 'success')
+            return redirect(url_for('opportunities_list'))
+        except:
+            db.session.rollback()
+            flash('Opportunity add failed.', 'danger')
+            return redirect(url_for('new_opportunity'))
+    
+    return render_template('opportunities/new_opportunity.html', form=form, account=account)
+
 # Update lead
 @app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
 @login_required

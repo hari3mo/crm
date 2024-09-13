@@ -83,4 +83,7 @@ ALTER TABLE Leads
 ADD FOREIGN KEY (CreatedBy) REFERENCES Users(Email)
 
 --@block
+DELETE FROM Opportunities
+
+--@block
 DROP TABLE alembic_version

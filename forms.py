@@ -58,10 +58,11 @@ class UserForm(FlaskForm):
 # Opportunity form
 class OpportunityForm(FlaskForm):
     account = StringField('Account:', validators=[DataRequired()])
-    lead = SelectField('Lead:', coerce=int, validate_choice=False, validators=[DataRequired()])
-    opportunity = StringField('Opportunity:', validators=[DataRequired()])
+    lead = SelectField('Lead:', coerce=int, validators=[DataRequired()])
+    opportunity = TextAreaField('Opportunity:', validators=[DataRequired()])
     value = StringField('Value:', validators=[DataRequired()])
-    stage = StringField('Stage:', validators=[DataRequired()])
+    stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
+        ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
     submit = SubmitField('Submit')
     
 # Opportunity update form

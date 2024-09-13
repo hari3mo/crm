@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Account: {{ account.CompanyName }}{% endblock %}
+{% block title %}Account - {{ account.CompanyName }}{% endblock %}
 
 {% block route %}{{ url_for('accounts_list') }}{% endblock %}
 
@@ -17,11 +17,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h1 class="h3 mb-0">{{ account.CompanyName }}</h1>
+                        {% if account.Leads %}
                         <div>
-                            <a href="#" class="btn btn-secondary animate-up-2 me-1">
+                            <a href="{{ url_for('new_opportunity', account=account.AccountID) }}" class="btn btn-secondary animate-up-2 me-1">
                                 New Opportunity
                             </a>
                         </div>
+                        {% endif %}
                     </div>
                     <p class="text-muted">Account ID: {{ account.AccountID }}</p>
                 </div>

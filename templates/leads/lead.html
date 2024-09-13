@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Lead: {{ lead.FirstName}} {{ lead.LastName }}{% endblock %}
+{% block title %}Lead - {{ lead.FirstName}} {{ lead.LastName }}{% endblock %}
 
 {% block route %}{{ url_for('leads_list') }}{% endblock %}
 
