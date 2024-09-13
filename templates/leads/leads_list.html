@@ -10,65 +10,6 @@
 
 {% block content %}
 
-
-<style>
-    
-    .apple-checkbox {
-        position: relative;
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-    }
-
-    .apple-checkbox input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-        height: 0;
-        width: 0;
-    }
-
-    .checkmark {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 18px;
-        width: 18px;
-        background-color: #ffffff;
-        border: 2px solid #d2d2d7;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-
-    .apple-checkbox:hover input ~ .checkmark {
-        border-color: #0071e3;
-    }
-
-    .apple-checkbox input:checked ~ .checkmark {
-        background-color: #0071e3;
-        border-color: #0071e3;
-    }
-
-    .checkmark:after {
-        content: "";
-        position: absolute;
-        display: none;
-        left: 50%;
-        top: 45%;
-        width: 5px;
-        height: 10px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: translate(-50%, -50%) rotate(45deg);
-        transition: all 0.2s ease;
-    }
-
-    .apple-checkbox input:checked ~ .checkmark:after {
-        display: block;
-    }
-
-</style>
-
 <div class="py-4">
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
@@ -141,6 +82,7 @@
                                 </ul>
                                 {% endif %}
                             </div>
+                        </th>
                         <th class="border-0">
                             Company Name
                             <svg id="company-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
@@ -156,7 +98,11 @@
                                 {% endif %}
                             </div>
                         </th>
-                        <th class="border-0 rounded-end">Follow-Up</th>
+                        <th>City</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0">Owner</th>
+                        <th class="border-0">Follow-Up</th>
+                        <th class="border-0 rounded-end">Date Created</th>
                     </tr>
                 </thead>
                 <tbody id="results">
@@ -171,12 +117,17 @@
                         <td>{{ lead.Email if lead.Email }}</td>
                         <td>{{ lead.Position if lead.Position }}</td>
                         <td>{{ lead.CompanyName if lead.CompanyName }}</td>
+                        <td>{{ lead.Account.City if lead.Account.City }}</td>
+                        <td>{{ lead.Status if lead.Status }}</td>
+                        <td>{{ lead.Owner if lead.Owner}}</td>
                         <td>
                             <label class="apple-checkbox">
                                 <input type="checkbox">
                                 <span class="checkmark"></span>
                             </label>    
                         </td>
+                        <td>{{ lead.DateCreated if lead.DateCreated }}</td>
+                        
                     </tr>
                     {% endfor %}
                     <!-- End of Item -->

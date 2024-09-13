@@ -188,7 +188,6 @@ def index():
 @login_required
 def accounts_list():
     accounts = None
-    leads = None
     accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)
      
     # Sort options    
@@ -275,6 +274,14 @@ def leads_list():
     
     return render_template('leads/leads_list.html', leads=leads, companies=companies,
                            positions=positions)
+    
+# Opportunities list
+@app.route('/opportunities/opportunities_list/')
+@login_required
+def opportunities_list():
+    opportunities = None
+    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)
+    return render_template('opportunities/opportunities_list.html', opportunities=opportunities)
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
@@ -313,6 +320,8 @@ def import_accounts():
                                     df.columns[7]: 'City',
                                     df.columns[8]: 'Timezone'})
             
+            df = df.assign(ClientID=current_user.ClientID, CreatedBy=current_user.Email)
+            
             # Grab max id
             id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
         
@@ -323,8 +332,7 @@ def import_accounts():
                 
             for index, row in df.iterrows():
                 dct = row.to_dict()
-                dct.update({'AccountID': id, 'ClientID': current_user.ClientID,
-                            'CreatedBy': current_user.Email})
+                dct.update({'AccountID': id})
                 id += 10
                 account = Accounts(**dct)
                 db.session.add(account)
@@ -379,6 +387,7 @@ def import_leads():
             df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
             # Replace NaN with None
             df = df.replace({np.nan: None})
+            df = df.assign(CreatedBy=current_user.Email, Status='Open')
             
             # Grab max id
             id = Leads.query.order_by(Leads.LeadID.desc()).first()
@@ -390,18 +399,16 @@ def import_leads():
             
             for index, row in df.iterrows():
                 dct = row.to_dict()
-                dct.update({'LeadID': id, 'CreatedBy': current_user.Email})
+                dct.update({'LeadID': id})
                 id += 50
                 lead = Leads(**dct)
                 db.session.add(lead)
 
-            
             db.session.commit() 
             os.remove(filepath)        
             flash('Import successful.', 'success')
             return redirect(url_for('leads_list'))    
 
-            
         except:
             db.session.rollback()
             flash('Import failed. Please ensure .csv file is ordered as \
@@ -514,8 +521,6 @@ def lead(id):
 def account(id):
     form = AccountForm()
     account = Accounts.query.get_or_404(id)
-    # leads  = Leads.query.filter_by(ClientID=current_user.ClientID)\
-    #     .filter_by(AccountID=account.AccountID)
     form.company_specialties.data = account.CompanySpecialties
     if form.validate_on_submit():
 
@@ -712,6 +717,9 @@ class Leads(db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(50))
     CompanyName =  db.Column(db.String(100), nullable=False)
+    Owner = db.Column(db.String(50))
+    Status = db.Column(db.String(50))
+    FollowUp = db.Column(db.Boolean)
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     
