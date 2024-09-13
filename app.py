@@ -530,7 +530,7 @@ def new_opportunity():
     if id is None:
             id = 1000
     else:
-        id = id.OpportunityID + 5
+        id = id.OpportunityID + 10
                 
     if form.validate_on_submit():
         try:
