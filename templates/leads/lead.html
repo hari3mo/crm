@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Lead - {{ lead.FirstName}} {{ lead.LastName }}{% endblock %}
+{% block title %}Lead - {{ lead.FirstName }} {{ lead.LastName }}{% endblock %}
 
 {% block route %}{{ url_for('leads_list') }}{% endblock %}
 
@@ -9,65 +9,64 @@
 {% block page %}View{% endblock %}
 
 {% block content %}
-
-
-<div class="py-4">
-    <div class="d-flex justify-content-between w-100 flex-wrap">
-        <div class="mb-3 mb-lg-0">
-            <h1 class="h4">Lead: {{ lead.FirstName }} {{ lead.LastName }} / {{ lead.LeadID }}</h1>
-        </div>
-        <div class="d-flex justify-content-end">
-            <a href="#" class="btn btn-primary animate-up-2 me-1">Opportunity</a>
-        </div>   
-    </div>
-</div>
-
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-8">
-        <div class="card card-body border-0 shadow mb-4">
-            <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
-            <form action="{{ url_for('lead', id=lead.LeadID) }}"method='POST'>
-                {{ form.hidden_tag() }}
-                <div class="row">
-                    <div class="col-sm-3 mb-3">
-                        <div class="form-group">
-                            {{ form.first_name.label(class="form-label" )}}
-                            {{ form.first_name(class="form-control", value=lead.FirstName) }}   
-                        </div>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="h3 mb-0">Lead: {{ lead.FirstName }} {{ lead.LastName }}</h1>
                     </div>
-                    <div class="col-sm-3 mb-3">
-                        {{ form.last_name.label(class="form-label" )}}
-                        {{ form.last_name(class="form-control", value=lead.LastName) }}
-                    </div>
-                    <div class="col-sm-6 mb-3">
-                        {{ form.email.label(class="form-label" )}}
-                        {{ form.email(class="form-control", value=lead.Email) }}
-                    </div>
+                    <p class="text-muted">Lead ID: {{ lead.LeadID }}</p>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12 mb-3">
-                        {{ form.position.label(class="form-label" )}}
-                        {{ form.position(class="form-control", value=lead.Position) }}
-                    </div>
-                </div>
-                <div class="mt-3 row">
-                    <div class="col d-flex justify-content-start">
-                        {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update') }}
-                   <!--
-                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Lead</a>
-                        <a href="{{ url_for('accounts_list')}}" class="btn btn-secondary animate-up-2 me-1">Opportunity</a>
-            
-                    -->
-                        </div>
-                    <div class="col d-flex justify-content-end">
-                        <a href="{{ url_for('delete_lead', id=lead.LeadID) }}" class="btn btn-danger animate-up-2 me-1">Delete</a>
-                        <!-- <a href="{{ url_for('leads_list')}}" class="btn btn-primary animate-up-2 me-1">Discard</a> -->
-                    </div>
-                </div>
-
-            </form>
+            </div>
         </div>
     </div>
-</div>
 
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
+                    <form action="{{ url_for('lead', id=lead.LeadID) }}" method='POST'>
+                        {{ form.hidden_tag() }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.first_name.label(class="form-label") }}
+                                {{ form.first_name(class="form-control", value=lead.FirstName) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name.label(class="form-label") }}
+                                {{ form.last_name(class="form-control", value=lead.LastName) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control", value=lead.Email) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.position.label(class="form-label") }}
+                                {{ form.position(class="form-control", value=lead.Position) }}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update Lead') }}
+                            <a href="{{ url_for('delete_lead', id=lead.LeadID) }}" class="btn btn-danger animate-up-2 me-1">Delete</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Opportunities</h2>
+                    <!-- Add related opportunities or other relevant information here -->
+                    <p class="text-muted">No opportunities associated with this lead.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -280,7 +280,8 @@ def leads_list():
 @login_required
 def opportunities_list():
     opportunities = None
-    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)
+    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Opportunities.OpportunityID.desc()).all()
     return render_template('opportunities/opportunities_list.html', opportunities=opportunities)
 
 # Import accounts
