@@ -253,7 +253,7 @@ def accounts_list():
 @login_required
 def leads_list():
     leads = None
-    leads = Leads.query.filter_by(ClientID=current_user.ClientID).order_by(Leads.LeadID.desc())#.all()
+    leads = Leads.query.filter_by(ClientID=current_user.ClientID).order_by(Leads.LeadID.desc())
     
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
@@ -284,11 +284,11 @@ def leads_list():
         leads = leads.filter_by(Status=status)
         
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
-            .distinct().all()
-    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners])
+            .distinct().filter(Leads.Owner.isnot(None)).all()
+    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners]) + ['Not assigned']
     owner = request.args.get('owner')
     if owner:
-        if owner == 'None':
+        if owner == 'Not assigned':
             leads = leads.filter(Leads.Owner.is_(None))
         else:
             leads = Leads.query.filter_by(Owner=owner)
@@ -300,8 +300,8 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads, companies=companies,
-                           positions=positions, cities=cities, owners=owners)
+    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
+        positions=positions, cities=cities, owners=owners)
     
 # Opportunities list
 @app.route('/opportunities/opportunities_list/')
@@ -329,9 +329,9 @@ def import_accounts():
         
         try:        
             # Rename function
-            while os.path.exists(filepath):
-                filename = filename.split('.')[0] + ' copy.csv'
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+            # while os.path.exists(filepath):
+            #     filename = filename.split('.')[0] + ' copy.csv'
+            #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
             
             file.save(filepath)
             
@@ -418,9 +418,9 @@ def import_leads():
             return redirect(url_for('import_leads'))
             
         # Rename function
-        while os.path.exists(filepath):
-            filename = filename.split('.')[0] + ' copy.csv'
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+        # while os.path.exists(filepath):
+        #     filename = filename.split('.')[0] + ' copy.csv'
+        #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
         
         file.save(filepath)
         
@@ -667,7 +667,7 @@ def follow_up(id):
         return redirect(url_for('leads_list')) 
     lead.FollowUp = False if lead.FollowUp else True
     db.session.commit()
-    flash(f'Follow up status for {lead.FirstName} {lead.LastName} updated.', 'success')
+    flash(f'Follow-up status for {lead.FirstName} {lead.LastName} updated.', 'success')
     return redirect(url_for('leads_list'))
 
 # Update account
@@ -725,6 +725,11 @@ def delete_account(id):
     if account is None:
         flash('Account not found.', 'danger')
         return redirect(url_for('accounts_list'))
+    
+    if account.Leads:
+        flash('Account cannot be deleted as it has associated leads.', 'danger')
+        return redirect(url_for('account', id=account.AccountID))
+    
     try:
         db.session.delete(account)
         db.session.commit()
@@ -744,6 +749,11 @@ def delete_lead(id):
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list'))
+    
+    if lead.Opportunities:
+        flash('Lead cannot be deleted as it has associated opportunities.', 'danger')
+        return redirect(url_for('lead', id=lead.LeadID))
+    
     try:
         db.session.delete(lead)
         db.session.commit()
@@ -812,7 +822,7 @@ def search_accounts():
             Accounts.City.icontains(query) |
             Accounts.CompanyType.icontains(query) |
             Accounts.CompanyIndustry.icontains(query) |
-            Accounts.Timezone.icontains(query)).limit(100)
+            Accounts.Timezone.icontains(query))
     else:
         accounts = []
     return render_template('accounts/search_accounts.html', accounts=accounts)
@@ -832,7 +842,7 @@ def search_leads():
             Leads.Email.icontains(query) |
             Leads.Status.icontains(query) |
             Leads.Owner.icontains(query) |
-            Accounts.City.icontains(query)).limit(100)
+            Accounts.City.icontains(query))
     else:
         leads = []
     return render_template('leads/search_leads.html', leads=leads)
@@ -851,7 +861,7 @@ def search_opportunities():
             Opportunities.Stage.icontains(query) |
             Leads.FirstName.icontains(query) |
             Leads.LastName.icontains(query) |
-            Accounts.CompanyName.icontains(query)).limit(100)
+            Accounts.CompanyName.icontains(query))
     else:
         opportunities = []
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)

@@ -47,17 +47,17 @@
             </a>
         </div>
         <div class="col d-flex justify-content-end align-items-center">
-                <!-- Search form -->
-                <form class="navbar-search form-inline me-2" id="navbar-search-main">
-                    <div class="input-group input-group-merge search-bar">
-                        <span class="input-group-text" id="topbar-addon">
+             <!-- Search form -->
+            <form class="navbar-search form-inline me-2" id="navbar-search-main" onsubmit="return false;">
+                <div class="input-group input-group-merge search-bar">
+                    <span class="input-group-text" id="topbar-addon">
                         <svg class="icon icon-xs" x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                         </svg>
-                        </span>
-                        <input type="text" class="form-control" name="query" hx-get="/search_accounts" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search accounts" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
-                    </div>
-                </form>
+                    </span>
+                    <input type="text" class="form-control" name="query" hx-get="/search_accounts" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search accounts" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
+                </div>
+            </form>
             <a href="{{ url_for('clear_accounts') }}">
                 <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all accounts?');" type="button">Clear</button>
             </a>
