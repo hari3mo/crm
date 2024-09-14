@@ -274,12 +274,12 @@ def leads_list():
     if position:
         leads = leads.filter_by(Position=position)
         
-    companies = db.session.query(Leads.CompanyName).filter_by(ClientID=current_user.ClientID)\
-        .distinct().filter(Leads.CompanyName.isnot(None)).all()
+    companies = db.session.query(Accounts.CompanyName).join(Leads, Leads.AccountID == Accounts.AccountID)\
+    .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
     companies = sorted([company.CompanyName for company in companies])
     company = request.args.get('company')
     if company:
-        leads = leads.filter_by(CompanyName=company)
+        leads = leads.join(Accounts, Leads.AccountID == Accounts.AccountID).filter(Accounts.CompanyName == company)
         
     cities = db.session.query(Accounts.City).join(Leads, Leads.AccountID == Accounts.AccountID)\
         .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.City.isnot(None)).all()
@@ -493,6 +493,7 @@ def import_leads():
             df = df.assign(CreatedBy=current_user.Email, 
                             Status='Open',
                             FollowUp=False)
+            df = df.drop(columns=['CompanyName'])
             
             # Grab max id
             id = Leads.query.order_by(Leads.LeadID.desc()).first()
@@ -599,7 +600,6 @@ def new_lead():
                             FirstName=form.first_name.data,
                             LastName=form.last_name.data,
                             Email=form.email.data,
-                            CompanyName=account.CompanyName,
                             Owner=form.owner.data,
                             Status=form.status.data,
                             FollowUp=False,
@@ -898,14 +898,14 @@ def search_leads():
     if query:
         leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
             .join(Accounts, Leads.AccountID == Accounts.AccountID)\
-            .filter(Leads.CompanyName.icontains(query) |
-            (Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
+            .filter((Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
             Leads.FirstName.icontains(query) |
             Leads.LastName.icontains(query) |
             Leads.Position.icontains(query) |
             Leads.Email.icontains(query) |
             Leads.Status.icontains(query) |
             Leads.Owner.icontains(query) |
+            Accounts.CompanyName.icontains(query) |
             Accounts.City.icontains(query))
     else:
         leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
@@ -1035,7 +1035,7 @@ class Leads(db.Model):
     FirstName = db.Column(db.String(50), nullable=False)
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(50))
-    CompanyName =  db.Column(db.String(100), nullable=False)
+    # CompanyName =  db.Column(db.String(100), nullable=False)
     Owner = db.Column(db.String(50))
     Status = db.Column(db.String(50))
     FollowUp = db.Column(db.Boolean)
