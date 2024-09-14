@@ -28,8 +28,10 @@
         <div class="col-lg-8 mb-4">
             <div class="card border-0 shadow">
                 <div class="card-body">
-                    <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=opportunity.Account.AccountID) }}">{{ opportunity.Account.CompanyName }}</a></h2>
-                    <form method='POST'>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=opportunity.Account.AccountID) }}">{{ opportunity.Account.CompanyName }}</a></h2>
+                        <h2 class="h5 mb-4">Lead: <a class="link-info" href="{{ url_for('lead', id=opportunity.Lead.LeadID) }}">{{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName }}</a></h2>
+                    </div>                    <form method='POST'>
                         {{ form.hidden_tag() }}
                         <div class="row g-3">
                             <div class="col-md-6">

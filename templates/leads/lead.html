@@ -76,7 +76,7 @@
                     {% if lead.Opportunities %}
                     <ul class="list-group list-group-flush">
                     {% for opportunity in lead.Opportunities %}
-                        <a class="link-info" href="#">
+                        <a class="link-info" href="{{ url_for('opportunity', id=opportunity.OpportunityID) }}">
                             {{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName}} - {{ opportunity.Stage }}
                         </a>
                     {% endfor %}
