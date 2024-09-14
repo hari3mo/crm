@@ -120,12 +120,14 @@
                         <td>{{ lead.Account.City if lead.Account.City }}</td>
                         <td>{{ lead.Status if lead.Status }}</td>
                         <td>{{ lead.Owner if lead.Owner}}</td>
-                        <td>
+                        <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
+                            <td>
                             <label class="apple-checkbox">
-                                <input type="checkbox" oninput="" {% if lead.FollowUp %}checked{% endif %}>
+                                <input type="checkbox" oninput="submitForm({{lead.LeadID}})" {% if lead.FollowUp %}checked{% endif %}>
                                 <span class="checkmark"></span>
                             </label>    
                         </td>
+                        </form>
                         <td>{{ lead.DateCreated if lead.DateCreated }}</td>
                         
                     </tr>
@@ -167,6 +169,12 @@
                 });
             });
         });
+    </script>
+
+    <script>
+        function submitForm(leadID) {
+            document.getElementById('followUp_' + leadID).submit();
+        }
     </script>
         
 {% endblock %}

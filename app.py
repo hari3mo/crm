@@ -572,6 +572,20 @@ def lead(id):
         return redirect(url_for('leads_list'))
     return render_template('leads/lead.html', lead=lead, form=form)
 
+# Update lead follow up
+@app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
+@login_required
+def follow_up(id):
+    lead = None
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    if lead is None:
+        flash('Lead not found.', 'danger')
+        return redirect(url_for('leads_list')) 
+    lead.FollowUp = False if lead.FollowUp else True
+    db.session.commit()
+    flash(f'Follow up status for {lead.FirstName} {lead.LastName} updated.', 'success')
+    return redirect(url_for('leads_list'))
+
 # Update account
 @app.route('/accounts/update/<int:id>', methods=['GET', 'POST'])
 @login_required
