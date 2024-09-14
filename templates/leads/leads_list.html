@@ -167,7 +167,7 @@
                         </td>
                         <td>
                             <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID )}}">
-                                {{ lead.CompanyName if lead.CompanyName }}
+                                {{ lead.Account.CompanyName if lead.Account.CompanyName }}
                             </a>
                         </td>
                         <td>{{ lead.Email if lead.Email }}</td>
