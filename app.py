@@ -940,6 +940,11 @@ def search_opportunities():
 def page_not_foredid(e):
     return redirect(url_for('index'))
 
+# Internal server error
+@app.errorhandler(500)
+def internal_server_error(e):
+    return e
+
 ##############################################################################
 
 # Models
