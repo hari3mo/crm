@@ -609,7 +609,7 @@ def new_lead():
                 db.session.commit()
                 flash('Lead added successfully.', 'success')
                 return redirect(url_for('leads_list'))
-        
+            
         else:
             flash('Account not found.', 'danger')
             return redirect(url_for('new_lead'))
@@ -634,7 +634,6 @@ def new_opportunity():
     
     leads = Leads.query.filter_by(AccountID=account.AccountID).all()
     leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
-    
     form.lead.choices = leads
     
     # Grab max id
