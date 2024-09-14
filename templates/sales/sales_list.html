@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Sales{% endblock %}
+
+{% block route %}{{ url_for('sales_list') }}{% endblock %}
+
+{% block path %}Sales{% endblock %}
+
+{% block page %}List{% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Sales</h1>
+        </div>
+    </div>
+</div>
+
+    <div class="mt-3 row">
+        <div class="col d-flex justify-content-end">
+            <form class="navbar-search form-inline me-2" id="navbar-search-main" onsubmit="return false;">
+                <div class="input-group input-group-merge search-bar">
+                    <span class="input-group-text" id="topbar-addon">
+                    <svg class="icon icon-xs" x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                    </span>
+                    <input type="text" class="form-control" name="query" hx-get="/search_sales" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search sales" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
+                </div>
+            </form>
+            <a href="#">
+                <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all sales?');" type="button">Clear</button>
+            </a>
+            <a href="{{ url_for('sales_list') }}">
+                <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
+            </a>
+        </div>
+    </div>
+    <br>
+    <div class="card border-0 shadow">
+    {% if opportunities %}
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0 rounded table-fixed">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="border-0 rounded-start">ID</th>
+                        <th class="border-0">
+                            Company Name
+                            <svg id="account-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="account-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if accounts  %}
+                                <ul>
+                                    {% for account in accounts %}
+                                    <a href="#"><li>{{ account }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="border-0">Lead Name</th>
+                        <th class="border-0">Lead Email</th>
+                        <th class="border-0">
+                            Value
+                            <svg id="value-icon" data-slot="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+                                <title>Sort</title>
+                                <path clip-rule="evenodd" fill-rule="evenodd" d="M2.24 6.8a.75.75 0 0 0 1.06-.04l1.95-2.1v8.59a.75.75 0 0 0 1.5 0V4.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L2.2 5.74a.75.75 0 0 0 .04 1.06Zm8 6.4a.75.75 0 0 0-.04 1.06l3.25 3.5a.75.75 0 0 0 1.1 0l3.25-3.5a.75.75 0 1 0-1.1-1.02l-1.95 2.1V6.75a.75.75 0 0 0-1.5 0v8.59l-1.95-2.1a.75.75 0 0 0-1.06-.04Z"></path>
+                            </svg>
+                            <div id="value-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="#"><li>Ascending</li></a>
+                                    <a href="#"><li>Descending</li></a>
+                                </ul>
+                            </div>
+                        </th>
+                        <th class="border-0">
+                            Stage
+                            <svg id="stage-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="stage-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="#"><li>Prospecting</li></a>
+                                    <a href="#"><li>Qualification</li></a>
+                                    <a href="#"><li>Proposal</li></a>
+                                    <a href="#"><li>Won</li></a>
+                                    <a href="#"><li>Loss</li></a>
+                                </ul>
+                            </div>
+                        </th>
+                        <th class="border-0">
+                            Owner
+                            <svg id="owner-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="owner-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if owners %}
+                                <ul>
+                                    {% for owner in owners %}
+                                    <a href="#"><li>{{ owner }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="border-0 rounded-end">
+                            Date Created
+                            <svg id="date-icon" data-slot="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+                                <title>Sort</title>
+                                <path clip-rule="evenodd" fill-rule="evenodd" d="M2.24 6.8a.75.75 0 0 0 1.06-.04l1.95-2.1v8.59a.75.75 0 0 0 1.5 0V4.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L2.2 5.74a.75.75 0 0 0 .04 1.06Zm8 6.4a.75.75 0 0 0-.04 1.06l3.25 3.5a.75.75 0 0 0 1.1 0l3.25-3.5a.75.75 0 1 0-1.1-1.02l-1.95 2.1V6.75a.75.75 0 0 0-1.5 0v8.59l-1.95-2.1a.75.75 0 0 0-1.06-.04Z"></path>
+                            </svg>
+                            <div id="date-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="#"><li>Newest</li></a>
+                                    <a href="#"><li>Oldest</li></a>
+                                </ul>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="results">
+                    <!-- Item -->
+                    <!-- End of Item -->
+                </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <br>
+            <h4 class="mt-2"><span>No sales found</span></h4>
+            <br>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = [
+            { iconId: 'account-icon', menuId: 'account-menu' },
+            { iconId: 'value-icon', menuId: 'value-menu' },
+            { iconId: 'stage-icon', menuId: 'stage-menu' },
+            { iconId: 'owner-icon', menuId: 'owner-menu' },
+            { iconId: 'date-icon', menuId: 'date-menu' },
+            ];
+        
+            dropdowns.forEach(function(dropdown) {
+                const menuIcon = document.getElementById(dropdown.iconId);
+                const menu = document.getElementById(dropdown.menuId);
+        
+                menuIcon.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    menu.style.display = 'block';
+                });
+        
+                document.addEventListener('click', function(event) {
+                    if (!menu.contains(event.target) && event.target !== menuIcon) {
+                        menu.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

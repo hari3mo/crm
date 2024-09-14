@@ -4,7 +4,6 @@ from wtforms import StringField, SubmitField, PasswordField, EmailField,\
 from flask_wtf.file import FileRequired
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-
 # Forms
     
 # Account form
@@ -70,6 +69,7 @@ class OpportunityForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
+    owner = StringField('Owner:')
     submit = SubmitField('Submit')
     
 # Opportunity update form
@@ -79,6 +79,7 @@ class OpportunityUpdateForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
+    owner = StringField('Owner:')
     submit = SubmitField('Submit')
     
 # Sale form
@@ -129,6 +130,10 @@ class AdminUpdateForm(FlaskForm):
 # Generate analytics form
 class GenerateForm(FlaskForm):
     submit = SubmitField('Submit')
+
+##############################################################################
+
+# Test forms
 
 # Password form (testing)
 class PasswordForm(FlaskForm):

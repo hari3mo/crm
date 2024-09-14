@@ -19,19 +19,6 @@
 </div>
 
     <div class="mt-3 row">
-        <!--
-        <div class="col d-flex justify-content-start">
-            <a href="#">
-                <button class="btn btn-sm btn-primary animate-up-2 me-1 d-flex align-items-center justify-content-between" type="button">
-                    <span class="me-2">New</span>
-                    <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-                        <title>New</title>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-                    </svg>
-                </button>
-            </a>
-        </div>
-    -->
         <div class="col d-flex justify-content-end">
             <form class="navbar-search form-inline me-2" id="navbar-search-main" onsubmit="return false;">
                 <div class="input-group input-group-merge search-bar">
@@ -105,6 +92,21 @@
                                 </ul>
                             </div>
                         </th>
+                        <th class="border-0">
+                            Owner
+                            <svg id="owner-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="owner-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if owners %}
+                                <ul>
+                                    {% for owner in owners %}
+                                    <a href="{{ url_for('opportunities_list', owner=owner) }}"><li>{{ owner }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
                         <th class="border-0 rounded-end">
                             Date Created
                             <svg id="date-icon" data-slot="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
@@ -113,8 +115,8 @@
                             </svg>
                             <div id="date-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <a href="{{ url_for('opportunities_list', sort='date', order='asc') }}"><li>Ascending</li></a>
-                                    <a href="{{ url_for('opportunities_list', sort='date', order='desc') }}"><li>Descending</li></a>
+                                    <a href="{{ url_for('opportunities_list', sort='date', order='asc') }}"><li>Newest</li></a>
+                                    <a href="{{ url_for('opportunities_list', sort='date', order='desc') }}"><li>Oldest</li></a>
                                 </ul>
                             </div>
                         </th>
@@ -142,6 +144,7 @@
                         <td>{{ opportunity.Lead.Email if opportunity.Lead.Email }}</td>
                         <td>{{ opportunity.Value if opportunity.Value }}</td>
                         <td>{{ opportunity.Stage if opportunity.Stage }}</td>
+                        <td>{{ opportunity.Owner if opportunity.Owner else 'Not assigned' }}</td>
                         <td>{{ opportunity.DateCreated if opportunity.DateCreated }}</td>
                     </tr>
                     {% endfor %}
@@ -165,6 +168,7 @@
             { iconId: 'account-icon', menuId: 'account-menu' },
             { iconId: 'value-icon', menuId: 'value-menu' },
             { iconId: 'stage-icon', menuId: 'stage-menu' },
+            { iconId: 'owner-icon', menuId: 'owner-menu' },
             { iconId: 'date-icon', menuId: 'date-menu' },
             ];
         

@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h1 class="h3 mb-0">Opportunity</h1>
-                        {{ opportunity.DateCreated }}
+                        {{ opportunity.DateCreated }}{% if opportunity.DateClosed %} - {{ opportunity.DateClosed }}{% endif %}
                     </div>
                     <p class="text-muted">Opportunity ID: {{ opportunity.OpportunityID }}</p>
                 </div>
@@ -42,9 +42,13 @@
                                 {{ form.value.label(class="form-label") }}
                                 {{ form.value(class="form-control", value=opportunity.Value) }}
                             </div>
-                            <div class="col">
+                            <div class="col-md-6">
                                 {{ form.stage.label(class="form-label") }}
                                 {{ form.stage(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.owner.label(class="form-label") }}
+                                {{ form.owner(class="form-control", value=opportunity.Owner) }}
                             </div>
                             <div class="col-12">
                                 {{ form.opportunity.label(class="form-label") }}
@@ -65,7 +69,22 @@
             <div class="card border-0 shadow mb-4">
                 <div class="card-body">
                     <h2 class="h5 mb-4">Sales</h2>
+                    {% if opportunity.Sales %}
+                    <ul class="list-group list-group-flush">
+                        {% for sale in opportunity.Sales %}
+                            <a class="link-info" href="#">
+                                {{ sale.SaleID }}
+                            </a>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
                     <p class="text-muted">No sales associated with this opportunity.</p>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-primary animate-up-2 me-1">
+                            New Sale
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
                 
             </div>

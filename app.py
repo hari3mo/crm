@@ -35,7 +35,7 @@ load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('MYSQL_URI')
 
 # Secret key
-app.config['SECRET_KEY'] = '9b2a012a1a1c425a8c86'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # Uploads folder
 app.config['UPLOAD_FOLDER'] = 'static/files'
@@ -78,7 +78,7 @@ def load_user(user_id):
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    
+
     user = None
     form = LoginForm()
     
@@ -98,7 +98,6 @@ def login():
                 # Check if user is an admin
                 admin = Admins.query.filter_by(User=current_user.Email).first()
                 session['admin'] = True if admin else False
-                # session['image'] = str(current_user.Client.Image)
                 flash('Successfully logged in.', 'success')
                 return redirect(url_for('index'))
             else:
@@ -210,21 +209,21 @@ def accounts_list():
     # Filter query
     industries = db.session.query(Accounts.CompanyIndustry).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.CompanyIndustry.isnot(None)).all()
-    industries = sorted([str(industry).strip('(').strip(')').strip(',').strip("'").strip('"') for industry in industries])
+    industries = sorted([industry.CompanyIndustry for industry in industries])
     industry = request.args.get('industry')
     if industry:
         accounts = accounts.filter_by(CompanyIndustry=industry)
     
     types = db.session.query(Accounts.CompanyType).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.CompanyType.isnot(None)).all()
-    types = sorted([str(type).strip('(').strip(')').strip(',').strip("'").strip('"') for type in types])
+    types = sorted([type.CompanyType for type in types])
     type = request.args.get('type')
     if type:
         accounts = accounts.filter_by(CompanyType=type)
     
     owners = db.session.query(Accounts.Owner).filter_by(ClientID=current_user.ClientID)\
             .distinct().filter(Accounts.Owner.isnot(None)).all()
-    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners]) + ['Not assigned']
+    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
     owner = request.args.get('owner')
     if owner:
         if owner == 'Not assigned':
@@ -234,21 +233,21 @@ def accounts_list():
     
     countries = db.session.query(Accounts.Country).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.Country.isnot(None)).all()
-    countries = sorted([str(country).strip('(').strip(')').strip(',').strip("'").strip('"') for country in countries])
+    countries = sorted([country.Country for country in countries])
     country = request.args.get('country')
     if country:
         accounts = accounts.filter_by(Country=country)
     
     cities = db.session.query(Accounts.City).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.City.isnot(None)).all()
-    cities = sorted([str(city).strip('(').strip(')').strip(',').strip("'").strip('"') for city in cities])
+    cities = sorted([city.City for city in cities])
     city = request.args.get('city')
     if city:
         accounts = accounts.filter_by(City=city)
     
     timezones = db.session.query(Accounts.Timezone).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.Timezone.isnot(None)).all()
-    timezones = sorted([str(timezone).strip('(').strip(')').strip(',').strip("'").strip('"') for timezone in timezones])
+    timezones = sorted([timezone.Timezone for timezone in timezones])
     timezone = request.args.get('timezone')
     if timezone:
         accounts = accounts.filter_by(Timezone=timezone)
@@ -268,7 +267,7 @@ def leads_list():
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.Position.isnot(None)).all()
-    positions = sorted([str(position).strip('(').strip(')').strip(',').strip("'").strip('"') for position in positions])
+    positions = sorted([position.Position for position in positions])
     if '' in positions:
         positions.remove('')
     position = request.args.get('position')
@@ -277,14 +276,14 @@ def leads_list():
         
     companies = db.session.query(Leads.CompanyName).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.CompanyName.isnot(None)).all()
-    companies = sorted([str(company).strip('(').strip(')').strip(',').strip("'").strip('"') for company in companies])
+    companies = sorted([company.CompanyName for company in companies])
     company = request.args.get('company')
     if company:
         leads = leads.filter_by(CompanyName=company)
         
     cities = db.session.query(Accounts.City).join(Leads, Leads.AccountID == Accounts.AccountID)\
         .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.City.isnot(None)).all()
-    cities = sorted([str(city).strip('(').strip(')').strip(',').strip("'").strip('"') for city in cities])
+    cities = sorted([city.City for city in cities])
     city = request.args.get('city')
     if city:
         leads = leads.join(Accounts, Leads.AccountID == Accounts.AccountID).filter(Accounts.City == city)
@@ -295,7 +294,7 @@ def leads_list():
         
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
             .distinct().filter(Leads.Owner.isnot(None)).all()
-    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners]) + ['Not assigned']
+    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
     owner = request.args.get('owner')
     if owner:
         if owner == 'Not assigned':
@@ -322,7 +321,7 @@ def opportunities_list():
     
     accounts = db.session.query(Accounts.CompanyName).join(Opportunities, Opportunities.AccountID == Accounts.AccountID)\
                 .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
-    accounts = sorted([str(account).strip('(').strip(')').strip(',').strip("'").strip('"') for account in accounts])
+    accounts = sorted([account.CompanyName for account in accounts])
     account = request.args.get('account')
     if account:
         opportunities = opportunities.join(Accounts, Opportunities.AccountID == Accounts.AccountID)\
@@ -347,8 +346,26 @@ def opportunities_list():
     if stage:
         opportunities = opportunities.filter_by(Stage=stage)
         
+    owners = db.session.query(Opportunities.Owner).filter_by(ClientID=current_user.ClientID)\
+            .distinct().filter(Opportunities.Owner.isnot(None)).all()
+    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
+    owner = request.args.get('owner')
+    if owner:
+        if owner == 'Not assigned':
+            opportunities = opportunities.filter(Opportunities.Owner.is_(None))
+        else:
+            opportunities = Opportunities.query.filter_by(Owner=owner)
+        
     return render_template('opportunities/opportunities_list.html', opportunities=opportunities.all(),
-                           accounts=accounts)
+                           accounts=accounts, owners=owners)
+
+# Sales list 
+@app.route('/sales/list/')
+@login_required
+def sales_list():
+    sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Sales.SaleID.desc())
+    return render_template('sales/sales_list.html', sales=sales)
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
@@ -449,74 +466,61 @@ def import_leads():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        # try:
-        if filename.split('.')[-1] != 'csv':
-            flash('Import failed. Please upload a .csv file.')
+        try:
+            if filename.split('.')[-1] != 'csv':
+                flash('Import failed. Please upload a .csv file.')
+                return redirect(url_for('import_leads'))
+                
+            # Rename function
+            # while os.path.exists(filepath):
+            #     filename = filename.split('.')[0] + ' copy.csv'
+            #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+            
+            file.save(filepath)
+            
+            df = pd.read_csv('static/files/{filename}'.format(filename=filename))
+            
+            df = df.rename(columns={df.columns[0]: 'CompanyName',
+                                    df.columns[1]: 'Position',
+                                    df.columns[2]: 'FirstName',
+                                    df.columns[3]: 'LastName',
+                                    df.columns[4]: 'Email'})
+            
+            accounts_df = pd.read_sql(db.session.query(Accounts).filter_by(ClientID=current_user.ClientID).statement, con=engine)
+            df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
+            # Replace NaN with None
+            df = df.replace({np.nan: None})
+            df = df.assign(CreatedBy=current_user.Email, 
+                            Status='Open',
+                            FollowUp=False)
+            
+            # Grab max id
+            id = Leads.query.order_by(Leads.LeadID.desc()).first()
+        
+            if id is None:
+                    id = 10000
+            else:
+                id = id.LeadID + 10
+            
+            # Iterate over rows method
+            for index, row in df.iterrows():
+                dct = row.to_dict()
+                dct.update({'LeadID': id})
+                id += 10
+                lead = Leads(**dct)
+                db.session.add(lead)
+
+            db.session.commit() 
+            os.remove(filepath)        
+            flash('Import successful.', 'success')
+            return redirect(url_for('leads_list'))    
+
+        except:
+            db.session.rollback()
+            flash('Import failed. Please ensure .csv file is ordered as \
+                follows: Company Name, Position, First Name, Last Name, \
+                    Email', 'danger')
             return redirect(url_for('import_leads'))
-            
-        # Rename function
-        # while os.path.exists(filepath):
-        #     filename = filename.split('.')[0] + ' copy.csv'
-        #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
-        
-        file.save(filepath)
-        
-        df = pd.read_csv('static/files/{filename}'.format(filename=filename))
-        
-        df = df.rename(columns={df.columns[0]: 'CompanyName',
-                                df.columns[1]: 'Position',
-                                df.columns[2]: 'FirstName',
-                                df.columns[3]: 'LastName',
-                                df.columns[4]: 'Email'})
-        
-        accounts_df = pd.read_sql(db.session.query(Accounts).filter_by(ClientID=current_user.ClientID).statement, con=engine)
-        df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
-        # Replace NaN with None
-        df = df.replace({np.nan: None})
-        df = df.assign(CreatedBy=current_user.Email, 
-                        Status='Open',
-                        FollowUp=False)
-        
-        # Grab max id
-        id = Leads.query.order_by(Leads.LeadID.desc()).first()
-    
-        if id is None:
-                id = 10000
-        else:
-            id = id.LeadID + 10
-            
-        # df['LeadID'] = np.arange(id, id + 10*df.shape[0], 10)
-        # df.to_sql('Leads', con=engine, if_exists='append', index=False)
-            
-        # Convert DataFrame to a list of dictionaries
-        # records = df.to_dict(orient='records')
-
-        # Iterate over the list of dictionaries
-        # for dct in records:
-        #     dct.update({'LeadID': id})
-        #     id += 10
-        #     lead = Leads(**dct)
-        #     db.session.add(lead)
-        
-        # Iterate over rows method
-        for index, row in df.iterrows():
-            dct = row.to_dict()
-            dct.update({'LeadID': id})
-            id += 10
-            lead = Leads(**dct)
-            db.session.add(lead)
-
-        db.session.commit() 
-        os.remove(filepath)        
-        flash('Import successful.', 'success')
-        return redirect(url_for('leads_list'))    
-
-        # except:
-        #     db.session.rollback()
-        #     flash('Import failed. Please ensure .csv file is ordered as \
-        #         follows: Company Name, Position, First Name, Last Name, \
-        #             Email', 'danger')
-        #     return redirect(url_for('import_leads'))
         
     return render_template('leads/import_leads.html', form=form)
 
@@ -652,6 +656,7 @@ def new_opportunity():
                                         Opportunity=form.opportunity.data,
                                         Value=form.value.data,
                                         Stage=form.stage.data,
+                                        Owner=form.owner.data,
                                         CreatedBy=current_user.Email)
             db.session.add(opportunity)
             db.session.commit()
@@ -750,22 +755,26 @@ def opportunity(id):
     opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
     leads = Leads.query.filter_by(AccountID=opportunity.Account.AccountID).all()
     leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
-    form = OpportunityUpdateForm(lead=opportunity.LeadID)
+    form = OpportunityUpdateForm(lead=opportunity.LeadID, stage=opportunity.Stage)
     form.lead.choices = leads
     form.opportunity.data = opportunity.Opportunity
     
     if form.validate_on_submit():
-        try:
-            opportunity.LeadID = form.lead.data
-            opportunity.Opportunity = form.opportunity.data
-            opportunity.Value = form.value.data
-            opportunity.Stage = form.stage.data
-            db.session.commit()
-            flash('Opportunity updated successfully.', 'success')
-            return redirect(url_for('opportunities_list'))
-        except:
-            flash('Opportunity update failed.', 'danger')
-            return redirect(url_for('opportunities_list'))
+        # try:
+        opportunity.LeadID = form.lead.data
+        opportunity.Opportunity = form.opportunity.data
+        opportunity.Value = form.value.data
+        opportunity.Stage = form.stage.data
+        if form.stage.data == 'Won' or form.stage.data == 'Lost':
+            opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
+        else:
+            opportunity.DateClosed = None
+        db.session.commit()
+        flash('Opportunity updated successfully.', 'success')
+        return redirect(url_for('opportunities_list'))
+        # except:
+        #     flash('Opportunity update failed.', 'danger')
+        #     return redirect(url_for('opportunities_list'))
         
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
@@ -917,6 +926,7 @@ def search_opportunities():
             (Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
             Opportunities.Value.icontains(query) |
             Opportunities.Stage.icontains(query) |
+            Opportunities.Owner.icontains(query) |
             Leads.FirstName.icontains(query) |
             Leads.LastName.icontains(query) |
             Accounts.CompanyName.icontains(query))
@@ -1042,6 +1052,7 @@ class Opportunities(db.Model):
     Opportunity = db.Column(db.Text)
     Value = db.Column(db.Integer)
     Stage = db.Column(db.String(100))
+    Owner = db.Column(db.String(50))
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
@@ -1054,12 +1065,16 @@ class Sales(db.Model):
     __tablename__ = 'Sales'
     SaleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
+    AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign Key to AccountID
+    LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    Amount = db.Column(db.Integer)
+    Value = db.Column(db.Integer)
     Stage = db.Column(db.String(50))
+    Owner = db.Column(db.String(50))
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
-    SalesRep = db.Column(db.String(50))
-    SaleDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    DateClosed = db.Column(db.Date)
+    
     
 # Admins model
 class Admins(db.Model):

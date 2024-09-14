@@ -18,6 +18,7 @@
     <td>{{ opportunity.Lead.Email if opportunity.Lead.Email }}</td>
     <td>{{ opportunity.Value if opportunity.Value }}</td>
     <td>{{ opportunity.Stage if opportunity.Stage }}</td>
+    <td>{{ opportunity.Owner if opportunity.Owner else 'Not assigned' }}</td>
     <td>{{ opportunity.DateCreated if opportunity.DateCreated }}</td>
 </tr>
 {% endfor %}
