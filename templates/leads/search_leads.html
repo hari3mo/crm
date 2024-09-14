@@ -5,7 +5,11 @@
             {{ lead.FirstName if lead.FirstName }} {{ lead.LastName if lead.LastName }}
         </a>
     </td>
-    <td>{{ lead.CompanyName if lead.CompanyName }}</td>
+    <td>
+        <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID )}}">
+            {{ lead.CompanyName if lead.CompanyName }}
+        </a>
+    </td>
     <td>{{ lead.Email if lead.Email }}</td>
     <td>{{ lead.Position if lead.Position }}</td>
     <td>{{ lead.Account.City if lead.Account.City }}</td>
