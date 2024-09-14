@@ -12,5 +12,6 @@
     <td>{{ account.Country if account.Country }}</td>
     <td>{{ account.City if account.City }}</td>
     <td>{{ account.Timezone if account.Timezone }}</td>
+    <td>{{ account.Owner if account.Owner else 'Not assigned' }}</td>
 </tr>
 {% endfor %}

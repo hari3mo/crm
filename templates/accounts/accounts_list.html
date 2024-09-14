@@ -162,7 +162,7 @@
                                 {% endif %}
                             </div>
                         </th>
-                        <th class="border-0 rounded-end">
+                        <th class="border-0">
                             Timezone
                             <svg id="timezone-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
@@ -177,7 +177,21 @@
                                 {% endif %}
                             </div>
                         </th>
-                       
+                       <th class="border-0 rounded-end">
+                            Owner
+                            <svg id="owner-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="owner-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if owners %}
+                                <ul>
+                                    {% for owner in owners %}
+                                    <a href="{{ url_for('accounts_list', owner=owner) }}"><li>{{ owner }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="results">
@@ -197,6 +211,8 @@
                         <td>{{ account.Country if account.Country }}</td>
                         <td>{{ account.City if account.City }}</td>
                         <td>{{ account.Timezone if account.Timezone }}</td>
+                        <td>{{ account.Owner if account.Owner else 'Not assigned' }}</td>
+
                     </tr>
                     {% endfor %}
                     <!-- End of Item -->
@@ -221,6 +237,7 @@
                 { iconId: 'industry-icon', menuId: 'industry-menu' },
                 { iconId: 'count-icon', menuId: 'count-menu' },
                 { iconId: 'type-icon', menuId: 'type-menu' },
+                { iconId: 'owner-icon', menuId: 'owner-menu' },
                 { iconId: 'country-icon', menuId: 'country-menu' },
                 { iconId: 'city-icon', menuId: 'city-menu' },
                 { iconId: 'timezone-icon', menuId: 'timezone-menu' }

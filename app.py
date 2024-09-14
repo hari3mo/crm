@@ -223,6 +223,16 @@ def accounts_list():
     if type:
         accounts = accounts.filter_by(CompanyType=type)
     
+    owners = db.session.query(Accounts.Owner).filter_by(ClientID=current_user.ClientID)\
+            .distinct().filter(Accounts.Owner.isnot(None)).all()
+    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners]) + ['Not assigned']
+    owner = request.args.get('owner')
+    if owner:
+        if owner == 'Not assigned':
+            accounts = accounts.filter(Accounts.Owner.is_(None))
+        else:
+            accounts = Accounts.query.filter_by(Owner=owner)
+    
     countries = db.session.query(Accounts.Country).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.Country.isnot(None)).all()
     countries = sorted([str(country).strip('(').strip(')').strip(',').strip("'").strip('"') for country in countries])
@@ -246,8 +256,8 @@ def accounts_list():
     
     
     return render_template('accounts/accounts_list.html', accounts=accounts.all(),
-        industries=industries, types=types, countries=countries, cities=cities,
-        timezones=timezones)
+        industries=industries, types=types, owners=owners, countries=countries, 
+        cities=cities, timezones=timezones)
 
 # Leads list
 @app.route('/leads/list/')
@@ -380,6 +390,7 @@ def import_accounts():
             
             df = df.assign(ClientID=current_user.ClientID, 
                            CreatedBy=current_user.Email,
+                           Owner=None,
                            DateCreated=datetime.datetime.now(datetime.timezone.utc))
             
             # Grab max id
@@ -534,6 +545,7 @@ def new_account():
                             CompanySpecialties=form.company_specialties.data, 
                             CompanyIndustry=form.company_industry.data,
                             CompanyType = form.company_type.data, 
+                            Owner=form.owner.data,
                             Country=form.country.data, 
                             City=form.city.data, 
                             Timezone=form.timezone.data,
@@ -865,6 +877,7 @@ def search_accounts():
             Accounts.Country.icontains(query) | 
             Accounts.City.icontains(query) |
             Accounts.CompanyType.icontains(query) |
+            Accounts.Owner.icontains(query) |
             Accounts.CompanyIndustry.icontains(query) |
             Accounts.Timezone.icontains(query))
     else:
@@ -993,6 +1006,7 @@ class Accounts(db.Model):
     Country = db.Column(db.String(50), nullable=False)
     City = db.Column(db.String(50))
     Timezone = db.Column(db.String(50))
+    Owner = db.Column(db.String(50))
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     

@@ -50,12 +50,16 @@
                                 {{ form.company_industry(class="form-control", value=account.CompanyIndustry) }}
                             </div>
                             <div class="col-md-6">
-                                {{ form.company_specialties.label(class="form-label") }}
-                                {{ form.company_specialties(class="form-control text-area") }}
-                            </div>
-                            <div class="col-md-6">
                                 {{ form.company_type.label(class="form-label") }}
                                 {{ form.company_type(class="form-control", value=account.CompanyType) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.owner.label(class="form-label") }}
+                                {{ form.owner(class="form-control") }}
+                            </div>
+                            <div class="col">
+                                {{ form.company_specialties.label(class="form-label") }}
+                                {{ form.company_specialties(class="form-control text-area") }}
                             </div>
                         </div>
 

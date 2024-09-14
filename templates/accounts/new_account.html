@@ -53,15 +53,23 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            {{ form.company_specialties.label(class="form-label" )}}
-                            {{ form.company_specialties(class="form-control text-area") }}
-                            </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-group">
                             {{ form.company_type.label(class="form-label" )}}
                             {{ form.company_type(class="form-control") }}
                         </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.owner.label(class="form-label" )}}
+                            {{ form.owner(class="form-control") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            {{ form.company_specialties.label(class="form-label" )}}
+                            {{ form.company_specialties(class="form-control text-area") }}
+                            </div>
                     </div>
                 </div>
                 <h2 class="h5 my-4">Location</h2>

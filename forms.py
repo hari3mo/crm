@@ -15,6 +15,7 @@ class AccountForm(FlaskForm):
     company_specialties = TextAreaField('Company Specialties:')
     company_industry = StringField('Company Industry:')
     company_type = StringField('Company Type:')
+    owner = StringField('Owner:')
     country = StringField('Country:*', validators=[DataRequired()])
     city = StringField('City:')
     timezone = StringField('Timezone:')
