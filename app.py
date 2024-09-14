@@ -253,7 +253,7 @@ def accounts_list():
 @login_required
 def leads_list():
     leads = None
-    leads = Leads.query.filter_by(ClientID=current_user.ClientID)#.order_by(Leads.LeadID.desc()).all()
+    leads = Leads.query.filter_by(ClientID=current_user.ClientID).order_by(Leads.LeadID.desc())#.all()
     
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
@@ -271,9 +271,37 @@ def leads_list():
     company = request.args.get('company')
     if company:
         leads = leads.filter_by(CompanyName=company)
+        
+    cities = db.session.query(Accounts.City).join(Leads, Leads.AccountID == Accounts.AccountID)\
+        .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.City.isnot(None)).all()
+    cities = sorted([str(city).strip('(').strip(')').strip(',').strip("'").strip('"') for city in cities])
+    city = request.args.get('city')
+    if city:
+        leads = leads.join(Accounts, Leads.AccountID == Accounts.AccountID).filter(Accounts.City == city)
+
+    status = request.args.get('status')
+    if status:
+        leads = leads.filter_by(Status=status)
+        
+    owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
+            .distinct().all()
+    owners = sorted([str(owner).strip('(').strip(')').strip(',').strip("'").strip('"') for owner in owners])
+    owner = request.args.get('owner')
+    if owner:
+        if owner == 'None':
+            leads = leads.filter(Leads.Owner.is_(None))
+        else:
+            leads = Leads.query.filter_by(Owner=owner)
     
-    return render_template('leads/leads_list.html', leads=leads, companies=companies,
-                           positions=positions)
+    follow_up = request.args.get('follow_up')
+    if follow_up:
+        if follow_up == 'True':
+            leads = leads.filter_by(FollowUp=True)
+        else:
+            leads = leads.filter_by(FollowUp=False)
+    
+    return render_template('leads/leads_list.html', leads=leads.limit(30), companies=companies,
+                           positions=positions, cities=cities, owners=owners)
     
 # Opportunities list
 @app.route('/opportunities/opportunities_list/')
@@ -322,7 +350,8 @@ def import_accounts():
                                     df.columns[8]: 'Timezone'})
             
             df = df.assign(ClientID=current_user.ClientID, 
-                           CreatedBy=current_user.Email)
+                           CreatedBy=current_user.Email,
+                           DateCreated=datetime.datetime.now(datetime.timezone.utc))
             
             # Grab max id
             id = Accounts.query.order_by(Accounts.AccountID.desc()).first()
@@ -332,14 +361,29 @@ def import_accounts():
             else:
                 id = id.AccountID + 10
                 
-            for index, row in df.iterrows():
-                dct = row.to_dict()
-                dct.update({'AccountID': id})
-                id += 10
-                account = Accounts(**dct)
-                db.session.add(account)
                 
-            db.session.commit()
+            df['AccountID'] = np.arange(id, id + 10*df.shape[0], 10)
+            df.to_sql('Accounts', con=engine, if_exists='append', index=False)
+            
+            # Convert DataFrame to a list of dictionaries
+            # records = df.to_dict(orient='records')
+
+            # Iterate over the list of dictionaries
+            # for dct in records:
+            #     dct.update({'AccountID': id})
+            #     id += 10
+            #     account = Accounts(**dct)
+            #     db.session.add(account)
+            
+            # Iterate over rows method
+            # for index, row in df.iterrows():
+            #     dct = row.to_dict()
+            #     dct.update({'AccountID': id})
+            #     id += 10
+            #     account = Accounts(**dct)
+            #     db.session.add(account)
+                
+            # db.session.commit()
             os.remove(filepath)        
             flash('Accounts import successful.', 'success')
             return redirect(url_for('accounts_list'))    
@@ -354,6 +398,9 @@ def import_accounts():
         
     return render_template('accounts/import_accounts.html', form=form)
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 # Import leads
 @app.route('/leads/import/', methods=['GET', 'POST'])
 @login_required
@@ -365,60 +412,74 @@ def import_leads():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        try:
-            if filename.split('.')[-1] != 'csv':
-                flash('Import failed. Please upload a .csv file.')
-                return redirect(url_for('import_leads'))
-                
-            # Rename function
-            while os.path.exists(filepath):
-                filename = filename.split('.')[0] + ' copy.csv'
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
-            
-            file.save(filepath)
-            
-            df = pd.read_csv('static/files/{filename}'.format(filename=filename))
-            
-            df = df.rename(columns={df.columns[0]: 'CompanyName',
-                                    df.columns[1]: 'Position',
-                                    df.columns[2]: 'FirstName',
-                                    df.columns[3]: 'LastName',
-                                    df.columns[4]: 'Email'})
-            
-            accounts_df = pd.read_sql(db.session.query(Accounts).filter_by(ClientID=current_user.ClientID).statement, con=engine)
-            df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
-            # Replace NaN with None
-            df = df.replace({np.nan: None})
-            df = df.assign(CreatedBy=current_user.Email, 
-                           Status='Open',
-                            FollowUp=False)
-            
-            # Grab max id
-            id = Leads.query.order_by(Leads.LeadID.desc()).first()
-        
-            if id is None:
-                    id = 10000
-            else:
-                id = id.LeadID + 10
-            
-            for index, row in df.iterrows():
-                dct = row.to_dict()
-                dct.update({'LeadID': id})
-                id += 50
-                lead = Leads(**dct)
-                db.session.add(lead)
-
-            db.session.commit() 
-            os.remove(filepath)        
-            flash('Import successful.', 'success')
-            return redirect(url_for('leads_list'))    
-
-        except:
-            db.session.rollback()
-            flash('Import failed. Please ensure .csv file is ordered as \
-                follows: Company Name, Position, First Name, Last Name, \
-                    Email', 'danger')
+        # try:
+        if filename.split('.')[-1] != 'csv':
+            flash('Import failed. Please upload a .csv file.')
             return redirect(url_for('import_leads'))
+            
+        # Rename function
+        while os.path.exists(filepath):
+            filename = filename.split('.')[0] + ' copy.csv'
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)                        
+        
+        file.save(filepath)
+        
+        df = pd.read_csv('static/files/{filename}'.format(filename=filename))
+        
+        df = df.rename(columns={df.columns[0]: 'CompanyName',
+                                df.columns[1]: 'Position',
+                                df.columns[2]: 'FirstName',
+                                df.columns[3]: 'LastName',
+                                df.columns[4]: 'Email'})
+        
+        accounts_df = pd.read_sql(db.session.query(Accounts).filter_by(ClientID=current_user.ClientID).statement, con=engine)
+        df = pd.merge(df, accounts_df[['AccountID', 'CompanyName', 'ClientID']], on='CompanyName')
+        # Replace NaN with None
+        df = df.replace({np.nan: None})
+        df = df.assign(CreatedBy=current_user.Email, 
+                        Status='Open',
+                        FollowUp=False)
+        
+        # Grab max id
+        id = Leads.query.order_by(Leads.LeadID.desc()).first()
+    
+        if id is None:
+                id = 10000
+        else:
+            id = id.LeadID + 10
+            
+        # df['LeadID'] = np.arange(id, id + 50*df.shape[0], 50)
+        # df.to_sql('Leads', con=engine, if_exists='append', index=False)
+            
+        # Convert DataFrame to a list of dictionaries
+        # records = df.to_dict(orient='records')
+
+        # Iterate over the list of dictionaries
+        # for dct in records:
+        #     dct.update({'LeadID': id})
+        #     id += 50
+        #     lead = Leads(**dct)
+        #     db.session.add(lead)
+        
+        # Iterate over rows method
+        for index, row in df.iterrows():
+            dct = row.to_dict()
+            dct.update({'LeadID': id})
+            id += 50
+            lead = Leads(**dct)
+            db.session.add(lead)
+
+        db.session.commit() 
+        os.remove(filepath)        
+        flash('Import successful.', 'success')
+        return redirect(url_for('leads_list'))    
+
+        # except:
+        #     db.session.rollback()
+        #     flash('Import failed. Please ensure .csv file is ordered as \
+        #         follows: Company Name, Position, First Name, Last Name, \
+        #             Email', 'danger')
+        #     return redirect(url_for('import_leads'))
         
     return render_template('leads/import_leads.html', form=form)
 
@@ -717,9 +778,11 @@ def search_accounts():
     if query:
         accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
             .filter(Accounts.CompanyName.icontains(query) |\
-            Accounts.Country.icontains(query) | Accounts.City.icontains(query) |\
-            Accounts.CompanyType.icontains(query) | Accounts.CompanyIndustry.icontains(query) |\
-                Accounts.Timezone.icontains(query)).limit(100)
+            Accounts.Country.icontains(query) | 
+            Accounts.City.icontains(query) |
+            Accounts.CompanyType.icontains(query) |
+            Accounts.CompanyIndustry.icontains(query) |
+            Accounts.Timezone.icontains(query)).limit(100)
     else:
         accounts = []
     return render_template('accounts/search_accounts.html', accounts=accounts)

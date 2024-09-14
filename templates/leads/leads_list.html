@@ -98,10 +98,65 @@
                                 {% endif %}
                             </div>
                         </th>
-                        <th>City</th>
-                        <th class="border-0">Status</th>
-                        <th class="border-0">Owner</th>
-                        <th class="border-0 rounded-end">Follow-Up</th>
+                        <th>
+                            City
+                            <svg id="city-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="city-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if positions %}
+                                <ul>
+                                    {% for city in cities %}
+                                    <a href="{{ url_for('leads_list', city=city) }}"><li>{{ city }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="border-0">
+                            Status
+                            <svg id="status-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="status-menu" class="menu apple-select-menu">
+                                {% if positions %}
+                                <ul>
+                                    <a href="{{ url_for('leads_list', status='open') }}"><li>Open</li></a>
+                                    <a href="{{ url_for('leads_list', status='closed') }}"><li>Closed</li></a>
+                                    <a href="{{ url_for('leads_list', status='converted') }}"><li>Converted</li></a>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="border-0">
+                            Owner
+                            <svg id="owner-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="owner-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if positions %}
+                                <ul>
+                                    {% for owner in owners %}
+                                    <a href="{{ url_for('leads_list', owner=owner) }}"><li>{{ owner }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="border-0 rounded-end">
+                            Follow-Up
+                            <svg id="follow_up-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="follow_up-menu" class="menu apple-select-menu">
+                                {% if positions %}
+                                <ul>
+                                    <a href="{{ url_for('leads_list', follow_up='True') }}"><li>True</li></a>
+                                    <a href="{{ url_for('leads_list', follow_up='False') }}"><li>False</li></a>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
                         <!-- <th class="border-0 rounded-end">Date Created</th> -->
                     </tr>
                 </thead>
@@ -155,6 +210,10 @@
             const dropdowns = [
             { iconId: 'position-icon', menuId: 'position-menu' },
             { iconId: 'company-icon', menuId: 'company-menu' },
+            { iconId: 'city-icon', menuId: 'city-menu' },
+            { iconId: 'status-icon', menuId: 'status-menu' },
+            { iconId: 'owner-icon', menuId: 'owner-menu' },
+            { iconId: 'follow_up-icon', menuId: 'follow_up-menu' },
             ];
         
             dropdowns.forEach(function(dropdown) {
