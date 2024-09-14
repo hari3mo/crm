@@ -29,6 +29,9 @@ class LeadForm(FlaskForm):
     email  = EmailField('Email:', validators=[DataRequired(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
     company = StringField('Account:', validators=[DataRequired()])
+    status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
+                                             ('Converted', 'Converted')])
+    owner = StringField('Owner:')
     submit = SubmitField('Submit')
     
 # Lead update form
@@ -37,6 +40,9 @@ class LeadUpdateForm(FlaskForm):
     last_name = StringField('Last Name:', validators=[DataRequired()])
     email  = EmailField('Email:', validators=[DataRequired(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
+    status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
+                                             ('Converted', 'Converted')])
+    owner = StringField('Owner:')
     submit = SubmitField('Submit')
 
 # User form

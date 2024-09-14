@@ -1,12 +1,29 @@
-{% for result in results %}
+{% for lead in leads %}
 <tr>
     <td class="fw-bold">
-        <a class="link-info" href="{{ url_for('lead', id=result.LeadID )}}">
-            {{ result.FirstName if result.FirstName }} {{ result.LastName if result.LastName }}
+        <a class="link-info" href="{{ url_for('lead', id=lead.LeadID )}}">
+            {{ lead.FirstName if lead.FirstName }} {{ lead.LastName if lead.LastName }}
         </a>
     </td>
-    <td>{{ result.Email if result.Email }}</td>
-    <td>{{ result.Position if result.Position }}</td>
-    <td>{{ result.CompanyName if result.CompanyName }}</td>
+    <td>{{ lead.Email if lead.Email }}</td>
+    <td>{{ lead.Position if lead.Position }}</td>
+    <td>{{ lead.CompanyName if lead.CompanyName }}</td>
+    <td>{{ lead.Account.City if lead.Account.City }}</td>
+    <td>{{ lead.Status if lead.Status }}</td>
+    <td>{{ lead.Owner if lead.Owner }}</td>
+    <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
+        <td>
+            <label class="apple-checkbox">
+                <input type="checkbox" oninput="submitForm({{lead.LeadID}})" {% if lead.FollowUp %}checked{% endif %}>
+                <span class="checkmark"></span>
+            </label>    
+        </td>
+    </form>
 </tr>
+
+<script>
+    function submitForm(leadID) {
+        document.getElementById('followUp_' + leadID).submit();
+    }
+</script>
 {% endfor %}

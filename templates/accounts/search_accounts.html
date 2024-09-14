@@ -1,16 +1,16 @@
-{% for result in results %}
+{% for account in accounts %}
 <tr>
     <td class="fw-bold">
-        <a class="link-info" href="{{ url_for('account', id=result.AccountID) }}">
-            {{ result.CompanyName if result.CompanyName }}
+        <a class="link-info" href="{{ url_for('account', id=account.AccountID) }}">
+            {{ account.CompanyName if account.CompanyName }}
         </a>
     </td>
-    <td>{{ result.CompanyRevenue if result.CompanyRevenue }}</td>
-    <td>{{ result.EmployeeHeadCount if result.EmployeeHeadCount }}</td>
-    <td>{{ result.CompanyIndustry if result.CompanyIndustry }}</td>
-    <td>{{ result.CompanyType if result.CompanyType }}</td>
-    <td>{{ result.Country if result.Country }}</td>
-    <td>{{ result.City if result.City }}</td>
-    <td>{{ result.Timezone if result.Timezone }}</td>
+    <td>{{ account.CompanyRevenue if account.CompanyRevenue }}</td>
+    <td>{{ account.EmployeeHeadCount if account.EmployeeHeadCount }}</td>
+    <td>{{ account.CompanyIndustry if account.CompanyIndustry }}</td>
+    <td>{{ account.CompanyType if account.CompanyType }}</td>
+    <td>{{ account.Country if account.Country }}</td>
+    <td>{{ account.City if account.City }}</td>
+    <td>{{ account.Timezone if account.Timezone }}</td>
 </tr>
 {% endfor %}

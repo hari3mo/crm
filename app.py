@@ -466,10 +466,9 @@ def new_account():
 @app.route('/leads/new/', methods=['GET', 'POST'])
 def new_lead():
     form = LeadForm()
-    
     company = request.args.get('account')
-    form.company.data = company if company else None
-    
+    if company:
+        form.company.data = company
     if form.validate_on_submit():
         account = None
         
@@ -498,6 +497,9 @@ def new_lead():
                             LastName=form.last_name.data,
                             Email=form.email.data,
                             CompanyName=account.CompanyName,
+                            Owner=form.owner.data,
+                            Status=form.status.data,
+                            FollowUp=False,
                             CreatedBy=current_user.Email)
                 
                 db.session.add(lead)
@@ -508,7 +510,6 @@ def new_lead():
         else:
             flash('Account not found.', 'danger')
             return redirect(url_for('new_lead'))
-    
     return render_template('leads/new_lead.html', form=form)
 
 # New opportunity
@@ -564,12 +565,29 @@ def new_opportunity():
 @app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
 @login_required
 def lead(id):
-    form = LeadUpdateForm()
     lead = None
     lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    form = LeadUpdateForm(status=lead.Status)
+    
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list'))
+    
+    if form.validate_on_submit():
+        try:
+            lead.Position = form.position.data
+            lead.FirstName = form.first_name.data
+            lead.LastName = form.last_name.data
+            lead.Email = form.email.data
+            lead.Status = form.status.data
+            lead.Owner = form.owner.data
+            db.session.commit()
+            flash('Lead updated successfully.', 'success')
+            return redirect(url_for('leads_list'))
+        except:
+            flash('Lead update failed.', 'danger')
+            return redirect(url_for('leads_list'))
+    
     return render_template('leads/lead.html', lead=lead, form=form)
 
 # Update lead follow up
@@ -683,13 +701,14 @@ def clear_leads():
 def search_accounts():
     query = request.args.get('query')
     if query:
-        results = Accounts.query.filter(Accounts.CompanyName.icontains(query) |\
+        accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+            .filter(Accounts.CompanyName.icontains(query) |\
             Accounts.Country.icontains(query) | Accounts.City.icontains(query) |\
             Accounts.CompanyType.icontains(query) | Accounts.CompanyIndustry.icontains(query) |\
                 Accounts.Timezone.icontains(query)).limit(100)
     else:
-        results = []
-    return render_template('accounts/search_accounts.html', results=results)
+        accounts = []
+    return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
 @app.route('/search_leads/')
@@ -697,12 +716,19 @@ def search_accounts():
 def search_leads():
     query = request.args.get('query')
     if query:
-        results = Leads.query.filter(Leads.CompanyName.icontains(query) | \
-            Leads.FirstName.icontains(query) | Leads.LastName.icontains(query) |\
-                Leads.Position.icontains(query) | Leads.Email.icontains(query)).limit(100)
+        leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
+            .join(Accounts, Leads.AccountID == Accounts.AccountID)\
+            .filter(Leads.CompanyName.icontains(query) |
+            Leads.FirstName.icontains(query) |
+            Leads.LastName.icontains(query) |
+            Leads.Position.icontains(query) |
+            Leads.Email.icontains(query) |
+            Leads.Status.icontains(query) |
+            Leads.Owner.icontains(query) |
+            Accounts.City.icontains(query)).limit(100)
     else:
-        results = []
-    return render_template('leads/search_leads.html', results=results)
+        leads = []
+    return render_template('leads/search_leads.html', leads=leads)
     
 # Invalid URL
 @app.errorhandler(404)

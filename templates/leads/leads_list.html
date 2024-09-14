@@ -119,7 +119,7 @@
                         <td>{{ lead.CompanyName if lead.CompanyName }}</td>
                         <td>{{ lead.Account.City if lead.Account.City }}</td>
                         <td>{{ lead.Status if lead.Status }}</td>
-                        <td>{{ lead.Owner if lead.Owner}}</td>
+                        <td>{{ lead.Owner if lead.Owner }}</td>
                         <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
                             <td>
                             <label class="apple-checkbox">
