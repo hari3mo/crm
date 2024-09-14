@@ -47,7 +47,7 @@
                         <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                     </svg>
                     </span>
-                    <input type="text" class="form-control" name="query" hx-get="/search_leads" hx-trigger="keyup changed delay:100ms" hx-target="#results" id="topbarInputIconLeft" placeholder="Search leads" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
+                    <input type="text" class="form-control" name="query" hx-get="/search_leads" hx-trigger="keyup changed delay:250ms" hx-target="#results" id="topbarInputIconLeft" placeholder="Search leads" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
             <a href="{{ url_for('clear_leads') }}">
