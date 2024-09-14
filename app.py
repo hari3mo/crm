@@ -1,3 +1,4 @@
+import logging.config
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 from flask_login import UserMixin, login_user, logout_user, current_user, login_required, LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -196,16 +197,16 @@ def accounts_list():
     if sort:
         if sort == 'revenue':
             if order == 'asc':
-                accounts = accounts.order_by(Accounts.CompanyRevenue).all()
+                accounts = accounts.order_by(Accounts.CompanyRevenue)
             else:
-                accounts = accounts.order_by(Accounts.CompanyRevenue.desc()).all()
+                accounts = accounts.order_by(Accounts.CompanyRevenue.desc())
         if sort == 'head_count':
             if order == 'asc':
-                accounts = accounts.order_by(Accounts.EmployeeHeadCount).all()
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount)
             else:
-                accounts = accounts.order_by(Accounts.EmployeeHeadCount.desc()).all()
+                accounts = accounts.order_by(Accounts.EmployeeHeadCount.desc())
     else:
-        accounts = accounts.order_by(Accounts.AccountID.desc()).all()
+        accounts = accounts.order_by(Accounts.AccountID.desc())
     
     # Filter query
     industries = db.session.query(Accounts.CompanyIndustry).filter_by(ClientID=current_user.ClientID)\
@@ -244,7 +245,7 @@ def accounts_list():
         accounts = accounts.filter_by(Timezone=timezone)
     
     
-    return render_template('accounts/accounts_list.html', accounts=accounts,
+    return render_template('accounts/accounts_list.html', accounts=accounts.all(),
         industries=industries, types=types, countries=countries, cities=cities,
         timezones=timezones)
 
@@ -302,15 +303,43 @@ def leads_list():
     
     return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
         positions=positions, cities=cities, owners=owners)
-    
+
+
 # Opportunities list
 @app.route('/opportunities/opportunities_list/')
 @login_required
 def opportunities_list():
-    opportunities = None
-    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
-        .order_by(Opportunities.OpportunityID.desc()).all()
-    return render_template('opportunities/opportunities_list.html', opportunities=opportunities)
+    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)
+    
+    accounts = db.session.query(Accounts.CompanyName).join(Opportunities, Opportunities.AccountID == Accounts.AccountID)\
+                .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
+    accounts = sorted([str(account).strip('(').strip(')').strip(',').strip("'").strip('"') for account in accounts])
+    account = request.args.get('account')
+    if account:
+        opportunities = opportunities.join(Accounts, Opportunities.AccountID == Accounts.AccountID)\
+            .filter(Accounts.CompanyName == account)    
+    
+    sort = request.args.get('sort')
+    order = request.args.get('order')
+    if sort == 'value':
+        if order == 'asc':
+            opportunities = opportunities.order_by(Opportunities.Value.asc())
+        else:
+            opportunities = opportunities.order_by(Opportunities.Value.desc())
+    if sort == 'date':
+        if order == 'asc':
+            opportunities = opportunities.order_by(Opportunities.DateCreated.asc())
+        else:
+            opportunities = opportunities.order_by(Opportunities.DateCreated.desc())
+    else:
+        opportunities = opportunities.order_by(Opportunities.OpportunityID.desc())
+        
+    stage = request.args.get('stage')
+    if stage:
+        opportunities = opportunities.filter_by(Stage=stage)
+        
+    return render_template('opportunities/opportunities_list.html', opportunities=opportunities.all(),
+                           accounts=accounts)
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
@@ -714,6 +743,21 @@ def opportunity(id):
     leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
     form = OpportunityUpdateForm(lead=opportunity.LeadID)
     form.lead.choices = leads
+    form.opportunity.data = opportunity.Opportunity
+    
+    if form.validate_on_submit():
+        try:
+            opportunity.LeadID = form.lead.data
+            opportunity.Opportunity = form.opportunity.data
+            opportunity.Value = form.value.data
+            opportunity.Stage = form.stage.data
+            db.session.commit()
+            flash('Opportunity updated successfully.', 'success')
+            return redirect(url_for('opportunities_list'))
+        except:
+            flash('Opportunity update failed.', 'danger')
+            return redirect(url_for('opportunities_list'))
+        
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
 # Delete account
@@ -824,7 +868,8 @@ def search_accounts():
             Accounts.CompanyIndustry.icontains(query) |
             Accounts.Timezone.icontains(query))
     else:
-        accounts = []
+        accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Accounts.AccountID.desc())
     return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
@@ -836,6 +881,7 @@ def search_leads():
         leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
             .join(Accounts, Leads.AccountID == Accounts.AccountID)\
             .filter(Leads.CompanyName.icontains(query) |
+            (Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
             Leads.FirstName.icontains(query) |
             Leads.LastName.icontains(query) |
             Leads.Position.icontains(query) |
@@ -844,7 +890,8 @@ def search_leads():
             Leads.Owner.icontains(query) |
             Accounts.City.icontains(query))
     else:
-        leads = []
+        leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Leads.LeadID.desc())
     return render_template('leads/search_leads.html', leads=leads)
 
 # Search opportunities
@@ -857,13 +904,15 @@ def search_opportunities():
             .join(Accounts, Opportunities.AccountID == Accounts.AccountID)\
             .join(Leads, Opportunities.LeadID == Leads.LeadID)\
             .filter(Opportunities.Opportunity.icontains(query) |
+            (Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
             Opportunities.Value.icontains(query) |
             Opportunities.Stage.icontains(query) |
             Leads.FirstName.icontains(query) |
             Leads.LastName.icontains(query) |
             Accounts.CompanyName.icontains(query))
     else:
-        opportunities = []
+        opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Opportunities.OpportunityID.desc())
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
     
 # Invalid URL

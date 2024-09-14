@@ -60,12 +60,64 @@
                 <thead class="thead-light">
                     <tr>
                         <th class="border-0 rounded-start">ID</th>
-                        <th class="border-0">Company Name</th>
+                        <th class="border-0">
+                            Company Name
+                            <svg id="account-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="account-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if accounts  %}
+                                <ul>
+                                    {% for account in accounts %}
+                                    <a href="{{ url_for('opportunities_list', account=account) }}"><li>{{ account }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
                         <th class="border-0">Lead Name</th>
                         <th class="border-0">Lead Email</th>
-                        <th class="border-0">Value</th>
-                        <th class="border-0">Stage</th>
-                        <th class="border-0 rounded-end">Date Created</th>
+                        <th class="border-0">
+                            Value
+                            <svg id="value-icon" data-slot="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+                                <title>Sort</title>
+                                <path clip-rule="evenodd" fill-rule="evenodd" d="M2.24 6.8a.75.75 0 0 0 1.06-.04l1.95-2.1v8.59a.75.75 0 0 0 1.5 0V4.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L2.2 5.74a.75.75 0 0 0 .04 1.06Zm8 6.4a.75.75 0 0 0-.04 1.06l3.25 3.5a.75.75 0 0 0 1.1 0l3.25-3.5a.75.75 0 1 0-1.1-1.02l-1.95 2.1V6.75a.75.75 0 0 0-1.5 0v8.59l-1.95-2.1a.75.75 0 0 0-1.06-.04Z"></path>
+                            </svg>
+                            <div id="value-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="{{ url_for('opportunities_list', sort='value', order='asc') }}"><li>Ascending</li></a>
+                                    <a href="{{ url_for('opportunities_list', sort='value', order='desc') }}"><li>Descending</li></a>
+                                </ul>
+                            </div>
+                        </th>
+                        <th class="border-0">
+                            Stage
+                            <svg id="stage-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="stage-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="{{ url_for('opportunities_list', stage='In Process') }}"><li>In Process</li></a>
+                                    <a href="{{ url_for('opportunities_list', stage='Proposals') }}"><li>Proposals</li></a>
+                                    <a href="{{ url_for('opportunities_list', stage='Negotiations') }}"><li>Negotiations</li></a>
+                                    <a href="{{ url_for('opportunities_list', stage='Won') }}"><li>Won</li></a>
+                                    <a href="{{ url_for('opportunities_list', stage='Loss') }}"><li>Loss</li></a>
+                                </ul>
+                            </div>
+                        </th>
+                        <th class="border-0 rounded-end">
+                            Date Created
+                            <svg id="date-icon" data-slot="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+                                <title>Sort</title>
+                                <path clip-rule="evenodd" fill-rule="evenodd" d="M2.24 6.8a.75.75 0 0 0 1.06-.04l1.95-2.1v8.59a.75.75 0 0 0 1.5 0V4.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L2.2 5.74a.75.75 0 0 0 .04 1.06Zm8 6.4a.75.75 0 0 0-.04 1.06l3.25 3.5a.75.75 0 0 0 1.1 0l3.25-3.5a.75.75 0 1 0-1.1-1.02l-1.95 2.1V6.75a.75.75 0 0 0-1.5 0v8.59l-1.95-2.1a.75.75 0 0 0-1.06-.04Z"></path>
+                            </svg>
+                            <div id="date-menu" class="menu apple-select-menu">
+                                <ul>
+                                    <a href="{{ url_for('opportunities_list', sort='date', order='asc') }}"><li>Ascending</li></a>
+                                    <a href="{{ url_for('opportunities_list', sort='date', order='desc') }}"><li>Descending</li></a>
+                                </ul>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="results">
@@ -78,12 +130,12 @@
                             </a>
                         </td>
                         <td>
-                            <a class="link-info" href="#">
+                            <a class="link-info" href="{{ url_for('account', id=opportunity.Account.AccountID) }}">
                                 {{ opportunity.Account.CompanyName }}
                             </a>
                         </td>
                         <td>
-                            <a class="link-info" href="#">
+                            <a class="link-info" href="{{ url_for('lead', id=opportunity.Lead.LeadID) }}">
                                 {{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName }}
                             </a>
                         </td>
@@ -110,8 +162,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dropdowns = [
-            { iconId: 'position-icon', menuId: 'position-menu' },
-            { iconId: 'company-icon', menuId: 'company-menu' },
+            { iconId: 'account-icon', menuId: 'account-menu' },
+            { iconId: 'value-icon', menuId: 'value-menu' },
+            { iconId: 'stage-icon', menuId: 'stage-menu' },
+            { iconId: 'date-icon', menuId: 'date-menu' },
             ];
         
             dropdowns.forEach(function(dropdown) {

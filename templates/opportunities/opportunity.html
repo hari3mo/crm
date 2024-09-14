@@ -38,7 +38,7 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.value.label(class="form-label") }}
-                                {{ form.value(class="form-control") }}
+                                {{ form.value(class="form-control", value=opportunity.Value) }}
                             </div>
                             <div class="col">
                                 {{ form.stage.label(class="form-label") }}
@@ -63,7 +63,7 @@
             <div class="card border-0 shadow mb-4">
                 <div class="card-body">
                     <h2 class="h5 mb-4">Sales</h2>
-                    <p class="text-muted">No sales associated with this account.</p>
+                    <p class="text-muted">No sales associated with this opportunity.</p>
                 </div>
                 
             </div>
