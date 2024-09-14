@@ -272,7 +272,7 @@ def leads_list():
     if company:
         leads = leads.filter_by(CompanyName=company)
     
-    return render_template('leads/leads_list.html', leads=leads.limit(40), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads, companies=companies,
                            positions=positions)
     
 # Opportunities list
