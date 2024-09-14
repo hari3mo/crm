@@ -5,9 +5,9 @@
             {{ lead.FirstName if lead.FirstName }} {{ lead.LastName if lead.LastName }}
         </a>
     </td>
+    <td>{{ lead.CompanyName if lead.CompanyName }}</td>
     <td>{{ lead.Email if lead.Email }}</td>
     <td>{{ lead.Position if lead.Position }}</td>
-    <td>{{ lead.CompanyName if lead.CompanyName }}</td>
     <td>{{ lead.Account.City if lead.Account.City }}</td>
     <td>{{ lead.Status if lead.Status }}</td>
     <td>{{ lead.Owner if lead.Owner }}</td>
@@ -20,10 +20,10 @@
         </td>
     </form>
 </tr>
+{% endfor %}
 
 <script>
     function submitForm(leadID) {
         document.getElementById('followUp_' + leadID).submit();
     }
 </script>
-{% endfor %}

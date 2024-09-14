@@ -67,6 +67,21 @@
                 <thead class="thead-light">
                     <tr>
                         <th class="border-0 rounded-start">Name</th>
+                        <th class="border-0">
+                            Company Name
+                            <svg id="company-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                            </svg>
+                            <div id="company-menu" class="menu apple-select-menu scrollable-menu">
+                                {% if companies %}
+                                <ul>
+                                    {% for company in companies %}
+                                    <a href="{{ url_for('leads_list', company=company) }}"><li>{{ company }}</li></a>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </th>
                         <th class="border-0">Email</th>
                         <th class="border-0">
                             Position
@@ -78,21 +93,6 @@
                                 <ul>
                                     {% for position in positions %}
                                     <a href="{{ url_for('leads_list', position=position) }}"><li>{{ position }}</li></a>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-                            </div>
-                        </th>
-                        <th class="border-0">
-                            Company Name
-                            <svg id="company-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
-                            </svg>
-                            <div id="company-menu" class="menu apple-select-menu scrollable-menu">
-                                {% if companies %}
-                                <ul>
-                                    {% for company in companies %}
-                                    <a href="{{ url_for('leads_list', company=company) }}"><li>{{ company }}</li></a>
                                     {% endfor %}
                                 </ul>
                                 {% endif %}
@@ -114,12 +114,16 @@
                                 {{ lead.FirstName if lead.FirstName }} {{ lead.LastName if lead.LastName }}
                             </a>
                         </td>
+                        <td>
+                            <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID )}}">
+                                {{ lead.CompanyName if lead.CompanyName }}
+                            </a>
+                        </td>
                         <td>{{ lead.Email if lead.Email }}</td>
                         <td>{{ lead.Position if lead.Position }}</td>
-                        <td>{{ lead.CompanyName if lead.CompanyName }}</td>
                         <td>{{ lead.Account.City if lead.Account.City }}</td>
                         <td>{{ lead.Status if lead.Status }}</td>
-                        <td>{{ lead.Owner if lead.Owner }}</td>
+                        <td>{{ lead.Owner if lead.Owner else '-' }}</td>
                         <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
                             <td>
                             <label class="apple-checkbox">

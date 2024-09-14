@@ -130,6 +130,29 @@
                     </div>
                 </div>
             </div>
+            <!--
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Sales</h2>
+                    {% if account.Sales %}
+                        <ul class="list-group list-group-flush">
+                        {% for sale in account.Sales %}
+                            <a class="link-info" href="#}">
+                                {{ sale.ProductName }} - ${{ sale.Amount }}
+                            </a>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No sales associated with this account.</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-primary animate-up-2 me-1">
+                            Add New Sale
+                        </a>
+                    </div>
+                </div>
+            </div>
+        -->
         </div>
     </div>
 </div>

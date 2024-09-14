@@ -43,7 +43,7 @@
                     <input type="text" class="form-control" name="query" hx-get="/search_opportunities" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search opportunities" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
-            <a href="#">
+            <a href="{{ url_for('clear_opportunities') }}">
                 <button class="btn btn-sm btn-danger animate-up-2 me-1" type="button">Clear</button>
             </a>
             <a href="{{ url_for('opportunities_list') }}">

@@ -272,7 +272,7 @@ def leads_list():
     if company:
         leads = leads.filter_by(CompanyName=company)
     
-    return render_template('leads/leads_list.html', leads=leads, companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.limit(40), companies=companies,
                            positions=positions)
     
 # Opportunities list
@@ -516,13 +516,18 @@ def new_lead():
 @app.route('/opportunities/new/', methods=['GET', 'POST'])
 @login_required
 def new_opportunity():
-    form = OpportunityForm()
     account = None
+    lead = None
+    
     account = request.args.get('account')
     account = Accounts.query.filter_by(ClientID=current_user.ClientID).filter_by(AccountID=account).first()
     if account is None:
         flash('Account not found.', 'danger')
         return redirect(url_for('opportunities_list'))
+    
+    lead = request.args.get('lead')
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=lead).first()
+    form = OpportunityForm(lead=lead.LeadID) if lead else OpportunityForm() 
     
     leads = Leads.query.filter_by(AccountID=account.AccountID).all()
     leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
@@ -694,6 +699,15 @@ def clear_leads():
     db.session.commit()
     flash('Leads cleared successfully.', 'success')
     return redirect(url_for('leads_list'))
+
+# Clear opportunities
+@app.route('/opportunities/clear/')
+@login_required
+def clear_opportunities():  
+    Opportunities.query.delete()
+    db.session.commit()
+    flash('Opportunities cleared successfully.', 'success')
+    return redirect(url_for('opportunities_list'))
 
 # Search accounts
 @app.route('/search_accounts/')
