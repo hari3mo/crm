@@ -4,7 +4,7 @@
 
 {% block route %}{{ url_for('leads_list') }}{% endblock %}
 
-{% block path %}Lead{% endblock %}
+{% block path %}Leads{% endblock %}
 
 {% block page %}View{% endblock %}
 
@@ -16,6 +16,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h1 class="h3 mb-0">Lead: {{ lead.FirstName }} {{ lead.LastName }}</h1>
+                        {{ lead.DateCreated }}
                     </div>
                     <p class="text-muted">Lead ID: {{ lead.LeadID }}</p>
                 </div>
