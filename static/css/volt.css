@@ -142,7 +142,7 @@ svg[data-slot="icon"]:hover {
     overflow-y: auto;
   }
 
-.company-specialties {
+.text-area {
     height: 100px; /* Adjust height as needed */
 }
 

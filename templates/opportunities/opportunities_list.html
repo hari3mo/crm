@@ -44,7 +44,7 @@
                 </div>
             </form>
             <a href="{{ url_for('clear_opportunities') }}">
-                <button class="btn btn-sm btn-danger animate-up-2 me-1" type="button">Clear</button>
+                <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all opportunities?');" type="button">Clear</button>
             </a>
             <a href="{{ url_for('opportunities_list') }}">
                 <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
@@ -73,7 +73,7 @@
                     {% for opportunity in opportunities %}
                     <tr>
                         <td class="fw-bold">
-                            <a class="link-info" href="#">
+                            <a class="link-info" href="{{ url_for('opportunity', id=opportunity.OpportunityID) }}">
                                 {{ opportunity.OpportunityID }}
                             </a>
                         </td>

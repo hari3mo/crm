@@ -1,0 +1,23 @@
+{% for opportunity in opportunities %}
+<tr>
+    <td class="fw-bold">
+        <a class="link-info" href="{{ url_for('opportunity', id=opportunity.OpportunityID) }}">
+            {{ opportunity.OpportunityID }}
+        </a>
+    </td>
+    <td>
+        <a class="link-info" href="#">
+            {{ opportunity.Account.CompanyName }}
+        </a>
+    </td>
+    <td>
+        <a class="link-info" href="#">
+            {{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName }}
+        </a>
+    </td>
+    <td>{{ opportunity.Lead.Email if opportunity.Lead.Email }}</td>
+    <td>{{ opportunity.Value if opportunity.Value }}</td>
+    <td>{{ opportunity.Stage if opportunity.Stage }}</td>
+    <td>{{ opportunity.DateCreated if opportunity.DateCreated }}</td>
+</tr>
+{% endfor %}

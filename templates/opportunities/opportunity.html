@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Opportunity - {{ opportunity.OpportunityID }}{% endblock %}
+
+{% block route %}{{ url_for('opportunities_list') }}{% endblock %}
+
+{% block path %}Opportunities{% endblock %}
+
+{% block page %}View{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="h3 mb-0">Opportunity</h1>
+                        {{ opportunity.DateCreated }}
+                    </div>
+                    <p class="text-muted">Opportunity ID: {{ opportunity.OpportunityID }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=opportunity.Account.AccountID) }}">{{ opportunity.Account.CompanyName }}</a></h2>
+                    <form method='POST'>
+                        {{ form.hidden_tag() }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.lead.label(class="form-label") }}
+                                {{ form.lead(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.value.label(class="form-label") }}
+                                {{ form.value(class="form-control") }}
+                            </div>
+                            <div class="col">
+                                {{ form.stage.label(class="form-label") }}
+                                {{ form.stage(class="form-control") }}
+                            </div>
+                            <div class="col-12">
+                                {{ form.opportunity.label(class="form-label") }}
+                                {{ form.opportunity(class="form-control text-area") }}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            {{ form.submit(class="btn btn-info animate-up-2 me-1", value='Update Opportunity') }}
+                            <a href="{{ url_for('delete_opportunity', id=opportunity.OpportunityID) }}" class="btn btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to delete this opportunity?');">Delete</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Sales</h2>
+                    <p class="text-muted">No sales associated with this account.</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

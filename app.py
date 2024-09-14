@@ -300,7 +300,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.limit(30), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads, companies=companies,
                            positions=positions, cities=cities, owners=owners)
     
 # Opportunities list
@@ -448,7 +448,7 @@ def import_leads():
         else:
             id = id.LeadID + 10
             
-        # df['LeadID'] = np.arange(id, id + 50*df.shape[0], 50)
+        # df['LeadID'] = np.arange(id, id + 10*df.shape[0], 10)
         # df.to_sql('Leads', con=engine, if_exists='append', index=False)
             
         # Convert DataFrame to a list of dictionaries
@@ -457,7 +457,7 @@ def import_leads():
         # Iterate over the list of dictionaries
         # for dct in records:
         #     dct.update({'LeadID': id})
-        #     id += 50
+        #     id += 10
         #     lead = Leads(**dct)
         #     db.session.add(lead)
         
@@ -465,7 +465,7 @@ def import_leads():
         for index, row in df.iterrows():
             dct = row.to_dict()
             dct.update({'LeadID': id})
-            id += 50
+            id += 10
             lead = Leads(**dct)
             db.session.add(lead)
 
@@ -705,6 +705,17 @@ def account(id):
     return render_template('accounts/account.html', form=form, account=account,
             id=id)    
 
+# Update opportunity
+@app.route('/opportunities/update/update/<int:id>', methods=['GET', 'POST'])
+@login_required
+def opportunity(id):
+    opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
+    leads = Leads.query.filter_by(AccountID=opportunity.Account.AccountID).all()
+    leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
+    form = OpportunityUpdateForm(lead=opportunity.LeadID)
+    form.lead.choices = leads
+    return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
+
 # Delete account
 @app.route('/accounts/delete/<int:id>')
 @login_required
@@ -742,6 +753,25 @@ def delete_lead(id):
     except:
         flash('Error deleting lead.', 'danger')
         return redirect(url_for('leads_list'))
+
+# Delete opportunity
+@app.route('/opportunities/delete/<int:id>')
+@login_required
+def delete_opportunity(id):
+    opportunity = None
+    opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
+    if opportunity is None:
+        flash('Opportunity not found.', 'danger')
+        return redirect(url_for('opportunities_list'))
+    try:
+        db.session.delete(opportunity)
+        db.session.commit()
+        flash('Opportunity deleted successfully.', 'success')
+        return redirect(url_for('opportunities_list'))
+    
+    except:
+        flash('Error deleting opportunity.', 'danger')
+        return redirect(url_for('opportunities_list'))
 
 # Clear accounts
 @app.route('/accounts/clear/')
@@ -806,6 +836,25 @@ def search_leads():
     else:
         leads = []
     return render_template('leads/search_leads.html', leads=leads)
+
+# Search opportunities
+@app.route('/search_opportunities/')
+@login_required
+def search_opportunities():
+    query = request.args.get('query')
+    if query:
+        opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+            .join(Accounts, Opportunities.AccountID == Accounts.AccountID)\
+            .join(Leads, Opportunities.LeadID == Leads.LeadID)\
+            .filter(Opportunities.Opportunity.icontains(query) |
+            Opportunities.Value.icontains(query) |
+            Opportunities.Stage.icontains(query) |
+            Leads.FirstName.icontains(query) |
+            Leads.LastName.icontains(query) |
+            Accounts.CompanyName.icontains(query)).limit(100)
+    else:
+        opportunities = []
+    return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
     
 # Invalid URL
 @app.errorhandler(404)

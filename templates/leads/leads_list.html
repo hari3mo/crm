@@ -51,7 +51,7 @@
                 </div>
             </form>
             <a href="{{ url_for('clear_leads') }}">
-                <button class="btn btn-sm btn-danger animate-up-2 me-1" type="button">Clear</button>
+                <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all leads?');" type="button">Clear</button>
             </a>
             <a href="{{ url_for('leads_list') }}">
                 <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
@@ -178,7 +178,7 @@
                         <td>{{ lead.Position if lead.Position }}</td>
                         <td>{{ lead.Account.City if lead.Account.City }}</td>
                         <td>{{ lead.Status if lead.Status }}</td>
-                        <td>{{ lead.Owner if lead.Owner else '-' }}</td>
+                        <td>{{ lead.Owner if lead.Owner }}</td>
                         <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
                             <td>
                             <label class="apple-checkbox">
