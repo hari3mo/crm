@@ -1,4 +1,3 @@
-import logging.config
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 from flask_login import UserMixin, login_user, logout_user, current_user, login_required, LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -438,8 +437,6 @@ def import_accounts():
         
     return render_template('accounts/import_accounts.html', form=form)
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 # Import leads
 @app.route('/leads/import/', methods=['GET', 'POST'])
@@ -1058,7 +1055,8 @@ class Sales(db.Model):
     SaleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
-    SaleAmount = db.Column(db.Integer)
+    Amount = db.Column(db.Integer)
+    Stage = db.Column(db.String(50))
     CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
     SalesRep = db.Column(db.String(50))
     SaleDate = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
