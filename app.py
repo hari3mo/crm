@@ -599,7 +599,7 @@ def new_lead():
                             Position=form.position.data,
                             FirstName=form.first_name.data,
                             LastName=form.last_name.data,
-                            Email=form.email.data,
+                            Email=form.email.data if form.email.data else None,
                             Owner=form.owner.data,
                             Status=form.status.data,
                             FollowUp=False,
@@ -781,7 +781,7 @@ def lead(id):
             lead.Position = form.position.data
             lead.FirstName = form.first_name.data
             lead.LastName = form.last_name.data
-            lead.Email = form.email.data
+            lead.Email = form.email.data if form.email.data else None
             lead.Status = form.status.data
             lead.Owner = form.owner.data
             db.session.commit()

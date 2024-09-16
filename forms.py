@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, EmailField,\
     IntegerField, FileField, TextAreaField, SelectField, BooleanField, ValidationError
 from flask_wtf.file import FileRequired
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 # Forms
     
@@ -26,7 +26,7 @@ class AccountForm(FlaskForm):
 class LeadForm(FlaskForm):
     first_name = StringField('First Name:', validators=[DataRequired()])
     last_name = StringField('Last Name:', validators=[DataRequired()])
-    email  = EmailField('Email:', validators=[Email()])
+    email  = EmailField('Email:', validators=[Optional(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
     company = StringField('Account:', validators=[DataRequired()])
     status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
@@ -38,7 +38,7 @@ class LeadForm(FlaskForm):
 class LeadUpdateForm(FlaskForm):
     first_name = StringField('First Name:', validators=[DataRequired()])
     last_name = StringField('Last Name:', validators=[DataRequired()])
-    email  = EmailField('Email:', validators=[Email()])
+    email  = EmailField('Email:', validators=[Optional(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
     status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
                                              ('Converted', 'Converted')])
@@ -89,6 +89,8 @@ class SaleForm(FlaskForm):
     stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\
         ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Won', 'Won'), ('Loss', 'Loss')])
     # owner = StringField('Owner:')
+    submit = SubmitField('Submit')
+
 # Sale form
 class SaleUpdateForm(FlaskForm):
     opportunity = IntegerField('Opportunity:', validators=[DataRequired()])
