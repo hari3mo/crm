@@ -26,7 +26,7 @@ class AccountForm(FlaskForm):
 class LeadForm(FlaskForm):
     first_name = StringField('First Name:', validators=[DataRequired()])
     last_name = StringField('Last Name:', validators=[DataRequired()])
-    email  = EmailField('Email:', validators=[DataRequired(), Email()])
+    email  = EmailField('Email:', validators=[Email()])
     position = StringField('Position:', validators=[DataRequired()])
     company = StringField('Account:', validators=[DataRequired()])
     status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
@@ -38,7 +38,7 @@ class LeadForm(FlaskForm):
 class LeadUpdateForm(FlaskForm):
     first_name = StringField('First Name:', validators=[DataRequired()])
     last_name = StringField('Last Name:', validators=[DataRequired()])
-    email  = EmailField('Email:', validators=[DataRequired(), Email()])
+    email  = EmailField('Email:', validators=[Email()])
     position = StringField('Position:', validators=[DataRequired()])
     status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
                                              ('Converted', 'Converted')])
@@ -69,7 +69,7 @@ class OpportunityForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
-    owner = StringField('Owner:')
+    # owner = StringField('Owner:')
     submit = SubmitField('Submit')
     
 # Opportunity update form
@@ -84,6 +84,13 @@ class OpportunityUpdateForm(FlaskForm):
     
 # Sale form
 class SaleForm(FlaskForm):
+    opportunity = IntegerField('Opportunity:', validators=[DataRequired()])
+    value = IntegerField('Value:', validators=[DataRequired()])
+    stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\
+        ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Won', 'Won'), ('Loss', 'Loss')])
+    # owner = StringField('Owner:')
+# Sale form
+class SaleUpdateForm(FlaskForm):
     opportunity = IntegerField('Opportunity:', validators=[DataRequired()])
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\

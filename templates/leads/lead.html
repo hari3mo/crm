@@ -42,7 +42,7 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.email.label(class="form-label") }}
-                                {{ form.email(class="form-control", value=lead.Email) }}
+                                {{ form.email(class="form-control", value=lead.Email if lead.Email) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.position.label(class="form-label") }}

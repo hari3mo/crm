@@ -22,7 +22,7 @@ import numpy as np
 from forms import LoginForm, SearchForm, UserForm, FileForm, \
     UserUpdateForm, AccountForm, LeadForm, OpportunityForm, \
     AdminUpdateForm, GenerateForm, LeadUpdateForm, OpportunityUpdateForm,\
-    SaleForm
+    SaleForm, SaleUpdateForm
 
 ##############################################################################
 
@@ -649,6 +649,7 @@ def new_opportunity():
         
         date_closed = None if form.stage.data != 'Won' and form.stage.data != 'Loss' \
             else datetime.datetime.now(datetime.timezone.utc)
+
         try:
             opportunity = Opportunities(OpportunityID=id,
                                         AccountID=account.AccountID,
@@ -657,7 +658,7 @@ def new_opportunity():
                                         Opportunity=form.opportunity.data,
                                         Value=form.value.data,
                                         Stage=form.stage.data,
-                                        Owner=form.owner.data,
+                                        Owner=lead.Owner if lead else None,
                                         CreatedBy=current_user.Email,
                                         DateClosed=date_closed)
             db.session.add(opportunity)
@@ -699,7 +700,6 @@ def new_sale():
         date_closed = None if form.stage.data != 'Won' and form.stage.data != 'Loss' \
             else datetime.datetime.now(datetime.timezone.utc)
       
-        
         try:
                 
             sale = Sales(SaleID=id,
@@ -709,10 +709,11 @@ def new_sale():
                          ClientID=current_user.ClientID,
                          Stage=form.stage.data,
                          Value=form.value.data,
-                         Owner=form.owner.data,
+                         Owner=opportunity.Owner if opportunity else None,
                          CreatedBy=current_user.Email,
                          DateClosed=date_closed)
             opportunity.Stage = 'Won'
+            opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             
             db.session.add(sale)
             db.session.commit()
@@ -823,6 +824,7 @@ def opportunity(id):
             opportunity.Opportunity = form.opportunity.data
             opportunity.Value = form.value.data
             opportunity.Stage = form.stage.data
+            opportunity.Owner = form.owner.data
             if form.stage.data == 'Won' or form.stage.data == 'Loss':
                 opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             else:
@@ -841,7 +843,7 @@ def opportunity(id):
 @login_required
 def sale(id):
     sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
-    form = SaleForm(stage=sale.Stage)
+    form = SaleUpdateForm(stage=sale.Stage)
     form.opportunity.data = sale.OpportunityID
     form.value.data = sale.Value
     form.owner.data = sale.Owner
