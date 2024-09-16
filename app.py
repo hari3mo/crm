@@ -818,21 +818,21 @@ def opportunity(id):
     form.opportunity.data = opportunity.Opportunity
     
     if form.validate_on_submit():
-        # try:
-        opportunity.LeadID = form.lead.data
-        opportunity.Opportunity = form.opportunity.data
-        opportunity.Value = form.value.data
-        opportunity.Stage = form.stage.data
-        if form.stage.data == 'Won' or form.stage.data == 'Loss':
-            opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
-        else:
-            opportunity.DateClosed = None
-        db.session.commit()
-        flash('Opportunity updated successfully.', 'success')
-        return redirect(url_for('opportunity', id=id))
-        # except:
-        #     flash('Opportunity update failed.', 'danger')
-        #     return redirect(url_for('opportunity', id=id))
+        try:
+            opportunity.LeadID = form.lead.data
+            opportunity.Opportunity = form.opportunity.data
+            opportunity.Value = form.value.data
+            opportunity.Stage = form.stage.data
+            if form.stage.data == 'Won' or form.stage.data == 'Loss':
+                opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
+            else:
+                opportunity.DateClosed = None
+            db.session.commit()
+            flash('Opportunity updated successfully.', 'success')
+            return redirect(url_for('opportunity', id=id))
+        except:
+            flash('Opportunity update failed.', 'danger')
+            return redirect(url_for('opportunity', id=id))
         
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
@@ -893,6 +893,10 @@ def delete_opportunity(id):
     if opportunity is None:
         flash('Opportunity not found.', 'danger')
         return redirect(url_for('opportunities_list'))
+    if opportunity.Sales:
+        flash('Opportunity cannot be deleted as it has associated sales.', 'danger')
+        return redirect(url_for('opportunity', id=opportunity.OpportunityID))
+    
     try:
         db.session.delete(opportunity)
         db.session.commit()
@@ -1123,7 +1127,7 @@ class Opportunities(db.Model):
     DateClosed = db.Column(db.Date)
 
     # References
-    Sale = db.relationship('Sales', backref='Opportunity')
+    Sales = db.relationship('Sales', backref='Opportunity')
 
 # Sales model
 class Sales(db.Model):
