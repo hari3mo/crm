@@ -40,7 +40,7 @@
     </div>
     <br>
     <div class="card border-0 shadow">
-    {% if opportunities %}
+    {% if sales %}
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-centered table-nowrap mb-0 rounded table-fixed">
@@ -124,6 +124,30 @@
                 </thead>
                 <tbody id="results">
                     <!-- Item -->
+                    {% for sale in sales %}
+                    <tr>
+                        <td class="fw-bold">
+                            <a class="link-info" href="#">
+                                {{ sale.SaleID }}
+                            </a>
+                        </td>
+                        <td>
+                            <a class="link-info" href="{{ url_for('account', id=sale.Account.AccountID) }}">
+                                {{ sale.Account.CompanyName }}
+                            </a>
+                        </td>
+                        <td>
+                            <a class="link-info" href="{{ url_for('lead', id=sale.Lead.LeadID) }}">
+                                {{ sale.Lead.FirstName }} {{ sale.Lead.LastName }}
+                            </a>
+                        </td>
+                        <td>{{ sale.Lead.Email if sale.Lead.Email }}</td>
+                        <td>{{ sale.Value if sale.Value }}</td>
+                        <td>{{ sale.Stage if sale.Stage }}</td>
+                        <td>{{ sale.Owner if sale.Owner else 'Not assigned' }}</td>
+                        <td>{{ sale.DateCreated if sale.DateCreated }}</td>
+                    </tr>
+                    {% endfor %}
                     <!-- End of Item -->
                 </tbody>
                 </table>

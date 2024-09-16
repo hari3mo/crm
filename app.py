@@ -309,7 +309,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.limit(50), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
         positions=positions, cities=cities, owners=owners)
 
 
@@ -635,18 +635,20 @@ def new_opportunity():
     leads = Leads.query.filter_by(AccountID=account.AccountID).all()
     leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
     form.lead.choices = leads
-    
-    # Grab max id
-    id = None
-    id = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
-        .order_by(Opportunities.OpportunityID.desc()).first()
-
-    if id is None:
-            id = 1000
-    else:
-        id = id.OpportunityID + 10
                 
     if form.validate_on_submit():
+        # Grab max id
+        id = None
+        id = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Opportunities.OpportunityID.desc()).first()
+
+        if id is None:
+                id = 1000
+        else:
+            id = id.OpportunityID + 10
+        
+        date_closed = None if form.stage.data != 'Won' and form.stage.data != 'Loss' \
+            else datetime.datetime.now(datetime.timezone.utc)
         try:
             opportunity = Opportunities(OpportunityID=id,
                                         AccountID=account.AccountID,
@@ -656,7 +658,8 @@ def new_opportunity():
                                         Value=form.value.data,
                                         Stage=form.stage.data,
                                         Owner=form.owner.data,
-                                        CreatedBy=current_user.Email)
+                                        CreatedBy=current_user.Email,
+                                        DateClosed=date_closed)
             db.session.add(opportunity)
             db.session.commit()
 
@@ -669,48 +672,61 @@ def new_opportunity():
     
     return render_template('opportunities/new_opportunity.html', form=form, account=account)
 
-# Update lead
-@app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
+# New sale
+@app.route('/sales/new/', methods=['GET', 'POST'])
 @login_required
-def lead(id):
-    lead = None
-    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
-    form = LeadUpdateForm(status=lead.Status)
-    
-    if lead is None:
-        flash('Lead not found.', 'danger')
-        return redirect(url_for('leads_list'))
+def new_sale():
+    form = SaleForm()
+    opportunity = None
+    opportunity = request.args.get('opportunity')
+    if opportunity:
+        opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+            .filter_by(OpportunityID=opportunity).first()
+        if opportunity is None:
+            flash('Opportunity not found.', 'danger')
+            return redirect(url_for('new_sale'))
+        form.opportunity.data = opportunity.OpportunityID
     
     if form.validate_on_submit():
+        # Grab max id
+        id = Sales.query.order_by(Sales.SaleID.desc()).first()
+        
+        if id is None:
+            id = 10000
+        else:
+            id = id.SaleID + 10
+            
+        date_closed = None if form.stage.data != 'Won' and form.stage.data != 'Loss' \
+            else datetime.datetime.now(datetime.timezone.utc)
+      
+        
         try:
-            lead.Position = form.position.data
-            lead.FirstName = form.first_name.data
-            lead.LastName = form.last_name.data
-            lead.Email = form.email.data
-            lead.Status = form.status.data
-            lead.Owner = form.owner.data
+                
+            sale = Sales(SaleID=id,
+                         AccountID=opportunity.Account.AccountID,
+                         LeadID=opportunity.Lead.LeadID,
+                         OpportunityID=opportunity.OpportunityID,
+                         ClientID=current_user.ClientID,
+                         Stage=form.stage.data,
+                         Value=form.value.data,
+                         Owner=form.owner.data,
+                         CreatedBy=current_user.Email,
+                         DateClosed=date_closed)
+            opportunity.Stage = 'Won'
+            
+            db.session.add(sale)
             db.session.commit()
-            flash('Lead updated successfully.', 'success')
-            return redirect(url_for('leads_list'))
+            
+            flash('Sale added successfully.', 'success')
+            return redirect(url_for('sales_list'))
+        
         except:
-            flash('Lead update failed.', 'danger')
-            return redirect(url_for('leads_list'))
+            db.session.rollback()
+            flash('Sale add failed.', 'danger')
+            return redirect(url_for('new_sale'))
     
-    return render_template('leads/lead.html', lead=lead, form=form)
+    return render_template('sales/new_sale.html', form=form)
 
-# Update lead follow up
-@app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
-@login_required
-def follow_up(id):
-    lead = None
-    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
-    if lead is None:
-        flash('Lead not found.', 'danger')
-        return redirect(url_for('leads_list')) 
-    lead.FollowUp = False if lead.FollowUp else True
-    db.session.commit()
-    flash(f'Follow-up status for {lead.FirstName} {lead.LastName} updated.', 'success')
-    return redirect(url_for('leads_list'))
 
 # Update account
 @app.route('/accounts/update/<int:id>', methods=['GET', 'POST'])
@@ -745,7 +761,50 @@ def account(id):
 
         
     return render_template('accounts/account.html', form=form, account=account,
-            id=id)    
+            id=id)   
+     
+# Update lead
+@app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
+@login_required
+def lead(id):
+    lead = None
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    form = LeadUpdateForm(status=lead.Status)
+    
+    if lead is None:
+        flash('Lead not found.', 'danger')
+        return redirect(url_for('leads_list'))
+    
+    if form.validate_on_submit():
+        try:
+            lead.Position = form.position.data
+            lead.FirstName = form.first_name.data
+            lead.LastName = form.last_name.data
+            lead.Email = form.email.data
+            lead.Status = form.status.data
+            lead.Owner = form.owner.data
+            db.session.commit()
+            flash('Lead updated successfully.', 'success')
+            return redirect(url_for('lead', id=id))
+        except:
+            flash('Lead update failed.', 'danger')
+            return redirect(url_for('lead', id=id))
+    
+    return render_template('leads/lead.html', lead=lead, form=form)
+
+# Update lead follow up
+@app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
+@login_required
+def follow_up(id):
+    lead = None
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
+    if lead is None:
+        flash('Lead not found.', 'danger')
+        return redirect(url_for('leads_list')) 
+    lead.FollowUp = False if lead.FollowUp else True
+    db.session.commit()
+    flash(f'Follow-up status for {lead.FirstName} {lead.LastName} updated.', 'success')
+    return redirect(url_for('leads_list'))
 
 # Update opportunity
 @app.route('/opportunities/update/update/<int:id>', methods=['GET', 'POST'])
@@ -764,16 +823,16 @@ def opportunity(id):
         opportunity.Opportunity = form.opportunity.data
         opportunity.Value = form.value.data
         opportunity.Stage = form.stage.data
-        if form.stage.data == 'Won' or form.stage.data == 'Lost':
+        if form.stage.data == 'Won' or form.stage.data == 'Loss':
             opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
         else:
             opportunity.DateClosed = None
         db.session.commit()
         flash('Opportunity updated successfully.', 'success')
-        return redirect(url_for('opportunities_list'))
+        return redirect(url_for('opportunity', id=id))
         # except:
         #     flash('Opportunity update failed.', 'danger')
-        #     return redirect(url_for('opportunities_list'))
+        #     return redirect(url_for('opportunity', id=id))
         
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
@@ -1024,6 +1083,7 @@ class Accounts(db.Model):
     # References
     Leads = db.relationship('Leads', backref='Account')
     Opportunities = db.relationship('Opportunities', backref='Account')
+    Sales = db.relationship('Sales', backref='Account')
     
 # Leads model
 class Leads(db.Model):
@@ -1044,6 +1104,7 @@ class Leads(db.Model):
     
     # References
     Opportunities = db.relationship('Opportunities', backref='Lead')
+    Sales = db.relationship('Sales', backref='Lead')
 
 
 # Opportunities model    

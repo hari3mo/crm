@@ -84,6 +84,11 @@ class OpportunityUpdateForm(FlaskForm):
     
 # Sale form
 class SaleForm(FlaskForm):
+    opportunity = IntegerField('Opportunity:', validators=[DataRequired()])
+    value = IntegerField('Value:', validators=[DataRequired()])
+    stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\
+        ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Won', 'Won'), ('Loss', 'Loss')])
+    owner = StringField('Owner:')
     submit = SubmitField('Submit')
 
 # File form
