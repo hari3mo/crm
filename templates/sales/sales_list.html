@@ -56,7 +56,7 @@
                                 {% if accounts  %}
                                 <ul>
                                     {% for account in accounts %}
-                                    <a href="#"><li>{{ account }}</li></a>
+                                    <a href="{{ url_for('sales_list', account=account)}}"><li>{{ account }}</li></a>
                                     {% endfor %}
                                 </ul>
                                 {% endif %}
@@ -72,8 +72,8 @@
                             </svg>
                             <div id="value-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <a href="#"><li>Ascending</li></a>
-                                    <a href="#"><li>Descending</li></a>
+                                    <a href="{{ url_for('sales_list', sort="value", order="asc")}}"><li>Ascending</li></a>
+                                    <a href="{{ url_for('sales_list', sort="value", order="dsc")}}"><li>Descending</li></a>
                                 </ul>
                             </div>
                         </th>
@@ -84,11 +84,11 @@
                             </svg>
                             <div id="stage-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <a href="#"><li>Prospecting</li></a>
-                                    <a href="#"><li>Qualification</li></a>
-                                    <a href="#"><li>Proposal</li></a>
-                                    <a href="#"><li>Won</li></a>
-                                    <a href="#"><li>Loss</li></a>
+                                    <a href="{{ url_for('sales_list', stage='Prospecting') }}"><li>Prospecting</li></a>
+                                    <a href="{{ url_for('sales_list', stage='Qualification') }}"><li>Qualification</li></a>
+                                    <a href="{{ url_for('sales_list', stage='Proposal') }}"><li>Proposal</li></a>
+                                    <a href="{{ url_for('sales_list', stage='Won') }}"><li>Won</li></a>
+                                    <a href="{{ url_for('sales_list', stage='Loss') }}"><li>Loss</li></a>
                                 </ul>
                             </div>
                         </th>
@@ -115,8 +115,8 @@
                             </svg>
                             <div id="date-menu" class="menu apple-select-menu">
                                 <ul>
-                                    <a href="#"><li>Newest</li></a>
-                                    <a href="#"><li>Oldest</li></a>
+                                    <a href="{{ url_for('sales_list', sort="date", order="asc")}}"><li>Newest</li></a>
+                                    <a href="{{ url_for('sales_list', sort="date", order="asc")}}"><li>Oldest</li></a>
                                 </ul>
                             </div>
                         </th>

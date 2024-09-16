@@ -1,0 +1,24 @@
+{% for sale in sales %}
+<tr>
+    <td class="fw-bold">
+        <a class="link-info" href="{{ url_for('sale', id=sale.SaleID) }}">
+            {{ sale.SaleID }}
+        </a>
+    </td>
+    <td>
+        <a class="link-info" href="#">
+            {{ sale.Account.CompanyName }}
+        </a>
+    </td>
+    <td>
+        <a class="link-info" href="#">
+            {{ sale.Lead.FirstName }} {{ sale.Lead.LastName }}
+        </a>
+    </td>
+    <td>{{ sale.Lead.Email if sale.Lead.Email }}</td>
+    <td>{{ sale.Value if sale.Value }}</td>
+    <td>{{ sale.Stage if sale.Stage }}</td>
+    <td>{{ sale.Owner if sale.Owner else 'Not assigned' }}</td>
+    <td>{{ sale.DateCreated if sale.DateCreated }}</td>
+</tr>
+{% endfor %}

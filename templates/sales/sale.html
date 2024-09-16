@@ -33,10 +33,6 @@
                         {{ form.hidden_tag() }}
                         <div class="row g-3">
                             <div class="col-md-6">
-                                {{ form.opportunity.label(class="form-label") }}
-                                {{ form.opportunity(class="form-control", placeholder="ID") }}
-                            </div>
-                            <div class="col-md-6">
                                 {{ form.value.label(class="form-label") }}
                                 {{ form.value(class="form-control") }}
                             </div>
@@ -44,7 +40,7 @@
                                 {{ form.stage.label(class="form-label") }}
                                 {{ form.stage(class="form-control") }}
                             </div>
-                            <div class="col-md-6">
+                            <div class="col">
                                 {{ form.owner.label(class="form-label") }}
                                 {{ form.owner(class="form-control") }}
                             </div>

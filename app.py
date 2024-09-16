@@ -363,9 +363,49 @@ def opportunities_list():
 @app.route('/sales/list/')
 @login_required
 def sales_list():
-    sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
-        .order_by(Sales.SaleID.desc())
-    return render_template('sales/sales_list.html', sales=sales)
+    sales = Sales.query.filter_by(ClientID=current_user.ClientID)
+        
+    accounts = db.session.query(Accounts.CompanyName).join(Sales, Sales.AccountID == Accounts.AccountID)\
+                .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
+    accounts = sorted([account.CompanyName for account in accounts])
+    account = request.args.get('account')
+    if account:
+        sales = sales.join(Accounts, Sales.AccountID == Accounts.AccountID)\
+            .filter(Accounts.CompanyName == account)
+            
+    sort = request.args.get('sort')
+    order = request.args.get('order')
+    if sort == 'value':
+        if order == 'asc':
+            sales = sales.order_by(Sales.Value.asc())
+        else:
+            sales = sales.order_by(Sales.Value.desc())
+    if sort == 'date':
+        if order == 'asc':
+            sales = sales.order_by(Sales.DateCreated.asc())
+        else:
+            sales = sales.order_by(Sales.DateCreated.desc())
+    else:
+        sales = sales.order_by(Sales.OpportunityID.desc())    
+        
+    stage = request.args.get('stage')
+    if stage:
+        opportunities = opportunities.filter_by(Stage=stage)
+        
+    owners = db.session.query(Sales.Owner).filter_by(ClientID=current_user.ClientID)\
+            .distinct().filter(Sales.Owner.isnot(None)).all()
+    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
+    if '' in owners:
+        owners.remove('')
+    owner = request.args.get('owner')
+    if owner:
+        if owner == 'Not assigned':
+            sales = sales.filter(Sales.Owner.is_(None))
+        else:
+            sales = Sales.query.filter_by(Owner=owner)
+    
+    return render_template('sales/sales_list.html', sales=sales.all(), accounts=accounts,
+                           owners=owners)
 
 # Import accounts
 @app.route('/accounts/import/', methods=['GET', 'POST'])
@@ -844,9 +884,23 @@ def opportunity(id):
 def sale(id):
     sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
     form = SaleUpdateForm(stage=sale.Stage)
-    form.opportunity.data = sale.OpportunityID
     form.value.data = sale.Value
-    form.owner.data = sale.Owner
+    form.owner.data = sale.Owner if sale.Owner else None
+    if form.validate_on_submit():
+        try:
+            sale.Stage = form.stage.data
+            sale.Value = form.value.data
+            sale.Owner = form.owner.data
+            if form.stage.data == 'Won' or form.stage.data == 'Loss':
+                sale.DateClosed = datetime.datetime.now(datetime.timezone.utc)
+            else:
+                sale.DateClosed = None
+            db.session.commit()
+            flash('Sale updated successfully.', 'success')
+            return redirect(url_for('sale', id=id))
+        except:
+            flash('Sale update failed.', 'danger')
+            return redirect(url_for('sale', id=id))
     return render_template('sales/sale.html', form=form, sale=sale)
 
 # Delete account
@@ -1037,6 +1091,28 @@ def search_opportunities():
         opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
             .order_by(Opportunities.OpportunityID.desc())
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
+
+# Search sales
+@app.route('/search_sales/')
+@login_required
+def search_sales():
+    query = request.args.get('query')
+    if query:
+        sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
+            .join(Accounts, Sales.AccountID == Accounts.AccountID)\
+            .join(Leads, Sales.LeadID == Leads.LeadID)\
+            .filter((Leads.FirstName + ' ' + Leads.LastName).icontains(query) |
+            Sales.Value.icontains(query) |
+            Sales.Stage.icontains(query) |
+            Sales.Owner.icontains(query) |
+            Leads.FirstName.icontains(query) |
+            Leads.LastName.icontains(query) |
+            Accounts.CompanyName.icontains(query))
+    else:
+        sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Sales.SaleID.desc())
+    return render_template('sales/search_sales.html', sales=sales)
+
     
 # Invalid URL
 @app.errorhandler(404)
