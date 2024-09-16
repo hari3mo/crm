@@ -836,6 +836,17 @@ def opportunity(id):
         
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
+# Update sale
+@app.route('/sales/update/<int:id>', methods=['GET', 'POST'])
+@login_required
+def sale(id):
+    sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
+    form = SaleForm(stage=sale.Stage)
+    form.opportunity.data = sale.OpportunityID
+    form.value.data = sale.Value
+    form.owner.data = sale.Owner
+    return render_template('sales/sale.html', form=form, sale=sale)
+
 # Delete account
 @app.route('/accounts/delete/<int:id>')
 @login_required
@@ -906,6 +917,25 @@ def delete_opportunity(id):
     except:
         flash('Error deleting opportunity.', 'danger')
         return redirect(url_for('opportunities_list'))
+# Delete sale
+@app.route('/sales/delete/<int:id>')
+@login_required
+def delete_sale(id):
+    sale = None
+    sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
+    if sale is None:
+        flash('Sale not found.', 'danger')
+        return redirect(url_for('sales_list'))
+    
+    try:
+        db.session.delete(sale)
+        db.session.commit()
+        flash('Sale deleted successfully.', 'success')
+        return redirect(url_for('sales_list'))
+    
+    except:
+        flash('Error deleting sale.', 'danger')
+        return redirect(url_for('sales_list'))
 
 # Clear accounts
 @app.route('/accounts/clear/')
@@ -933,6 +963,15 @@ def clear_opportunities():
     db.session.commit()
     flash('Opportunities cleared successfully.', 'success')
     return redirect(url_for('opportunities_list'))
+
+# Clear sales
+@app.route('/sales/clear/')
+@login_required
+def clear_sales():
+    Sales.query.delete()
+    db.session.commit()
+    flash('Sales cleared successfully.', 'success')
+    return redirect(url_for('sales_list'))
 
 # Search accounts
 @app.route('/search_accounts/')

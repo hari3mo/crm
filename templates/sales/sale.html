@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sale{% endblock %}
+
+{% block route %}{{ url_for('sales_list') }}{% endblock %}
+
+{% block path %}Sales{% endblock %}
+
+{% block page %}View{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="h3 mb-0">Sale</h1>
+                        {{ sale.DateCreated }}{% if sale.DateClosed %} - {{ sale.DateClosed }}{% endif %}
+                    </div>
+                    <p class="text-muted">Sale ID: {{ sale.SaleID }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Details</h2>
+                    <form method='POST'>
+                        {{ form.hidden_tag() }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.opportunity.label(class="form-label") }}
+                                {{ form.opportunity(class="form-control", placeholder="ID") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.value.label(class="form-label") }}
+                                {{ form.value(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.stage.label(class="form-label") }}
+                                {{ form.stage(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.owner.label(class="form-label") }}
+                                {{ form.owner(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            {{ form.submit(class="btn btn-info animate-up-2", value="Update Sale") }}
+                            <a href="{{ url_for('delete_sale', id=sale.SaleID) }}" class="btn btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to delete this sale?');">Delete</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Related Information</h2>
+                    <a href="{{ url_for('account', id=sale.Account.AccountID) }}">
+                        <p>Account: <span class="link-info">{{ sale.Account.CompanyName }}</span></p>
+                    </a>
+                    <a  href="{{ url_for('lead', id=sale.Lead.LeadID) }}">
+                        <p>Lead: <span class="link-info">{{ sale.Lead.FirstName }} {{ sale.Lead.LastName }}</span></p>
+                    </a>
+                    <a href="{{ url_for('opportunity', id=sale.Opportunity.OpportunityID) }}">   
+                        <p>Opportunity: <span class="link-info">{{ sale.Opportunity.OpportunityID }}</span></p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

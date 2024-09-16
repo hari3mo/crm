@@ -30,7 +30,7 @@
                     <input type="text" class="form-control" name="query" hx-get="/search_sales" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search sales" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
-            <a href="#">
+            <a href="{{ url_for('clear_sales') }}">
                 <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all sales?');" type="button">Clear</button>
             </a>
             <a href="{{ url_for('sales_list') }}">
@@ -127,7 +127,7 @@
                     {% for sale in sales %}
                     <tr>
                         <td class="fw-bold">
-                            <a class="link-info" href="#">
+                            <a class="link-info" href="{{ url_for('sale', id=sale.SaleID) }}">
                                 {{ sale.SaleID }}
                             </a>
                         </td>
