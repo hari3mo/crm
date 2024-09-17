@@ -1054,7 +1054,7 @@ def search_accounts():
             Accounts.Timezone.icontains(query))
     else:
         accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Accounts.AccountID.desc())
+            .order_by(Accounts.AccountID.desc()).limit(100)
     return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
@@ -1062,8 +1062,6 @@ def search_accounts():
 @login_required
 def search_leads():
     query = request.args.get('query')
-    leads_all = Leads.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Leads.LeadID.desc())
     if query:
         leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
             .join(Accounts, Leads.AccountID == Accounts.AccountID)\
@@ -1078,6 +1076,8 @@ def search_leads():
             Accounts.City.icontains(query))
     else:
         leads = leads_all
+        # leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
+        #     .order_by(Leads.LeadID.desc()).limit(100)
     return render_template('leads/search_leads.html', leads=leads)
 
 # Search opportunities
@@ -1282,3 +1282,4 @@ class Admins(db.Model):
 if __name__ == "__main__":
     app.run(debug=True)
     
+leads_all = Leads.query.filter_by(ClientID=current_user.ClientID).all()
