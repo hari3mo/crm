@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 from flask_login import UserMixin, login_user, logout_user, current_user, login_required, LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_caching import Cache
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
@@ -27,6 +28,9 @@ from forms import LoginForm, SearchForm, UserForm, FileForm, \
 ##############################################################################
 
 app = Flask(__name__) 
+
+# Intialize cache
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Load environment variables
 load_dotenv()
@@ -263,6 +267,8 @@ def accounts_list():
 def leads_list():
     leads = None
     leads = Leads.query.filter_by(ClientID=current_user.ClientID).order_by(Leads.LeadID.desc())
+    
+    cache.set(f'leads_{current_user.ClientID}', leads, timeout=300)
     
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
@@ -1054,7 +1060,7 @@ def search_accounts():
             Accounts.Timezone.icontains(query))
     else:
         accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Accounts.AccountID.desc()).limit(100)
+            .order_by(Accounts.AccountID.desc())
     return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
@@ -1075,9 +1081,11 @@ def search_leads():
             Accounts.CompanyName.icontains(query) |
             Accounts.City.icontains(query))
     else:
-        leads = leads_all
-        # leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
-        #     .order_by(Leads.LeadID.desc()).limit(100)
+        leads = cache.get(f'leads_{current_user.ClientID}')
+        if leads is None:
+            leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
+                .order_by(Leads.LeadID.desc())
+                
     return render_template('leads/search_leads.html', leads=leads)
 
 # Search opportunities
@@ -1099,7 +1107,7 @@ def search_opportunities():
             Accounts.CompanyName.icontains(query))
     else:
         opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Opportunities.OpportunityID.desc()).limit(100)
+            .order_by(Opportunities.OpportunityID.desc())
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
 
 # Search sales
@@ -1120,7 +1128,7 @@ def search_sales():
             Accounts.CompanyName.icontains(query))
     else:
         sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Sales.SaleID.desc()).limit(100)
+            .order_by(Sales.SaleID.desc())
     return render_template('sales/search_sales.html', sales=sales)
 
     
@@ -1278,8 +1286,6 @@ class Admins(db.Model):
     User = db.Column(db.String(50), primary_key=True)
 
 ##############################################################################
-leads_all = Leads.query.filter_by(ClientID=current_user.ClientID).all()
-
 if __name__ == "__main__":
     app.run(debug=True)
     
