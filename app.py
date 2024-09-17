@@ -311,7 +311,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.limit(20), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
         positions=positions, cities=cities, owners=owners)
 
 
