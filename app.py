@@ -26,14 +26,17 @@ from forms import LoginForm, SearchForm, UserForm, FileForm, \
     SaleForm, SaleUpdateForm
 
 ##############################################################################
-
-app = Flask(__name__) 
-
-# Intialize cache
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-
 # Load environment variables
 load_dotenv()
+
+# Initialize app
+app = Flask(__name__) 
+
+# Initialize cache
+cache = Cache()
+cache.init_app(app)
+app.config['CACHE_TYPE'] = 'simple'
+
 
 # MySQL database connection
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('MYSQL_URI')
@@ -185,14 +188,13 @@ def index():
 
 # Analytics
 
-
 # Accounts list
 @app.route('/accounts/list/')
 @login_required
 def accounts_list():
     accounts = None
     accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)
-     
+
     # Sort options    
     sort = request.args.get('sort')
     order = request.args.get('order')
@@ -267,9 +269,7 @@ def accounts_list():
 def leads_list():
     leads = None
     leads = Leads.query.filter_by(ClientID=current_user.ClientID).order_by(Leads.LeadID.desc())
-    
-    cache.set(f'leads_{current_user.ClientID}', leads, timeout=300)
-    
+        
     # Filter query
     positions = db.session.query(Leads.Position).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.Position.isnot(None)).all()
@@ -317,7 +317,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.limit(30), companies=companies,
         positions=positions, cities=cities, owners=owners)
 
 
@@ -841,9 +841,6 @@ def lead(id):
     
     return render_template('leads/lead.html', lead=lead, form=form)
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 # Update lead follow up
 @app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -856,7 +853,6 @@ def follow_up(id):
     lead.FollowUp = False if lead.FollowUp else True
     db.session.commit()
     view = request.args.get('view')
-    logging.debug(f'View:{view}')
     if view:
         flash('Follow-up status updated.', 'success')
         return redirect(url_for('lead', id=id))
@@ -1060,7 +1056,7 @@ def search_accounts():
             Accounts.Timezone.icontains(query))
     else:
         accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Accounts.AccountID.desc())
+            .order_by(Accounts.AccountID.desc()).limit(100)
     return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
@@ -1081,11 +1077,8 @@ def search_leads():
             Accounts.CompanyName.icontains(query) |
             Accounts.City.icontains(query))
     else:
-        leads = cache.get(f'leads_{current_user.ClientID}')
-        if leads is None:
-            leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
-                .order_by(Leads.LeadID.desc())
-                
+        leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
+            .order_by(Leads.LeadID.desc()).limit(100)
     return render_template('leads/search_leads.html', leads=leads)
 
 # Search opportunities
@@ -1107,7 +1100,7 @@ def search_opportunities():
             Accounts.CompanyName.icontains(query))
     else:
         opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Opportunities.OpportunityID.desc())
+            .order_by(Opportunities.OpportunityID.desc()).limit(100)
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
 
 # Search sales
@@ -1128,7 +1121,7 @@ def search_sales():
             Accounts.CompanyName.icontains(query))
     else:
         sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Sales.SaleID.desc())
+            .order_by(Sales.SaleID.desc()).limit(100)
     return render_template('sales/search_sales.html', sales=sales)
 
     
