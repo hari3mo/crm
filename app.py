@@ -741,7 +741,6 @@ def new_sale():
             else datetime.datetime.now(datetime.timezone.utc)
       
         try:
-                
             sale = Sales(SaleID=id,
                          AccountID=opportunity.Account.AccountID,
                          LeadID=opportunity.Lead.LeadID,
@@ -752,7 +751,8 @@ def new_sale():
                          Owner=opportunity.Owner if opportunity else None,
                          CreatedBy=current_user.Email,
                          DateClosed=date_closed)
-            opportunity.Stage = 'Won'
+            if opportunity.Stage != 'Won':
+                opportunity.Stage = 'Won'
             opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             
             db.session.add(sale)
