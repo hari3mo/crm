@@ -295,6 +295,8 @@ def leads_list():
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
             .distinct().filter(Leads.Owner.isnot(None)).all()
     owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
+    if '' in owners:
+        owners.remove('')
     owner = request.args.get('owner')
     if owner:
         if owner == 'Not assigned':
@@ -309,7 +311,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.limit(20), companies=companies,
         positions=positions, cities=cities, owners=owners)
 
 
@@ -803,7 +805,7 @@ def account(id):
         
     return render_template('accounts/account.html', form=form, account=account,
             id=id)   
-     
+
 # Update lead
 @app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -824,7 +826,6 @@ def lead(id):
             lead.Email = form.email.data if form.email.data else None
             lead.Status = form.status.data
             lead.Owner = form.owner.data
-            lead.FollowUp = True if form.follow_up.data else False
             db.session.commit()
             flash('Lead updated successfully.', 'success')
             return redirect(url_for('lead', id=id))
@@ -833,6 +834,9 @@ def lead(id):
             return redirect(url_for('lead', id=id))
     
     return render_template('leads/lead.html', lead=lead, form=form)
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Update lead follow up
 @app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
@@ -845,6 +849,11 @@ def follow_up(id):
         return redirect(url_for('leads_list')) 
     lead.FollowUp = False if lead.FollowUp else True
     db.session.commit()
+    view = request.args.get('view')
+    logging.debug(f'View:{view}')
+    if view:
+        flash('Follow-up status updated.', 'success')
+        return redirect(url_for('lead', id=id))
     flash(f'Follow-up status for {lead.FirstName} {lead.LastName} updated.', 'success')
     return redirect(url_for('leads_list'))
 

@@ -30,13 +30,15 @@
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
-                        <h2 class="h6 mb-4">Follow-Up: 
-                            <label class="apple-checkbox follow-up-label">
-                                {{ form.follow_up(type="checkbox", id="followUp", checked=True if lead.FollowUp else False) }}
+                        <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID, view=True) }}" method="POST">
+                        <h2 class="h6 mb-4">Follow-Up:
+                            <label class="apple-checkbox">
+                                <input type="checkbox" onchange="submitForm({{lead.LeadID}})" {% if lead.FollowUp %}checked{% endif %}>
                                 <span class="checkmark"></span>
                             </label>    
                         </h2>
-                        </div>
+                    </form>
+                    </div>
                     <form action="{{ url_for('lead', id=lead.LeadID) }}" method='POST'>
                         {{ form.hidden_tag() }}
                         <div class="row g-3">
@@ -102,4 +104,11 @@
         </div>
     </div>
 </div>
+
+<script>
+    function submitForm(leadID) {
+        document.getElementById('followUp_' + leadID).submit();
+    }
+</script>
+
 {% endblock %}

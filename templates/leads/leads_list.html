@@ -178,7 +178,7 @@
                         <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
                             <td>
                             <label class="apple-checkbox">
-                                <input type="checkbox" oninput="submitForm({{lead.LeadID}})" {% if lead.FollowUp %}checked{% endif %}>
+                                <input type="checkbox" onchange="submitForm({{lead.LeadID}})" {% if lead.FollowUp %}checked{% endif %}>
                                 <span class="checkmark"></span>
                             </label>    
                         </td>
