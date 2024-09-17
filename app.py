@@ -1278,8 +1278,8 @@ class Admins(db.Model):
     User = db.Column(db.String(50), primary_key=True)
 
 ##############################################################################
+leads_all = Leads.query.filter_by(ClientID=current_user.ClientID).all()
 
 if __name__ == "__main__":
     app.run(debug=True)
     
-leads_all = Leads.query.filter_by(ClientID=current_user.ClientID).all()
