@@ -1076,7 +1076,7 @@ def search_leads():
             Accounts.City.icontains(query))
     else:
         leads = Leads.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Leads.LeadID.desc())
+            .order_by(Leads.LeadID.desc()).limit(100)
     return render_template('leads/search_leads.html', leads=leads)
 
 # Search opportunities
