@@ -824,6 +824,7 @@ def lead(id):
             lead.Email = form.email.data if form.email.data else None
             lead.Status = form.status.data
             lead.Owner = form.owner.data
+            lead.FollowUp = True if form.follow_up.data else False
             db.session.commit()
             flash('Lead updated successfully.', 'success')
             return redirect(url_for('lead', id=id))
@@ -884,8 +885,7 @@ def opportunity(id):
 def sale(id):
     sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
     form = SaleUpdateForm(stage=sale.Stage)
-    form.value.data = sale.Value
-    form.owner.data = sale.Owner if sale.Owner else None
+
     if form.validate_on_submit():
         try:
             sale.Stage = form.stage.data

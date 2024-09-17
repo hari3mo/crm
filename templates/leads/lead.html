@@ -28,7 +28,15 @@
         <div class="col-lg-8 mb-4">
             <div class="card border-0 shadow">
                 <div class="card-body">
-                    <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="h5 mb-4">Account: <a class="link-info" href="{{ url_for('account', id=lead.Account.AccountID) }}">{{ lead.Account.CompanyName }}</a></h2>
+                        <h2 class="h6 mb-4">Follow-Up: 
+                            <label class="apple-checkbox follow-up-label">
+                                {{ form.follow_up(type="checkbox", id="followUp", checked=True if lead.FollowUp else False) }}
+                                <span class="checkmark"></span>
+                            </label>    
+                        </h2>
+                        </div>
                     <form action="{{ url_for('lead', id=lead.LeadID) }}" method='POST'>
                         {{ form.hidden_tag() }}
                         <div class="row g-3">
@@ -46,11 +54,11 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.position.label(class="form-label") }}
-                                {{ form.position(class="form-control", value=lead.Position) }}
+                                {{ form.position(class="form-control", value=lead.Position if lead.Position) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.owner.label(class="form-label") }}
-                                {{ form.owner(class="form-control", value=lead.Owner) }}
+                                {{ form.owner(class="form-control", value=lead.Owner if lead.Owner) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.status.label(class="form-label") }}

@@ -34,7 +34,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 {{ form.value.label(class="form-label") }}
-                                {{ form.value(class="form-control") }}
+                                {{ form.value(class="form-control", value=sale.Value if sale.Value) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.stage.label(class="form-label") }}
@@ -42,7 +42,7 @@
                             </div>
                             <div class="col">
                                 {{ form.owner.label(class="form-label") }}
-                                {{ form.owner(class="form-control") }}
+                                {{ form.owner(class="form-control", value=sale.Owner if sale.Owner) }}
                             </div>
                         </div>
 

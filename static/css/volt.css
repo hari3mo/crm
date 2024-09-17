@@ -23,6 +23,10 @@
     width: 200px; 
 } */
 
+.follow-up-label {
+    margin-left: 2px; /* Adjust the value as needed */
+}
+
 .table-fixed th, .table-fixed td {
     text-overflow: ellipsis;
     white-space: normal;

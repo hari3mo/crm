@@ -40,7 +40,7 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.value.label(class="form-label") }}
-                                {{ form.value(class="form-control", value=opportunity.Value) }}
+                                {{ form.value(class="form-control", value=opportunity.Value if opportunity.Value) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.stage.label(class="form-label") }}
@@ -48,7 +48,7 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.owner.label(class="form-label") }}
-                                {{ form.owner(class="form-control", value=opportunity.Owner) }}
+                                {{ form.owner(class="form-control", value=opportunity.Owner if opportunity.Owner) }}
                             </div>
                             <div class="col-12">
                                 {{ form.opportunity.label(class="form-label") }}

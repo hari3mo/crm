@@ -43,6 +43,7 @@ class LeadUpdateForm(FlaskForm):
     status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
                                              ('Converted', 'Converted')])
     owner = StringField('Owner:')
+    follow_up = BooleanField('Follow Up:')
     submit = SubmitField('Submit')
 
 # User form

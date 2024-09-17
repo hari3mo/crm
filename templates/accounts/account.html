@@ -35,23 +35,23 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 {{ form.company_name.label(class="form-label") }}
-                                {{ form.company_name(class="form-control", value=account.CompanyName) }}
+                                {{ form.company_name(class="form-control", value=account.CompanyName if account.CompanyName) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.company_revenue.label(class="form-label")}}
-                                {{ form.company_revenue(class="form-control", value=account.CompanyRevenue) }}
+                                {{ form.company_revenue(class="form-control", value=account.CompanyRevenue if account.CompanyRevenue) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.employee_head_count.label(class="form-label") }}
-                                {{ form.employee_head_count(class="form-control", value=account.EmployeeHeadCount) }}
+                                {{ form.employee_head_count(class="form-control", value=account.EmployeeHeadCount if account.EmployeeHeadCount) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.company_industry.label(class="form-label") }}
-                                {{ form.company_industry(class="form-control", value=account.CompanyIndustry) }}
+                                {{ form.company_industry(class="form-control", value=account.CompanyIndustry if account.CompanyIndustry) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.company_type.label(class="form-label") }}
-                                {{ form.company_type(class="form-control", value=account.CompanyType) }}
+                                {{ form.company_type(class="form-control", value=account.CompanyType if account.CompanyType) }}
                             </div>
                             <div class="col-md-6">
                                 {{ form.owner.label(class="form-label") }}
@@ -67,15 +67,15 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 {{ form.country.label(class="form-label") }}
-                                {{ form.country(class="form-control", value=account.Country) }}
+                                {{ form.country(class="form-control", value=account.Country if account.Country) }}
                             </div>
                             <div class="col-md-4">
                                 {{ form.city.label(class="form-label") }}
-                                {{ form.city(class="form-control", value=account.City) }}
+                                {{ form.city(class="form-control", value=account.City if account.City) }}
                             </div>
                             <div class="col-md-4">
                                 {{ form.timezone.label(class="form-label") }}
-                                {{ form.timezone(class="form-control", value=account.Timezone) }}
+                                {{ form.timezone(class="form-control", value=account.Timezone if account.Timezone) }}
                             </div>
                         </div>
 
@@ -96,7 +96,7 @@
                     <h2 class="h5 mb-4">Leads</h2>
                     {% if account.Leads %}
                         <ul class="list-group list-group-flush">
-                        {% for lead in account.Leads %}
+                    {% for lead in account.Leads %}
                             <a class="link-info" href="{{ url_for('lead', id=lead.LeadID) }}">
                                 {{ lead.FirstName }} {{ lead.LastName }} {% if lead.Email %}: {{ lead.Email}} {% endif %}
                             </a>
