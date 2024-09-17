@@ -1054,7 +1054,7 @@ def search_accounts():
             Accounts.Timezone.icontains(query))
     else:
         accounts = Accounts.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Accounts.AccountID.desc())
+            .order_by(Accounts.AccountID.desc()).limit(100)
     return render_template('accounts/search_accounts.html', accounts=accounts)
 
 # Search leads
@@ -1098,7 +1098,7 @@ def search_opportunities():
             Accounts.CompanyName.icontains(query))
     else:
         opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Opportunities.OpportunityID.desc())
+            .order_by(Opportunities.OpportunityID.desc()).limit(100)
     return render_template('opportunities/search_opportunities.html', opportunities=opportunities)
 
 # Search sales
@@ -1119,7 +1119,7 @@ def search_sales():
             Accounts.CompanyName.icontains(query))
     else:
         sales = Sales.query.filter_by(ClientID=current_user.ClientID)\
-            .order_by(Sales.SaleID.desc())
+            .order_by(Sales.SaleID.desc()).limit(100)
     return render_template('sales/search_sales.html', sales=sales)
 
     
