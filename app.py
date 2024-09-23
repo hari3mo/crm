@@ -1093,6 +1093,15 @@ def clear_sales():
     flash('Sales cleared successfully.', 'success')
     return redirect(url_for('sales_list'))
 
+# Clear interactions
+@app.route('/interactions/clear/')
+@login_required
+def clear_interactions():
+    Interactions.query.delete()
+    db.session.commit()
+    flash('Interactions cleared successfully.', 'success')
+    return redirect(url_for('opportunities_list'))
+
 # Search accounts
 @app.route('/search_accounts/')
 @login_required
