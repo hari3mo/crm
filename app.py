@@ -1090,7 +1090,7 @@ def clear_accounts():
         db.session.commit()
         flash('Accounts cleared successfully.', 'success')
     except:
-        flash('Accounts clear failed.', 'danger')
+        flash('Accounts clear failed. Foreign key relationships may exist.', 'danger')
     return redirect(url_for('accounts_list'))
 
 # Clear leads
@@ -1102,7 +1102,7 @@ def clear_leads():
         db.session.commit()
         flash('Leads cleared successfully.', 'success')
     except:
-        flash('Leads clear failed.', 'danger')
+        flash('Leads clear failed. Foreign key relationships may exist.', 'danger')
     return redirect(url_for('leads_list'))
 
 # Clear opportunities
@@ -1114,7 +1114,7 @@ def clear_opportunities():
         db.session.commit()
         flash('Opportunities cleared successfully.', 'success')
     except:
-        flash('Opportunities clear failed.', 'danger')
+        flash('Opportunities clear failed. Foreign key relationships may exist.', 'danger')
 
     return redirect(url_for('opportunities_list'))
 
@@ -1127,7 +1127,7 @@ def clear_sales():
         db.session.commit()
         flash('Sales cleared successfully.', 'success')
     except:
-        flash('Sales clear failed.', 'danger')
+        flash('Sales clear failed. Foreign key relationships may exist.', 'danger')
 
     return redirect(url_for('sales_list'))
 
