@@ -842,12 +842,11 @@ def account(id):
 @login_required
 def lead(id):
     lead = None
-    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()
-    form = LeadUpdateForm(status=lead.Status)
-    
+    lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=id).first()    
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list'))
+    form = LeadUpdateForm(status=lead.Status)
     
     if form.validate_on_submit():
         try:
@@ -924,8 +923,13 @@ def opportunity(id):
 @app.route('/sales/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def sale(id):
+    sale = None
     sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
+    if sale is None:
+        flash('Sale not found.', 'danger')
+        return redirect(url_for('sales_list'))
     form = SaleUpdateForm(stage=sale.Stage)
+
 
     if form.validate_on_submit():
         try:
@@ -948,10 +952,18 @@ def sale(id):
 @app.route('/interactions/view/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def interaction(id):
+    interaction = None
     interaction = Interactions.query.filter_by(ClientID=current_user.ClientID)\
         .filter_by(InteractionID=id).first()
+    if interaction is None:
+        flash('Interaction not found.', 'danger')
+        return redirect(url_for('opportunities_list'))
     form = InteractionForm()
     form.interaction.data = interaction.Interaction
+    
+    if form.validate_on_submit():
+        interaction.Interaction = form.interaction.data
+        db.session.commit()
     return render_template('interaction.html', form=form, interaction=interaction)
 
 # Delete account
