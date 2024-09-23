@@ -811,24 +811,23 @@ def account(id):
         return redirect(url_for('accounts_list'))
     form.company_specialties.data = account.CompanySpecialties
     if form.validate_on_submit():
-
-        account.CompanyName = form.company_name.data
-        account.CompanyRevenue = form.company_revenue.data
-        account.EmployeeHeadCount = form.employee_head_count.data
-        account.CompanySpecialties = request.form.get('company_specialties')
-        account.CompanyType = form.company_type.data
-        account.Country = form.country.data
-        account.City = form.city.data
-        account.Timezone = form.timezone.data
-        
         try:
+            account.CompanyName = form.company_name.data
+            account.CompanyRevenue = form.company_revenue.data
+            account.EmployeeHeadCount = form.employee_head_count.data
+            account.CompanySpecialties = request.form.get('company_specialties')
+            account.CompanyType = form.company_type.data
+            account.Country = form.country.data
+            account.City = form.city.data
+            account.Timezone = form.timezone.data
+            
             db.session.commit()
             flash('Account updated successfully.', 'success')
-            return redirect(url_for('account', id=id))
-        
+            
         except:
             flash('Account update failed.', 'danger')
-            return redirect(url_for('account', id=id))
+        
+        return redirect(url_for('account', id=id))
 
         
     return render_template('accounts/account.html', form=form, account=account,
@@ -855,10 +854,11 @@ def lead(id):
             lead.Owner = form.owner.data if form.owner.data else None
             db.session.commit()
             flash('Lead updated successfully.', 'success')
-            return redirect(url_for('lead', id=id))
+        
         except:
             flash('Lead update failed.', 'danger')
-            return redirect(url_for('lead', id=id))
+        
+        return redirect(url_for('lead', id=id))
     
     return render_template('leads/lead.html', lead=lead, form=form)
 
@@ -871,9 +871,15 @@ def follow_up(id):
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list')) 
-    lead.FollowUp = False if lead.FollowUp else True
-    db.session.commit()
     view = request.args.get('view')
+    try:
+        lead.FollowUp = False if lead.FollowUp else True
+        db.session.commit()
+    except:
+        flash('Follow-up status update failed.', 'danger')
+        if view:
+            return redirect(url_for('lead', id=id))
+        return redirect(url_for('leads_list'))
     if view:
         flash('Follow-up status updated.', 'success')
         return redirect(url_for('lead', id=id))
@@ -909,10 +915,11 @@ def opportunity(id):
                 opportunity.DateClosed = None
             db.session.commit()
             flash('Opportunity updated successfully.', 'success')
-            return redirect(url_for('opportunity', id=id))
+
         except:
             flash('Opportunity update failed.', 'danger')
-            return redirect(url_for('opportunity', id=id))
+            
+        return redirect(url_for('opportunity', id=id))
         
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
@@ -939,10 +946,11 @@ def sale(id):
                 sale.DateClosed = None
             db.session.commit()
             flash('Sale updated successfully.', 'success')
-            return redirect(url_for('sale', id=id))
+            
         except:
             flash('Sale update failed.', 'danger')
-            return redirect(url_for('sale', id=id))
+            
+        return redirect(url_for('sale', id=id))
     return render_template('sales/sale.html', form=form, sale=sale)
 
 # Update interaction
@@ -959,9 +967,14 @@ def interaction(id):
     form.interaction.data = interaction.Interaction
 
     if form.validate_on_submit():
-        interaction.Interaction = request.form.get('interaction')
-        db.session.commit()
-        flash('Interaction updated succesfully.', 'success')
+        try:
+            interaction.Interaction = request.form.get('interaction')
+            db.session.commit()
+            flash('Interaction updated succesfully.', 'success')
+            
+        except:
+            flash('Interaction update failed', 'danger')
+            
         return redirect(url_for('interaction', id=id))
     
     return render_template('interaction.html', form=form, interaction=interaction)
@@ -979,16 +992,13 @@ def delete_account(id):
     if account.Leads:
         flash('Account cannot be deleted as it has associated leads.', 'danger')
         return redirect(url_for('account', id=account.AccountID))
-    
     try:
         db.session.delete(account)
         db.session.commit()
         flash('Account deleted successfully.', 'success')
-        return redirect(url_for('accounts_list'))
-    
     except:
-        flash('Error deleting account.', 'danger')
-        return redirect(url_for('accounts_list'))
+        flash('Error deleting account.', 'danger') 
+    return redirect(url_for('accounts_list'))
     
 # Delete lead
 @app.route('/leads/delete/<int:id>')
@@ -1003,16 +1013,13 @@ def delete_lead(id):
     if lead.Opportunities:
         flash('Lead cannot be deleted as it has associated opportunities.', 'danger')
         return redirect(url_for('lead', id=lead.LeadID))
-    
     try:
         db.session.delete(lead)
         db.session.commit()
         flash('Lead deleted successfully.', 'success')
-        return redirect(url_for('leads_list'))
-    
     except:
         flash('Error deleting lead.', 'danger')
-        return redirect(url_for('leads_list'))
+    return redirect(url_for('leads_list'))
 
 # Delete opportunity
 @app.route('/opportunities/delete/<int:id>')
@@ -1026,16 +1033,14 @@ def delete_opportunity(id):
     if opportunity.Sales:
         flash('Opportunity cannot be deleted as it has associated sales.', 'danger')
         return redirect(url_for('opportunity', id=opportunity.OpportunityID))
-    
     try:
         db.session.delete(opportunity)
         db.session.commit()
         flash('Opportunity deleted successfully.', 'success')
-        return redirect(url_for('opportunities_list'))
-    
     except:
         flash('Error deleting opportunity.', 'danger')
-        return redirect(url_for('opportunities_list'))
+        
+    return redirect(url_for('opportunities_list'))
     
 # Delete sale
 @app.route('/sales/delete/<int:id>')
@@ -1046,60 +1051,75 @@ def delete_sale(id):
     if sale is None:
         flash('Sale not found.', 'danger')
         return redirect(url_for('sales_list'))
-    
     try:
         db.session.delete(sale)
         db.session.commit()
         flash('Sale deleted successfully.', 'success')
-        return redirect(url_for('sales_list'))
-    
     except:
         flash('Error deleting sale.', 'danger')
-        return redirect(url_for('sales_list'))
+    return redirect(url_for('sales_list'))
 
 # Clear accounts
 @app.route('/accounts/clear/')
 @login_required
 def clear_accounts():
-    Accounts.query.delete()
-    db.session.commit()
-    flash('Accounts cleared successfully.', 'success')
+    try:
+        Accounts.query.delete()
+        db.session.commit()
+        flash('Accounts cleared successfully.', 'success')
+    except:
+        flash('Accounts clear failed.', 'danger')
     return redirect(url_for('accounts_list'))
 
 # Clear leads
 @app.route('/leads/clear/')
 @login_required
 def clear_leads():
-    Leads.query.delete()
-    db.session.commit()
-    flash('Leads cleared successfully.', 'success')
+    try:
+        Leads.query.delete()
+        db.session.commit()
+        flash('Leads cleared successfully.', 'success')
+    except:
+        flash('Leads clear failed.', 'danger')
     return redirect(url_for('leads_list'))
 
 # Clear opportunities
 @app.route('/opportunities/clear/')
 @login_required
 def clear_opportunities():  
-    Opportunities.query.delete()
-    db.session.commit()
-    flash('Opportunities cleared successfully.', 'success')
+    try:
+        Opportunities.query.delete()
+        db.session.commit()
+        flash('Opportunities cleared successfully.', 'success')
+    except:
+        flash('Opportunities clear failed.', 'danger')
+
     return redirect(url_for('opportunities_list'))
 
 # Clear sales
 @app.route('/sales/clear/')
 @login_required
 def clear_sales():
-    Sales.query.delete()
-    db.session.commit()
-    flash('Sales cleared successfully.', 'success')
+    try:
+        Sales.query.delete()
+        db.session.commit()
+        flash('Sales cleared successfully.', 'success')
+    except:
+        flash('Sales clear failed.', 'danger')
+
     return redirect(url_for('sales_list'))
 
 # Clear interactions
 @app.route('/interactions/clear/')
 @login_required
 def clear_interactions():
-    Interactions.query.delete()
-    db.session.commit()
-    flash('Interactions cleared successfully.', 'success')
+    try:
+        Interactions.query.delete()
+        db.session.commit()
+        flash('Interactions cleared successfully.', 'success')
+    except:
+        flash('Interactions clear failed.', 'danger')
+
     return redirect(url_for('opportunities_list'))
 
 # Search accounts
