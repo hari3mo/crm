@@ -792,8 +792,8 @@ def new_interaction():
     if form.validate_on_submit():
         interaction = Interactions(Interaction=form.interaction.data,
                                     OpportunityID=opportunity.OpportunityID,
-                                   ClientID=current_user.ClientID,
-                                   CreatedBy=current_user.Email)
+                                    ClientID=current_user.ClientID,
+                                    CreatedBy=current_user.Email)
         db.session.add(interaction)
         db.session.commit()
         flash('Interaction added successfully.', 'success')
@@ -818,7 +818,7 @@ def account(id):
         account.CompanyName = form.company_name.data
         account.CompanyRevenue = form.company_revenue.data
         account.EmployeeHeadCount = form.employee_head_count.data
-        account.CompanySpecialties = form.company_specialties.data
+        account.CompanySpecialties = request.form.get('company_specialties')
         account.CompanyType = form.company_type.data
         account.Country = form.country.data
         account.City = form.city.data
@@ -902,7 +902,7 @@ def opportunity(id):
     if form.validate_on_submit():
         try:
             opportunity.LeadID = form.lead.data
-            opportunity.Opportunity = form.opportunity.data
+            opportunity.Opportunity = request.form.get('opportunity')
             opportunity.Value = form.value.data
             opportunity.Stage = form.stage.data
             opportunity.Owner = form.owner.data
@@ -924,7 +924,8 @@ def opportunity(id):
 @login_required
 def sale(id):
     sale = None
-    sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
+    sale = Sales.query.filter_by(ClientID=current_user.ClientID)\
+        .filter_by(SaleID=id).first()
     if sale is None:
         flash('Sale not found.', 'danger')
         return redirect(url_for('sales_list'))
@@ -946,7 +947,8 @@ def sale(id):
             flash('Sale update failed.', 'danger')
             return redirect(url_for('sale', id=id))
     return render_template('sales/sale.html', form=form, sale=sale)
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 # Update interaction
 @app.route('/interactions/view/<int:id>/', methods=['GET', 'POST'])
 @login_required
@@ -958,10 +960,12 @@ def interaction(id):
         flash('Interaction not found.', 'danger')
         return redirect(url_for('opportunities_list'))
     form = InteractionForm()
+    logging.debug(f'InteractionID: {interaction.InteractionID}')
     form.interaction.data = interaction.Interaction
-    
+    logging.debug(f'Interaction before submit: {form.interaction.data}')
+
     if form.validate_on_submit():
-        interaction.Interaction = form.interaction.data
+        interaction.Interaction = request.form.get('interaction')
         db.session.commit()
         flash('Interaction updated succesfully.', 'success')
         return redirect(url_for('interaction', id=id))
