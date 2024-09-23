@@ -3,5 +3,6 @@ env/
 __pycache__/
 migrations/
 static/files/*.csv
+ERP/
 .DS_Store
 .env
