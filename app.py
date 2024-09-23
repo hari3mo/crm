@@ -785,15 +785,18 @@ def new_interaction():
         .filter_by(OpportunityID=opportunity).first()
         if opportunity is None:
             flash('Opportunity not found.', 'danger')
-            return redirect(url_for('new_sale'))
+            return redirect(url_for('opportunities_list'))
     if form.validate_on_submit():
-        interaction = Interactions(Interaction=form.interaction.data,
-                                    OpportunityID=opportunity.OpportunityID,
-                                    ClientID=current_user.ClientID,
-                                    CreatedBy=current_user.Email)
-        db.session.add(interaction)
-        db.session.commit()
-        flash('Interaction added successfully.', 'success')
+        try:
+            interaction = Interactions(Interaction=form.interaction.data,
+                                        OpportunityID=opportunity.OpportunityID,
+                                        ClientID=current_user.ClientID,
+                                        CreatedBy=current_user.Email)
+            db.session.add(interaction)
+            db.session.commit()
+            flash('Interaction added successfully.', 'success')
+        except:
+            flash('Interaction add failed.', 'danger')
         return redirect(url_for('opportunity', id=opportunity.OpportunityID))
 
     
@@ -980,7 +983,7 @@ def interaction(id):
     return render_template('interaction.html', form=form, interaction=interaction)
 
 # Delete account
-@app.route('/accounts/delete/<int:id>')
+@app.route('/accounts/delete/<int:id>/')
 @login_required
 def delete_account(id):
     account = None
@@ -1001,7 +1004,7 @@ def delete_account(id):
     return redirect(url_for('accounts_list'))
     
 # Delete lead
-@app.route('/leads/delete/<int:id>')
+@app.route('/leads/delete/<int:id>/')
 @login_required
 def delete_lead(id):
     lead = None
@@ -1022,7 +1025,7 @@ def delete_lead(id):
     return redirect(url_for('leads_list'))
 
 # Delete opportunity
-@app.route('/opportunities/delete/<int:id>')
+@app.route('/opportunities/delete/<int:id>/')
 @login_required
 def delete_opportunity(id):
     opportunity = None
@@ -1043,7 +1046,7 @@ def delete_opportunity(id):
     return redirect(url_for('opportunities_list'))
     
 # Delete sale
-@app.route('/sales/delete/<int:id>')
+@app.route('/sales/delete/<int:id>/')
 @login_required
 def delete_sale(id):
     sale = None
@@ -1058,6 +1061,25 @@ def delete_sale(id):
     except:
         flash('Error deleting sale.', 'danger')
     return redirect(url_for('sales_list'))
+
+# Delete interaction
+@app.route('/interactions/delete/<int:id>/')
+@login_required
+def delete_interaction(id):
+    interaction = None
+    interaction = Interactions.query.filter_by(ClientID=current_user.ClientID)\
+        .filter_by(InteractionID=id).first()
+    if interaction is None:
+        flash('Interaction not found.', 'danger')
+        return redirect(url_for('opportunities_list'))
+    opportunity = interaction.Opportunity.OpportunityID
+    try:
+        db.session.delete(interaction)
+        db.session.commit()
+        flash('Interaction deleted successfully.', 'success')
+    except:
+        flash('Error deleting interaction.', 'danger')
+    return redirect(url_for('opportunity', id=opportunity))
 
 # Clear accounts
 @app.route('/accounts/clear/')
