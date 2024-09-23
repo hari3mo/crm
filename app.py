@@ -301,8 +301,6 @@ def leads_list():
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
             .distinct().filter(Leads.Owner.isnot(None)).all()
     owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
-    if '' in owners:
-        owners.remove('')
     owner = request.args.get('owner')
     if owner:
         if owner == 'Not assigned':
@@ -403,8 +401,7 @@ def sales_list():
     owners = db.session.query(Sales.Owner).filter_by(ClientID=current_user.ClientID)\
             .distinct().filter(Sales.Owner.isnot(None)).all()
     owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
-    if '' in owners:
-        owners.remove('')
+
     owner = request.args.get('owner')
     if owner:
         if owner == 'Not assigned':
@@ -595,7 +592,7 @@ def new_account():
                             CompanySpecialties=form.company_specialties.data, 
                             CompanyIndustry=form.company_industry.data,
                             CompanyType = form.company_type.data, 
-                            Owner=form.owner.data,
+                            Owner=form.owner.data if form.owner.data else None,
                             Country=form.country.data, 
                             City=form.city.data, 
                             Timezone=form.timezone.data,
@@ -648,7 +645,7 @@ def new_lead():
                             FirstName=form.first_name.data,
                             LastName=form.last_name.data,
                             Email=form.email.data if form.email.data else None,
-                            Owner=form.owner.data,
+                            Owner=form.owner.data if form.owner.data else None,
                             Status=form.status.data,
                             FollowUp=False,
                             CreatedBy=current_user.Email)
@@ -855,7 +852,7 @@ def lead(id):
             lead.LastName = form.last_name.data
             lead.Email = form.email.data if form.email.data else None
             lead.Status = form.status.data
-            lead.Owner = form.owner.data
+            lead.Owner = form.owner.data if form.owner.data else None
             db.session.commit()
             flash('Lead updated successfully.', 'success')
             return redirect(url_for('lead', id=id))
@@ -905,7 +902,7 @@ def opportunity(id):
             opportunity.Opportunity = request.form.get('opportunity')
             opportunity.Value = form.value.data
             opportunity.Stage = form.stage.data
-            opportunity.Owner = form.owner.data
+            opportunity.Owner = form.owner.data if form.Owner.data else None
             if form.stage.data == 'Won' or form.stage.data == 'Loss':
                 opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             else:
@@ -935,7 +932,7 @@ def sale(id):
         try:
             sale.Stage = form.stage.data
             sale.Value = form.value.data
-            sale.Owner = form.owner.data
+            sale.Owner = form.owner.data if form.owner.data else None
             if form.stage.data == 'Won' or form.stage.data == 'Loss':
                 sale.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             else:
@@ -947,8 +944,7 @@ def sale(id):
             flash('Sale update failed.', 'danger')
             return redirect(url_for('sale', id=id))
     return render_template('sales/sale.html', form=form, sale=sale)
-import logging
-logging.basicConfig(level=logging.DEBUG)
+
 # Update interaction
 @app.route('/interactions/view/<int:id>/', methods=['GET', 'POST'])
 @login_required
@@ -960,9 +956,7 @@ def interaction(id):
         flash('Interaction not found.', 'danger')
         return redirect(url_for('opportunities_list'))
     form = InteractionForm()
-    logging.debug(f'InteractionID: {interaction.InteractionID}')
     form.interaction.data = interaction.Interaction
-    logging.debug(f'Interaction before submit: {form.interaction.data}')
 
     if form.validate_on_submit():
         interaction.Interaction = request.form.get('interaction')
