@@ -89,3 +89,4 @@ DELETE FROM Sales
 DROP TABLE alembic_version
 
 --@block
+DELETE FROM Interactions

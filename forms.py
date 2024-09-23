@@ -137,6 +137,11 @@ class AdminUpdateForm(FlaskForm):
                                      validators=[EqualTo('password', 
                                                          message='Passwords do not match.')])
     submit = SubmitField('Submit')
+
+# Interaction form
+class InteractionForm(FlaskForm):
+    interaction = TextAreaField('Interaction:', validators=[DataRequired()])
+    submit = SubmitField()
     
 # Generate analytics form
 class GenerateForm(FlaskForm):

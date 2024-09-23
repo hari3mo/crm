@@ -23,7 +23,7 @@ import numpy as np
 from forms import LoginForm, SearchForm, UserForm, FileForm, \
     UserUpdateForm, AccountForm, LeadForm, OpportunityForm, \
     AdminUpdateForm, GenerateForm, LeadUpdateForm, OpportunityUpdateForm,\
-    SaleForm, SaleUpdateForm
+    SaleForm, SaleUpdateForm, InteractionForm
 
 ##############################################################################
 # Load environment variables
@@ -31,11 +31,6 @@ load_dotenv()
 
 # Initialize app
 app = Flask(__name__) 
-
-# Initialize cache
-cache = Cache()
-cache.init_app(app)
-app.config['CACHE_TYPE'] = 'simple'
 
 
 # MySQL database connection
@@ -49,6 +44,11 @@ app.config['UPLOAD_FOLDER'] = 'static/files'
 
 # Remember me duration
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=3)
+
+# Initialize cache
+app.config['CACHE_TYPE'] = 'simple'
+cache = Cache()
+cache.init_app(app)
 
 # Set default session timeout length
 app.permanent_session_lifetime = timedelta(minutes=30)
@@ -776,9 +776,34 @@ def new_sale():
     
     return render_template('sales/new_sale.html', form=form)
 
+# New interaction
+@app.route('/interactions/new/', methods=['GET', 'POST'])
+@login_required
+def new_interaction():
+    form = InteractionForm()
+    opportunity = None
+    opportunity = request.args.get('opportunity')
+    if opportunity:
+        opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+        .filter_by(OpportunityID=opportunity).first()
+        if opportunity is None:
+            flash('Opportunity not found.', 'danger')
+            return redirect(url_for('new_sale'))
+    if form.validate_on_submit():
+        interaction = Interactions(Interaction=form.interaction.data,
+                                    OpportunityID=opportunity.OpportunityID,
+                                   ClientID=current_user.ClientID,
+                                   CreatedBy=current_user.Email)
+        db.session.add(interaction)
+        db.session.commit()
+        flash('Interaction added successfully.', 'success')
+        return redirect(url_for('opportunity', id=opportunity.OpportunityID))
+
+    
+    return render_template('new_interaction.html',  form=form, opportunity=opportunity)
 
 # Update account
-@app.route('/accounts/update/<int:id>', methods=['GET', 'POST'])
+@app.route('/accounts/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def account(id):
     form = AccountForm()
@@ -813,7 +838,7 @@ def account(id):
             id=id)   
 
 # Update lead
-@app.route('/leads/update/<int:id>', methods=['GET', 'POST'])
+@app.route('/leads/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def lead(id):
     lead = None
@@ -842,7 +867,7 @@ def lead(id):
     return render_template('leads/lead.html', lead=lead, form=form)
 
 # Update lead follow up
-@app.route('/leads/follow_up/<int:id>', methods=['GET', 'POST'])
+@app.route('/leads/follow_up/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def follow_up(id):
     lead = None
@@ -860,7 +885,7 @@ def follow_up(id):
     return redirect(url_for('leads_list'))
 
 # Update opportunity
-@app.route('/opportunities/update/update/<int:id>', methods=['GET', 'POST'])
+@app.route('/opportunities/update/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def opportunity(id):
     opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
@@ -891,7 +916,7 @@ def opportunity(id):
     return render_template('opportunities/opportunity.html', form=form, opportunity=opportunity)
 
 # Update sale
-@app.route('/sales/update/<int:id>', methods=['GET', 'POST'])
+@app.route('/sales/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def sale(id):
     sale = Sales.query.filter_by(ClientID=current_user.ClientID).filter_by(SaleID=id).first()
@@ -913,6 +938,16 @@ def sale(id):
             flash('Sale update failed.', 'danger')
             return redirect(url_for('sale', id=id))
     return render_template('sales/sale.html', form=form, sale=sale)
+
+# Update interaction
+@app.route('/interactions/view/<int:id>/', methods=['GET', 'POST'])
+@login_required
+def interaction(id):
+    interaction = Interactions.query.filter_by(ClientID=current_user.ClientID)\
+        .filter_by(InteractionID=id).first()
+    form = InteractionForm()
+    form.interaction.data = interaction.Interaction
+    return render_template('interaction.html', form=form, interaction=interaction)
 
 # Delete account
 @app.route('/accounts/delete/<int:id>')
@@ -984,6 +1019,7 @@ def delete_opportunity(id):
     except:
         flash('Error deleting opportunity.', 'danger')
         return redirect(url_for('opportunities_list'))
+    
 # Delete sale
 @app.route('/sales/delete/<int:id>')
 @login_required
@@ -1142,7 +1178,7 @@ def internal_server_error(e):
 # Clients model
 class Clients(db.Model):
     __tablename__ = 'Clients'
-    ClientID = db.Column(db.Integer, primary_key=True)
+    ClientID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Client = db.Column(db.String(50), nullable=False, unique=True)
     License = db.Column(db.String(20), nullable=False, unique=True)
     # Image = db.Column(db.String(255), unique=True)
@@ -1150,11 +1186,12 @@ class Clients(db.Model):
     ValidTo = db.Column(db.Date)
     
     # References
-    User = db.relationship('Users', backref='Client')
-    Account = db.relationship('Accounts', backref='Client')
-    Lead = db.relationship('Leads', backref='Clients')
-    Opportunity = db.relationship('Opportunities', backref='Client')
-    Sale = db.relationship('Sales', backref='Client')
+    Users = db.relationship('Users', backref='Client')
+    Accounts = db.relationship('Accounts', backref='Client')
+    Leads = db.relationship('Leads', backref='Clients')
+    Opportunities = db.relationship('Opportunities', backref='Client')
+    Sales = db.relationship('Sales', backref='Client')
+    Interactions = db.relationship('Interactions', backref='Client')
     
 # Users model
 class Users(db.Model, UserMixin):
@@ -1170,10 +1207,11 @@ class Users(db.Model, UserMixin):
     ValidTo = db.Column(db.Date)
     
     # References
-    Account = db.relationship('Accounts', backref='User')
-    Lead = db.relationship('Leads', backref='User')
-    Opportunity = db.relationship('Opportunities', backref='User')
-    Sale = db.relationship('Sales', backref='User')
+    Accounts = db.relationship('Accounts', backref='User')
+    Leads = db.relationship('Leads', backref='User')
+    Opportunities = db.relationship('Opportunities', backref='User')
+    Sales = db.relationship('Sales', backref='User')
+    Interactions = db.relationship('Interactions', backref='User')
     
     @property
     def password(self):
@@ -1197,7 +1235,7 @@ class Users(db.Model, UserMixin):
 # Accounts model
 class Accounts(db.Model):
     __tablename__ = 'Accounts'
-    AccountID = db.Column(db.Integer, primary_key=True)
+    AccountID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     CompanyName = db.Column(db.String(100), nullable=False)
     CompanyRevenue = db.Column(db.Integer, nullable=False)
@@ -1242,7 +1280,7 @@ class Leads(db.Model):
 # Opportunities model    
 class Opportunities(db.Model):
     __tablename__ = 'Opportunities'
-    OpportunityID = db.Column(db.Integer, primary_key=True)
+    OpportunityID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     AccountID = db.Column(db.Integer, db.ForeignKey(Accounts.AccountID)) # Foreign Key to AccountID
     LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID)) # Foreign key to LeadID
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
@@ -1256,6 +1294,7 @@ class Opportunities(db.Model):
 
     # References
     Sales = db.relationship('Sales', backref='Opportunity')
+    Interactions = db.relationship('Interactions', backref='Opportunity')
 
 # Sales model
 class Sales(db.Model):
@@ -1272,6 +1311,15 @@ class Sales(db.Model):
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
     
+# Interactions model
+class Interactions(db.Model):
+    __tablename__ = 'Interactions'
+    InteractionID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
+    ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
+    Interaction = db.Column(db.Text)
+    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))    
     
 # Admins model
 class Admins(db.Model):
@@ -1281,4 +1329,3 @@ class Admins(db.Model):
 ##############################################################################
 if __name__ == "__main__":
     app.run(debug=True)
-    

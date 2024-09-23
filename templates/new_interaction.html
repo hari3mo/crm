@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}New Interaction - {{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName }}{% endblock %}
+
+{% block route %}#{% endblock %}
+
+{% block path %}Interactions{% endblock %}
+
+{% block page %}New{% endblock %}
+
+
+
+{% block content %}
+
+<div class="py-4">
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">New Interaction - {{ opportunity.Lead.FirstName }} {{ opportunity.Lead.LastName }} </h1>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+        <div class="card card-body border-0 shadow mb-4">
+            <!--
+            <h2 class="h5 mb-4">Details</h2>
+        -->
+            <form method='POST'>
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col">
+                        {{ form.interaction.label(class="form-label") }}
+                        {{ form.interaction(class="form-control text-area") }}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    {{ form.submit(class="btn btn-info animate-up-2") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
