@@ -902,7 +902,7 @@ def opportunity(id):
             opportunity.Opportunity = request.form.get('opportunity')
             opportunity.Value = form.value.data
             opportunity.Stage = form.stage.data
-            opportunity.Owner = form.owner.data if form.Owner.data else None
+            opportunity.Owner = form.owner.data if form.owner.data else None
             if form.stage.data == 'Won' or form.stage.data == 'Loss':
                 opportunity.DateClosed = datetime.datetime.now(datetime.timezone.utc)
             else:
