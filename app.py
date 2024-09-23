@@ -930,7 +930,6 @@ def sale(id):
         return redirect(url_for('sales_list'))
     form = SaleUpdateForm(stage=sale.Stage)
 
-
     if form.validate_on_submit():
         try:
             sale.Stage = form.stage.data
@@ -964,6 +963,9 @@ def interaction(id):
     if form.validate_on_submit():
         interaction.Interaction = form.interaction.data
         db.session.commit()
+        flash('Interaction updated succesfully.', 'success')
+        return redirect(url_for('interaction', id=id))
+    
     return render_template('interaction.html', form=form, interaction=interaction)
 
 # Delete account
