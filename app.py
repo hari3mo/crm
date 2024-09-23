@@ -888,12 +888,17 @@ def follow_up(id):
 @app.route('/opportunities/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def opportunity(id):
+    opportunity = None
     opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
-    leads = Leads.query.filter_by(AccountID=opportunity.Account.AccountID).all()
-    leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
-    form = OpportunityUpdateForm(lead=opportunity.LeadID, stage=opportunity.Stage)
-    form.lead.choices = leads
-    form.opportunity.data = opportunity.Opportunity
+    if opportunity:
+        leads = Leads.query.filter_by(AccountID=opportunity.Account.AccountID).all()
+        leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
+        form = OpportunityUpdateForm(lead=opportunity.LeadID, stage=opportunity.Stage)
+        form.lead.choices = leads
+        form.opportunity.data = opportunity.Opportunity
+    else:
+        flash('Opportunity not found.', 'danger')
+        return redirect(url_for('opportunities_list'))
     
     if form.validate_on_submit():
         try:
