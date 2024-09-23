@@ -97,7 +97,7 @@
                         <ul class="list-group list-group-flush">
                     {% for lead in account.Leads %}
                             <a class="link-info" href="{{ url_for('lead', id=lead.LeadID) }}">
-                                {{ lead.FirstName }} {{ lead.LastName }} {% if lead.Email %}: {{ lead.Email}} {% endif %}
+                                {{ lead.FirstName }} {{ lead.LastName }}
                             </a>
                         {% endfor %}
                         </ul>
@@ -135,7 +135,7 @@
                     </div>
                 </div>
             </div>
-
+            <!--
             <div class="card border-0 shadow mb-4">
                 <div class="card-body">
                     <h2 class="h5 mb-4">Sales</h2>
@@ -150,16 +150,16 @@
                     {% else %}
                         <p class="text-muted">No sales associated with this account.</p>
                     {% endif %}
-                    <!--
+
                     <div class="mt-3">
                         <a href="#" class="btn btn-outline-primary animate-up-2 me-1">
                             New Sale
                         </a>
                     </div>
-                    -->
+
                 </div>
             </div>
-
+        -->
 
         </div>
     </div>
