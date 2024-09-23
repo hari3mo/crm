@@ -875,14 +875,17 @@ def follow_up(id):
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list')) 
     view = request.args.get('view')
+    
     try:
         lead.FollowUp = False if lead.FollowUp else True
         db.session.commit()
+        
     except:
         flash('Follow-up status update failed.', 'danger')
         if view:
             return redirect(url_for('lead', id=id))
         return redirect(url_for('leads_list'))
+    
     if view:
         flash('Follow-up status updated.', 'success')
         return redirect(url_for('lead', id=id))
