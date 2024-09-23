@@ -885,7 +885,7 @@ def follow_up(id):
     return redirect(url_for('leads_list'))
 
 # Update opportunity
-@app.route('/opportunities/update/update/<int:id>/', methods=['GET', 'POST'])
+@app.route('/opportunities/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def opportunity(id):
     opportunity = Opportunities.query.filter_by(ClientID=current_user.ClientID).filter_by(OpportunityID=id).first()
