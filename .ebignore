@@ -1,4 +1,7 @@
 __pycache__
-env
+env/
 migrations/
+static/files/*.csv
+ERP/
+html&css/
 ERPCRMDB.session.sql
