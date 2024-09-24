@@ -1396,6 +1396,11 @@ class Interactions(db.Model):
 class Admins(db.Model):
     __tablename__ = 'Admins'
     User = db.Column(db.String(50), primary_key=True)
+    
+# Alembic model
+class Alembic(db.Model):
+    __tablename__ = 'alembic_version'
+    version_num = db.Column(db.String(32), primary_key=True)
 
 ##############################################################################
 if __name__ == "__main__":

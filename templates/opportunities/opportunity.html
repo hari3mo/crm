@@ -70,29 +70,6 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow mb-4">
                 <div class="card-body">
-                    <h2 class="h5 mb-4">Sales</h2>
-                    {% if opportunity.Sales %}
-                    <ul class="list-group list-group-flush">
-                        {% for sale in opportunity.Sales %}
-                            <a class="link-info" href="{{ url_for('sale', id=sale.SaleID) }}">
-                                {{ sale.SaleID }} - {{ sale.Stage}}
-                            </a>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-muted">No sales associated with this opportunity.</p>
-                    {% endif %}
-
-                    <div class="mt-3">
-                        <a href="{{ url_for('new_sale', opportunity=opportunity.OpportunityID) }}" class="btn btn-outline-primary animate-up-2 me-1">
-                            New Sale
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card border-0 shadow mb-4">
-                <div class="card-body">
                     <h2 class="h5 mb-4">Interactions</h2>
                     <div class="scrollable-list" style="max-height: 119px; overflow-y: auto;">
                         {% if opportunity.Interactions %}
@@ -118,6 +95,29 @@
                     -->
                     </div>
                 </div>
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Sales</h2>
+                    {% if opportunity.Sales %}
+                    <ul class="list-group list-group-flush">
+                        {% for sale in opportunity.Sales %}
+                            <a class="link-info" href="{{ url_for('sale', id=sale.SaleID) }}">
+                                {{ sale.SaleID }} - {{ sale.Stage}}
+                            </a>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No sales associated with this opportunity.</p>
+                    {% endif %}
+
+                    <div class="mt-3">
+                        <a href="{{ url_for('new_sale', opportunity=opportunity.OpportunityID) }}" class="btn btn-outline-primary animate-up-2 me-1">
+                            New Sale
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             </div>
         </div>
     </div>
