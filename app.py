@@ -589,13 +589,16 @@ def new_account():
                             CompanyName=form.company_name.data, 
                             CompanyRevenue=form.company_revenue.data, 
                             EmployeeHeadCount=form.employee_head_count.data,
-                            CompanySpecialties=form.company_specialties.data, 
-                            CompanyIndustry=form.company_industry.data,
-                            CompanyType = form.company_type.data, 
+                            CompanySpecialties=form.company_specialties.data\
+                                if form.company_specialties.data else None, 
+                            CompanyIndustry=form.company_industry.data\
+                                if form.company_industry.data else None,
+                            CompanyType = form.company_type.data\
+                                if form.company_type.data else None, 
                             Owner=form.owner.data if form.owner.data else None,
                             Country=form.country.data, 
-                            City=form.city.data, 
-                            Timezone=form.timezone.data,
+                            City=form.city.data if form.city.data else None, 
+                            Timezone=form.timezone.data if form.timezone.data else None,
                             ClientID=current_user.ClientID,
                             CreatedBy=current_user.Email)
             
@@ -818,11 +821,13 @@ def account(id):
             account.CompanyName = form.company_name.data
             account.CompanyRevenue = form.company_revenue.data
             account.EmployeeHeadCount = form.employee_head_count.data
-            account.CompanySpecialties = request.form.get('company_specialties')
-            account.CompanyType = form.company_type.data
+            account.CompanySpecialties = request.form.get('company_specialties')\
+                if request.form.get('company_specialties') else None
+            account.CompanyType = form.company_type.data \
+                if form.company_type.data else None
             account.Country = form.country.data
-            account.City = form.city.data
-            account.Timezone = form.timezone.data
+            account.City = form.city.data if form.city.data else None
+            account.Timezone = form.timezone.data if form.timezone.data else None
             
             db.session.commit()
             flash('Account updated successfully.', 'success')
