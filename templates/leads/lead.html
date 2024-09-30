@@ -58,13 +58,9 @@
                                 {{ form.position.label(class="form-label") }}
                                 {{ form.position(class="form-control", value=lead.Position if lead.Position) }}
                             </div>
-                            <div class="col-md-6">
+                            <div class="col mb-3">
                                 {{ form.owner.label(class="form-label") }}
                                 {{ form.owner(class="form-control", value=lead.Owner if lead.Owner) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.status.label(class="form-label") }}
-                                {{ form.status(class="form-control") }}
                             </div>
                         </div>
 
@@ -87,7 +83,7 @@
                     <ul class="list-group list-group-flush">
                     {% for opportunity in lead.Opportunities %}
                         <a class="link-info" href="{{ url_for('opportunity', id=opportunity.OpportunityID) }}">
-                            {{ opportunity.OpportunityID }} - {{ opportunity.Stage }}
+                            {{ opportunity.Owner if opportunity.Owner else 'Not assigned' }} - {{ opportunity.Stage }}
                         </a>
                     {% endfor %}
                     </ul>

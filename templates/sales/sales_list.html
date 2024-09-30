@@ -101,8 +101,13 @@
                                 {% if owners %}
                                 <ul>
                                     {% for owner in owners %}
-                                    <a href="#"><li>{{ owner }}</li></a>
+                                    <a href="{{ url_for('sales_list', owner=owner.UserID) }}"><li>{{ owner.FirstName + ' ' + owner.LastName }}</li></a>
                                     {% endfor %}
+                                    <a href="{{ url_for('sales_list', owner='NA') }}"><li>Not assigned</li></a>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <a href="{{ url_for('sales_list', owner='NA') }}"><li>Not assigned</li></a>
                                 </ul>
                                 {% endif %}
                             </div>
@@ -144,7 +149,8 @@
                         <td>{{ sale.Lead.Email if sale.Lead.Email }}</td>
                         <td>{{ sale.Value if sale.Value }}</td>
                         <td>{{ sale.Stage if sale.Stage }}</td>
-                        <td>{{ sale.Owner if sale.Owner else 'Not assigned' }}</td>
+                        <td>{{ sale.User.FirstName + ' ' + sale.User.LastName 
+                            if sale.Owner else 'Not assigned' }}</td>
                         <td>{{ sale.DateCreated if sale.DateCreated }}</td>
                     </tr>
                     {% endfor %}
@@ -164,11 +170,36 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const icon = document.getElementById('owner-icon');
+            const menu = document.getElementById('owner-menu');
+        
+            icon.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevent the click from propagating to the document
+                
+                // Toggle the menu visibility
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                } else {
+                    menu.style.display = 'block';
+                }
+            });
+        
+            // Close the dropdown when clicking outside of it
+            document.addEventListener('click', function() {
+                menu.style.display = 'none';
+            });
+        
+            // Prevent the dropdown from closing when clicking inside it
+            menu.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
             const dropdowns = [
             { iconId: 'account-icon', menuId: 'account-menu' },
             { iconId: 'value-icon', menuId: 'value-menu' },
             { iconId: 'stage-icon', menuId: 'stage-menu' },
-            { iconId: 'owner-icon', menuId: 'owner-menu' },
             { iconId: 'date-icon', menuId: 'date-menu' },
             ];
         

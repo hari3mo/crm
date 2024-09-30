@@ -14,7 +14,7 @@ class AccountForm(FlaskForm):
     company_specialties = TextAreaField('Company Specialties:')
     company_industry = StringField('Company Industry:')
     company_type = StringField('Company Type:')
-    owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     country = StringField('Country:*', validators=[DataRequired()])
     city = StringField('City:')
     timezone = StringField('Timezone:')
@@ -29,9 +29,9 @@ class LeadForm(FlaskForm):
     email  = EmailField('Email:', validators=[Optional(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
     company = StringField('Account:', validators=[DataRequired()])
-    status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
-                                             ('Converted', 'Converted')])
-    owner = StringField('Owner:')
+    # status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
+    #                                          ('Converted', 'Converted')])
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
     
 # Lead update form
@@ -40,9 +40,7 @@ class LeadUpdateForm(FlaskForm):
     last_name = StringField('Last Name:', validators=[DataRequired()])
     email  = EmailField('Email:', validators=[Optional(), Email()])
     position = StringField('Position:', validators=[DataRequired()])
-    status = SelectField('Status:', choices=[('Open', 'Open'), ('Closed', 'Closed'),
-                                             ('Converted', 'Converted')])
-    owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
 
 # User form
@@ -69,7 +67,7 @@ class OpportunityForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
-    # owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
     
 # Opportunity update form
@@ -79,7 +77,7 @@ class OpportunityUpdateForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('In Process', 'In Process'), ('Proposals', 'Proposals'),\
         ('Negotiations', 'Negotiations'), ('Won', 'Won'), ('Loss', 'Loss')])
-    owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
     
 # Sale form
@@ -88,7 +86,7 @@ class SaleForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\
         ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Won', 'Won'), ('Loss', 'Loss')])
-    # owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
 
 # Sale form
@@ -96,7 +94,7 @@ class SaleUpdateForm(FlaskForm):
     value = IntegerField('Value:', validators=[DataRequired()])
     stage = SelectField('Stage:', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'),\
         ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Won', 'Won'), ('Loss', 'Loss')])
-    owner = StringField('Owner:')
+    owner = SelectField('Owner:', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
 
 # File form

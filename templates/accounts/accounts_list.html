@@ -180,8 +180,13 @@
                                 {% if owners %}
                                 <ul>
                                     {% for owner in owners %}
-                                    <a href="{{ url_for('accounts_list', owner=owner) }}"><li>{{ owner }}</li></a>
+                                    <a href="{{ url_for('accounts_list', owner=owner.UserID) }}"><li>{{ owner.FirstName + ' ' + owner.LastName }}</li></a>
                                     {% endfor %}
+                                    <a href="{{ url_for('accounts_list', owner='NA') }}"><li>Not assigned</li></a>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <a href="{{ url_for('accounts_list', owner='NA') }}"><li>Not assigned</li></a>                                    
                                 </ul>
                                 {% endif %}
                             </div>
@@ -204,7 +209,8 @@
                         <td>{{ account.Country if account.Country }}</td>
                         <td>{{ account.City if account.City }}</td>
                         <td>{{ account.Timezone if account.Timezone }}</td>
-                        <td>{{ account.Owner if account.Owner else 'Not assigned' }}</td>
+                        <td>{{ account.User.FirstName + ' ' + account.User.LastName
+                             if account.Owner else 'Not assigned' }}</td>
 
                     </tr>
                     {% endfor %}

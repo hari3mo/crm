@@ -10,6 +10,10 @@
 
 {% block content %}
 
+<style> 
+
+</style>
+
 <div class="py-4">
     <div class="d-flex justify-content-between w-100 flex-wrap">
         <div class="mb-3 mb-lg-0">
@@ -114,19 +118,6 @@
                             </div>
                         </th>
                         <th class="border-0">
-                            Status
-                            <svg id="status-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
-                            </svg>
-                            <div id="status-menu" class="menu apple-select-menu">
-                                <ul>
-                                    <a href="{{ url_for('leads_list', status='open') }}"><li>Open</li></a>
-                                    <a href="{{ url_for('leads_list', status='closed') }}"><li>Closed</li></a>
-                                    <a href="{{ url_for('leads_list', status='converted') }}"><li>Converted</li></a>
-                                </ul>
-                            </div>
-                        </th>
-                        <th class="border-0">
                             Owner
                             <svg id="owner-icon" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
@@ -135,8 +126,13 @@
                                 {% if owners %}
                                 <ul>
                                     {% for owner in owners %}
-                                    <a href="{{ url_for('leads_list', owner=owner) }}"><li>{{ owner }}</li></a>
+                                    <a href="{{ url_for('leads_list', owner=owner.UserID) }}"><li>{{ owner.FirstName + ' ' + owner.LastName }}</li></a>
                                     {% endfor %}
+                                    <a href="{{ url_for('leads_list', owner='NA') }}"><li>Not assigned</li></a>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <a href="{{ url_for('leads_list', owner='NA') }}"><li>Not assigned</li></a>
                                 </ul>
                                 {% endif %}
                             </div>
@@ -173,8 +169,7 @@
                         <td>{{ lead.Email if lead.Email }}</td>
                         <td>{{ lead.Position if lead.Position }}</td>
                         <td>{{ lead.Account.City if lead.Account.City }}</td>
-                        <td>{{ lead.Status if lead.Status }}</td>
-                        <td>{{ lead.Owner if lead.Owner else 'Not assigned'}}</td>
+                        <td>{{ lead.User.FirstName + ' ' + lead.User.LastName if lead.Owner else 'Not assigned'}}</td>
                         <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
                             <td>
                             <label class="apple-checkbox">
@@ -203,13 +198,65 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const icon = document.getElementById('follow_up-icon');
+            const menu = document.getElementById('follow_up-menu');
+        
+            icon.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevent the click from propagating to the document
+                
+                // Toggle the menu visibility
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                } else {
+                    menu.style.display = 'block';
+                }
+            });
+        
+            // Close the dropdown when clicking outside of it
+            document.addEventListener('click', function() {
+                menu.style.display = 'none';
+            });
+        
+            // Prevent the dropdown from closing when clicking inside it
+            menu.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const icon = document.getElementById('owner-icon');
+            const menu = document.getElementById('owner-menu');
+        
+            icon.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevent the click from propagating to the document
+                
+                // Toggle the menu visibility
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                } else {
+                    menu.style.display = 'block';
+                }
+            });
+        
+            // Close the dropdown when clicking outside of it
+            document.addEventListener('click', function() {
+                menu.style.display = 'none';
+            });
+        
+            // Prevent the dropdown from closing when clicking inside it
+            menu.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
             const dropdowns = [
             { iconId: 'position-icon', menuId: 'position-menu' },
             { iconId: 'company-icon', menuId: 'company-menu' },
             { iconId: 'city-icon', menuId: 'city-menu' },
-            { iconId: 'status-icon', menuId: 'status-menu' },
-            { iconId: 'owner-icon', menuId: 'owner-menu' },
-            { iconId: 'follow_up-icon', menuId: 'follow_up-menu' },
+            { iconId: 'status-icon', menuId: 'status-menu' }
             ];
         
             dropdowns.forEach(function(dropdown) {

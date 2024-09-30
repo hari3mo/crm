@@ -68,11 +68,11 @@ login_manager.login_message_category = "danger"
 @login_manager.user_loader
 def load_user(user_id):
     try:
-        return Users.query.filter_by(UserID=user_id).first()
-        # return Users.query.get(int(user_id))
+        # return Users.query.filter_by(UserID=user_id).first()
+        return Users.query.get(int(user_id))
     except:
         return redirect(url_for('login'))
-
+    
 ##############################################################################
 
 # Routes
@@ -184,7 +184,11 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    leads = pd.read_sql_table(con=engine, table_name='Leads')
+    accounts = pd.read_sql_table(con=engine, table_name='Accounts')
+    accounts_count = accounts[accounts['CompanyRevenue'] > 0].shape[0]
+    mean_revenue = float(round(accounts['CompanyRevenue'][accounts['CompanyRevenue'] > 0].mean(), ndigits=2))
+    return render_template('index.html', leads=leads.shape[0], mean_revenue=mean_revenue)
 
 # Analytics
 
@@ -227,16 +231,6 @@ def accounts_list():
     if type:
         accounts = accounts.filter_by(CompanyType=type)
     
-    owners = db.session.query(Accounts.Owner).filter_by(ClientID=current_user.ClientID)\
-            .distinct().filter(Accounts.Owner.isnot(None)).all()
-    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
-    owner = request.args.get('owner')
-    if owner:
-        if owner == 'Not assigned':
-            accounts = accounts.filter(Accounts.Owner.is_(None))
-        else:
-            accounts = Accounts.query.filter_by(Owner=owner)
-    
     countries = db.session.query(Accounts.Country).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Accounts.Country.isnot(None)).all()
     countries = sorted([country.Country for country in countries])
@@ -258,6 +252,17 @@ def accounts_list():
     if timezone:
         accounts = accounts.filter_by(Timezone=timezone)
     
+    owners = db.session.query(Accounts.Owner).filter_by(ClientID=current_user.ClientID)\
+        .distinct().filter(Accounts.Owner.isnot(None)).all()
+    owners = [owner.Owner for owner in owners]
+    owners = Users.query.filter(Users.UserID.in_(owners)).order_by(Users.FirstName, Users.LastName).all()
+    owner = request.args.get('owner')
+    
+    if owner:
+        if owner == 'NA':
+            accounts = accounts.filter(Accounts.Owner.is_(None))
+        else:
+            accounts = Accounts.query.filter_by(Owner=owner)
     
     return render_template('accounts/accounts_list.html', accounts=accounts.all(),
         industries=industries, types=types, owners=owners, countries=countries, 
@@ -297,13 +302,15 @@ def leads_list():
     status = request.args.get('status')
     if status:
         leads = leads.filter_by(Status=status)
-        
+    import logging
+            
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
-            .distinct().filter(Leads.Owner.isnot(None)).all()
-    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
+        .distinct().filter(Leads.Owner.isnot(None)).all()
+    owners = [owner.Owner for owner in owners]
+    owners = Users.query.filter(Users.UserID.in_(owners)).order_by(Users.FirstName, Users.LastName).all()
     owner = request.args.get('owner')
     if owner:
-        if owner == 'Not assigned':
+        if owner == 'NA':
             leads = leads.filter(Leads.Owner.is_(None))
         else:
             leads = Leads.query.filter_by(Owner=owner)
@@ -315,7 +322,7 @@ def leads_list():
         else:
             leads = leads.filter_by(FollowUp=False)
     
-    return render_template('leads/leads_list.html', leads=leads.all(), companies=companies,
+    return render_template('leads/leads_list.html', leads=leads.limit(20), companies=companies,
         positions=positions, cities=cities, owners=owners)
 
 
@@ -323,7 +330,8 @@ def leads_list():
 @app.route('/opportunities/opportunities_list/')
 @login_required
 def opportunities_list():
-    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)
+    opportunities = Opportunities.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Opportunities.OpportunityID.desc())
     
     accounts = db.session.query(Accounts.CompanyName).join(Opportunities, Opportunities.AccountID == Accounts.AccountID)\
                 .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
@@ -351,13 +359,15 @@ def opportunities_list():
     stage = request.args.get('stage')
     if stage:
         opportunities = opportunities.filter_by(Stage=stage)
-        
+      
     owners = db.session.query(Opportunities.Owner).filter_by(ClientID=current_user.ClientID)\
-            .distinct().filter(Opportunities.Owner.isnot(None)).all()
-    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
+        .distinct().filter(Opportunities.Owner.isnot(None)).all()
+    owners = [owner.Owner for owner in owners]
+    owners = Users.query.filter(Users.UserID.in_(owners)).order_by(Users.FirstName, Users.LastName).all()
     owner = request.args.get('owner')
+    
     if owner:
-        if owner == 'Not assigned':
+        if owner == 'NA':
             opportunities = opportunities.filter(Opportunities.Owner.is_(None))
         else:
             opportunities = Opportunities.query.filter_by(Owner=owner)
@@ -369,7 +379,7 @@ def opportunities_list():
 @app.route('/sales/list/')
 @login_required
 def sales_list():
-    sales = Sales.query.filter_by(ClientID=current_user.ClientID)
+    sales = Sales.query.filter_by(ClientID=current_user.ClientID).order_by(Sales.SaleID.desc())
         
     accounts = db.session.query(Accounts.CompanyName).join(Sales, Sales.AccountID == Accounts.AccountID)\
                 .distinct().filter_by(ClientID=current_user.ClientID).filter(Accounts.CompanyName.isnot(None)).all()
@@ -397,17 +407,19 @@ def sales_list():
     stage = request.args.get('stage')
     if stage:
         opportunities = opportunities.filter_by(Stage=stage)
-        
+    
     owners = db.session.query(Sales.Owner).filter_by(ClientID=current_user.ClientID)\
-            .distinct().filter(Sales.Owner.isnot(None)).all()
-    owners = sorted([owner.Owner for owner in owners]) + ['Not assigned']
-
+        .distinct().filter(Sales.Owner.isnot(None)).all()
+    owners = [owner.Owner for owner in owners]
+    owners = Users.query.filter(Users.UserID.in_(owners)).order_by(Users.FirstName, Users.LastName).all()
     owner = request.args.get('owner')
+    
     if owner:
-        if owner == 'Not assigned':
+        if owner == 'NA':
             sales = sales.filter(Sales.Owner.is_(None))
         else:
             sales = Sales.query.filter_by(Owner=owner)
+    
     
     return render_template('sales/sales_list.html', sales=sales.all(), accounts=accounts,
                            owners=owners)
@@ -536,7 +548,6 @@ def import_leads():
             # Replace NaN with None
             df = df.replace({np.nan: None})
             df = df.assign(CreatedBy=current_user.Email, 
-                            Status='Open',
                             FollowUp=False)
             df = df.drop(columns=['CompanyName'])
             
@@ -575,6 +586,10 @@ def import_leads():
 @login_required
 def new_account():
     form = AccountForm()
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
     try:
         if form.validate_on_submit():
             # Grab max id
@@ -619,6 +634,12 @@ def new_account():
 def new_lead():
     form = LeadForm()
     company = request.args.get('account')
+    
+    users = Users.query.filter_by(ClientID=current_user.ClientID)
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+    for user in users]
+    form.owner.choices = owners
+
     if company:
         form.company.data = company
     if form.validate_on_submit():
@@ -649,7 +670,7 @@ def new_lead():
                             LastName=form.last_name.data,
                             Email=form.email.data if form.email.data else None,
                             Owner=form.owner.data if form.owner.data else None,
-                            Status=form.status.data,
+                            # Status=form.status.data,
                             FollowUp=False,
                             CreatedBy=current_user.Email)
                 
@@ -678,11 +699,17 @@ def new_opportunity():
     
     lead = request.args.get('lead')
     lead = Leads.query.filter_by(ClientID=current_user.ClientID).filter_by(LeadID=lead).first()
-    form = OpportunityForm(lead=lead.LeadID) if lead else OpportunityForm() 
+    form = OpportunityForm(lead=lead.LeadID, owner=lead.Owner) 
     
     leads = Leads.query.filter_by(AccountID=account.AccountID).all()
     leads = [(0, '-')] + [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
     form.lead.choices = leads
+    
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
+    
                 
     if form.validate_on_submit():
         # Grab max id
@@ -725,7 +752,6 @@ def new_opportunity():
 @app.route('/sales/new/', methods=['GET', 'POST'])
 @login_required
 def new_sale():
-    form = SaleForm()
     opportunity = None
     opportunity = request.args.get('opportunity')
     if opportunity:
@@ -734,7 +760,13 @@ def new_sale():
         if opportunity is None:
             flash('Opportunity not found.', 'danger')
             return redirect(url_for('new_sale'))
-        form.opportunity.data = opportunity.OpportunityID
+        
+    form = SaleForm(owner=opportunity.Owner)
+    form.opportunity.data = opportunity.OpportunityID
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
     
     if form.validate_on_submit():
         # Grab max id
@@ -756,7 +788,7 @@ def new_sale():
                          ClientID=current_user.ClientID,
                          Stage=form.stage.data,
                          Value=form.value.data,
-                         Owner=opportunity.Owner if opportunity else None,
+                         Owner=form.owner.data if form.owner.data else None,
                          CreatedBy=current_user.Email,
                          DateClosed=date_closed)
             if opportunity.Stage != 'Won':
@@ -809,13 +841,19 @@ def new_interaction():
 @app.route('/accounts/update/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def account(id):
-    form = AccountForm()
-    accounts = None
+    account = None
     account = Accounts.query.filter_by(ClientID=current_user.ClientID).filter_by(AccountID=id).first()
     if account is None:
         flash('Account not found.', 'danger')
         return redirect(url_for('accounts_list'))
+    
+    form = AccountForm(owner=account.Owner)
     form.company_specialties.data = account.CompanySpecialties
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
+    
     if form.validate_on_submit():
         try:
             account.CompanyName = form.company_name.data
@@ -825,6 +863,7 @@ def account(id):
                 if request.form.get('company_specialties') else None
             account.CompanyType = form.company_type.data \
                 if form.company_type.data else None
+            account.Owner = form.owner.data if form.owner.data else None
             account.Country = form.country.data
             account.City = form.city.data if form.city.data else None
             account.Timezone = form.timezone.data if form.timezone.data else None
@@ -850,7 +889,11 @@ def lead(id):
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list'))
-    form = LeadUpdateForm(status=lead.Status)
+    form = LeadUpdateForm(status=lead.Status, owner=lead.Owner)
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
     
     if form.validate_on_submit():
         try:
@@ -858,7 +901,6 @@ def lead(id):
             lead.FirstName = form.first_name.data
             lead.LastName = form.last_name.data
             lead.Email = form.email.data if form.email.data else None
-            lead.Status = form.status.data
             lead.Owner = form.owner.data if form.owner.data else None
             db.session.commit()
             flash('Lead updated successfully.', 'success')
@@ -884,7 +926,6 @@ def follow_up(id):
     try:
         lead.FollowUp = False if lead.FollowUp else True
         db.session.commit()
-        
     except:
         flash('Follow-up status update failed.', 'danger')
         if view:
@@ -906,9 +947,15 @@ def opportunity(id):
     if opportunity:
         leads = Leads.query.filter_by(AccountID=opportunity.Account.AccountID).all()
         leads = [(lead.LeadID, f'{lead.FirstName} {lead.LastName}') for lead in leads]
-        form = OpportunityUpdateForm(lead=opportunity.LeadID, stage=opportunity.Stage)
+        form = OpportunityUpdateForm(lead=opportunity.LeadID, 
+                                     stage=opportunity.Stage,
+                                     owner=opportunity.Owner)
         form.lead.choices = leads
         form.opportunity.data = opportunity.Opportunity
+        users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+        owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+            for user in users]
+        form.owner.choices = owners
     else:
         flash('Opportunity not found.', 'danger')
         return redirect(url_for('opportunities_list'))
@@ -945,6 +992,10 @@ def sale(id):
         flash('Sale not found.', 'danger')
         return redirect(url_for('sales_list'))
     form = SaleUpdateForm(stage=sale.Stage)
+    users = Users.query.filter_by(ClientID=current_user.ClientID).all()
+    owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
+        for user in users]
+    form.owner.choices = owners
 
     if form.validate_on_submit():
         try:
@@ -1288,6 +1339,7 @@ class Users(db.Model, UserMixin):
     Opportunities = db.relationship('Opportunities', backref='User')
     Sales = db.relationship('Sales', backref='User')
     Interactions = db.relationship('Interactions', backref='User')
+
     
     @property
     def password(self):
@@ -1322,8 +1374,8 @@ class Accounts(db.Model):
     Country = db.Column(db.String(50), nullable=False)
     City = db.Column(db.String(50))
     Timezone = db.Column(db.String(50))
-    Owner = db.Column(db.String(50))
-    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID)) # Foreign key to UserID
+    CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     
     # References
@@ -1342,10 +1394,10 @@ class Leads(db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(50))
     # CompanyName =  db.Column(db.String(100), nullable=False)
-    Owner = db.Column(db.String(50))
+    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID)) # Foreign key to UserID
     Status = db.Column(db.String(50))
     FollowUp = db.Column(db.Boolean)
-    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    CreatedBy = db.Column(db.String(50)) 
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     
     # References
@@ -1363,8 +1415,8 @@ class Opportunities(db.Model):
     Opportunity = db.Column(db.Text)
     Value = db.Column(db.Integer)
     Stage = db.Column(db.String(100))
-    Owner = db.Column(db.String(50))
-    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID))
+    CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
 
@@ -1382,8 +1434,8 @@ class Sales(db.Model):
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Value = db.Column(db.Integer)
     Stage = db.Column(db.String(50))
-    Owner = db.Column(db.String(50))
-    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
+    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID))
+    CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
     
