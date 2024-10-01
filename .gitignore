@@ -6,3 +6,4 @@ static/files/*.csv
 ERP/
 .DS_Store
 .env
+notebook.ipynb

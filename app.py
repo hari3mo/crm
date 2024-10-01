@@ -184,13 +184,21 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    leads = pd.read_sql_table(con=engine, table_name='Leads')
-    accounts = pd.read_sql_table(con=engine, table_name='Accounts')
-    accounts_count = accounts[accounts['CompanyRevenue'] > 0].shape[0]
-    mean_revenue = float(round(accounts['CompanyRevenue'][accounts['CompanyRevenue'] > 0].mean(), ndigits=2))
+    try:
+        db.session.rollback()
+        leads = pd.read_sql_table(con=engine, table_name='Leads')
+        accounts = pd.read_sql_table(con=engine, table_name='Accounts')
+        mean_revenue = float(round(accounts['CompanyRevenue'][accounts['CompanyRevenue'] > 0].mean(), ndigits=2))
+    except:
+        return redirect(url_for('index'))
     return render_template('index.html', leads=leads.shape[0], mean_revenue=mean_revenue)
 
 # Analytics
+@app.route('/analytics/')
+@login_required
+def analytics():
+    return render_template('generate.html')
+
 
 # Accounts list
 @app.route('/accounts/list/')
