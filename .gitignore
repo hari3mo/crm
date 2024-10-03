@@ -2,8 +2,7 @@
 env/
 __pycache__/
 migrations/
-static/files/*.csv
+static/files/*
 ERP/
 .DS_Store
 .env
-notebook.ipynb

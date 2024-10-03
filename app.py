@@ -7,17 +7,23 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 from dotenv import load_dotenv
+import openai
+
 import datetime
+import time
 import json
 import os
+import re
+
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 
-from openai import OpenAI
-
 import pandas as pd
 import numpy as np
+import openai
 
 # Forms
 from forms import LoginForm, SearchForm, UserForm, FileForm, \
@@ -31,6 +37,10 @@ load_dotenv()
 
 # Initialize app
 app = Flask(__name__) 
+
+# Initialize cache
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
+cache.init_app(app)
 
 
 # MySQL database connection
@@ -75,10 +85,25 @@ def load_user(user_id):
     
 ##############################################################################
 
+# AI Assistant
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+client = openai.OpenAI()
+model  = 'gpt-4o-mini'
+assistant_id = 'asst_MkWTjEDWaQ8N4RQ7TRj9RyEl'
+
+assistant = client.beta.assistants.retrieve(assistant_id=assistant_id)
+
+instructions = 'You are a CRM assistant whose function is to analyze a leads\
+    profile and interactions to generate personalized sales scripts\
+    tailored to their specific needs/characteristics.'
+    
+thread = client.beta.threads.create()
+
+##############################################################################
 # Routes
 
 # Admin
-
 
 # Login
 @app.route('/login/', methods=['POST', 'GET'])
@@ -182,22 +207,101 @@ def logout():
 
 
 @app.route('/')
+@cache.cached(timeout=60 * 5)
 @login_required
 def index():
-    try:
-        db.session.rollback()
-        leads = pd.read_sql_table(con=engine, table_name='Leads')
-        accounts = pd.read_sql_table(con=engine, table_name='Accounts')
-        mean_revenue = float(round(accounts['CompanyRevenue'][accounts['CompanyRevenue'] > 0].mean(), ndigits=2))
-    except:
-        return redirect(url_for('index'))
-    return render_template('index.html', leads=leads.shape[0], mean_revenue=mean_revenue)
+
+    leads = len(Leads.query.all())
+    accounts = db.session.query(Accounts.CompanyRevenue).filter_by(ClientID=current_user.ClientID)\
+        .filter(Accounts.CompanyRevenue > 0).all()
+    leads_start = Leads.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Leads.DateCreated.desc()).first().DateCreated.strftime('%b %d')
+    accounts_start = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+        .order_by(Accounts.DateCreated.desc()).first().DateCreated.strftime('%b %d')
+    now = datetime.datetime.now().strftime('%b %d')
+    mean_revenue = np.round(np.mean(accounts),2)
+    return render_template('index.html', leads=leads, mean_revenue=mean_revenue, \
+        now=now, leads_start=leads_start, accounts_start=accounts_start)
 
 # Analytics
-@app.route('/analytics/')
-@login_required
+@app.route('/analytics/', methods=['POST', 'GET'])
 def analytics():
-    return render_template('generate.html')
+    @cache.memoize(60 * 5)
+    def generate(lead_id):
+        
+        lead = pd.read_sql(con=engine, sql=f'SELECT * FROM Leads WHERE\
+            ClientID={current_user.ClientID} AND LeadID={lead_id}')
+        account_id = int(lead['AccountID'][0])
+        lead = lead.to_json(orient='records')
+        account = pd.read_sql(con=engine, sql=f'SELECT * FROM Accounts WHERE\
+            ClientID={current_user.ClientID} AND AccountID={account_id}')
+        interactions = pd.read_sql(con=engine, sql=f'SELECT * FROM Interactions WHERE\
+            ClientID={current_user.ClientID} AND LeadID={lead_id}').to_json(orient='records')
+        
+        thread = client.beta.threads.create()
+
+        def create_message():
+            client.beta.threads.messages.create(
+                thread_id=thread.id,
+                role='user',
+                content=f'My name is {current_user.FirstName} and I work for \
+                    {current_user.Client.Client}. Generate a sales script to \
+                    approach the following lead with. Lead Information:\n{lead}\
+                    \nLead Account Information:\n{account}\nInteractions with Lead:\
+                    \n{interactions}. Your response should not address me directly.'
+            )
+            
+        def create_run():
+            run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id,
+            instructions='Script should be professional and relevant. Use all information\
+                available about the lead when creating the script. Header of script\
+                should be in the format: Sales Script for *lead name* - *lead company*'
+            )
+            return run
+        
+        def get_response():
+            messages = client.beta.threads.messages.list(
+                thread_id=thread.id
+            )
+            last_message = messages.data[0]
+            role = last_message.role
+            response = last_message.content[0].text.value
+            response = response.replace('\n', '<br>')
+            response = re.sub("\*\*(.*?)\*\*", '<b>\\1</b>', response)
+            response = response.replace('*', '')
+            
+            return response
+            # return f'{role.capitalize()}:\n{response}'
+
+        create_message()
+        run = create_run()
+        
+        if run:
+            while True:
+                time.sleep(1)
+                run_status = client.beta.threads.runs.retrieve(thread_id=thread.id,
+                                                        run_id=run.id)
+                if run_status.status == 'completed':
+                    # elapsed_time = run_status.completed_at - run_status.created_at
+                    # formatted_elapsed_time = time.strftime(
+                    # "%H:%M:%S", time.gmtime(elapsed_time))
+                    response = get_response()
+                    return response
+                    # return f"Run completed in {formatted_elapsed_time}\n{response}"
+                elif run_status.status == 'requires_action':
+                    break
+                elif run_status.status == 'failed':
+                    break
+    
+    form = GenerateForm()
+    output = None
+    if form.validate_on_submit():
+        output = generate(form.lead_id.data)
+        return render_template('generate.html', output=output, form=form)
+
+    return render_template('generate.html', form=form, output=output)
 
 
 # Accounts list
@@ -310,7 +414,6 @@ def leads_list():
     status = request.args.get('status')
     if status:
         leads = leads.filter_by(Status=status)
-    import logging
             
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.Owner.isnot(None)).all()
@@ -833,8 +936,9 @@ def new_interaction():
         try:
             interaction = Interactions(Interaction=form.interaction.data,
                                         OpportunityID=opportunity.OpportunityID,
+                                        LeadID=opportunity.Lead.LeadID,
                                         ClientID=current_user.ClientID,
-                                        CreatedBy=current_user.Email)
+                                        CreatedBy=current_user.UserID)
             db.session.add(interaction)
             db.session.commit()
             flash('Interaction added successfully.', 'success')
@@ -1382,7 +1486,7 @@ class Accounts(db.Model):
     Country = db.Column(db.String(50), nullable=False)
     City = db.Column(db.String(50))
     Timezone = db.Column(db.String(50))
-    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID)) # Foreign key to UserID
+    Owner = db.Column(db.Integer, db.ForeignKey(Users.UserID)) # Foreign key to UserID
     CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     
@@ -1402,7 +1506,7 @@ class Leads(db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(50))
     # CompanyName =  db.Column(db.String(100), nullable=False)
-    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID)) # Foreign key to UserID
+    Owner = db.Column(db.Integer, db.ForeignKey(Users.UserID)) # Foreign key to UserID
     Status = db.Column(db.String(50))
     FollowUp = db.Column(db.Boolean)
     CreatedBy = db.Column(db.String(50)) 
@@ -1411,6 +1515,8 @@ class Leads(db.Model):
     # References
     Opportunities = db.relationship('Opportunities', backref='Lead')
     Sales = db.relationship('Sales', backref='Lead')
+    Interactions = db.relationship('Interactions', backref='Lead')
+
 
 
 # Opportunities model    
@@ -1423,7 +1529,7 @@ class Opportunities(db.Model):
     Opportunity = db.Column(db.Text)
     Value = db.Column(db.Integer)
     Stage = db.Column(db.String(100))
-    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID))
+    Owner = db.Column(db.Integer, db.ForeignKey(Users.UserID))
     CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
@@ -1442,7 +1548,7 @@ class Sales(db.Model):
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Value = db.Column(db.Integer)
     Stage = db.Column(db.String(50))
-    Owner = db.Column(db.String(50), db.ForeignKey(Users.UserID))
+    Owner = db.Column(db.Integer, db.ForeignKey(Users.UserID))
     CreatedBy = db.Column(db.String(50))
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
     DateClosed = db.Column(db.Date)
@@ -1451,11 +1557,14 @@ class Sales(db.Model):
 class Interactions(db.Model):
     __tablename__ = 'Interactions'
     InteractionID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID)) # Foreign key to OpportunityID
+    OpportunityID = db.Column(db.Integer, db.ForeignKey(Opportunities.OpportunityID), nullable=True) # Foreign key to OpportunityID
+    LeadID = db.Column(db.Integer, db.ForeignKey(Leads.LeadID), nullable=False) # Foreign key to LeadID
     ClientID = db.Column(db.Integer, db.ForeignKey(Clients.ClientID)) # Foreign key to ClientID
     Interaction = db.Column(db.Text)
-    CreatedBy = db.Column(db.String(50), db.ForeignKey(Users.Email)) # Foreign key to Email
-    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))    
+    CreatedBy = db.Column(db.Integer, db.ForeignKey(Users.UserID)) # Foreign key to UserID
+    DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
+    
+    
     
 # Admins model
 class Admins(db.Model):

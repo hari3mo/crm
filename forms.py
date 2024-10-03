@@ -143,6 +143,7 @@ class InteractionForm(FlaskForm):
     
 # Generate analytics form
 class GenerateForm(FlaskForm):
+    lead_id = IntegerField('LeadID:', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 ##############################################################################

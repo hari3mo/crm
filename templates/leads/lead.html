@@ -97,6 +97,29 @@
                     </div>
                 </div>
             </div>
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-4">Interactions</h2>
+                    {% if lead.Interactions %}
+                    <ul class="list-group list-group-flush">
+                    {% for interaction in lead.Interactions %}
+                        <a class="link-info" href="{{ url_for('interaction', id=interaction.InteractionID) }}">
+                            {{ interaction.DateCreated }} - {{ interaction.User.FirstName }} {{ interaction.User.LastName }}
+                        </a>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No opportunities associated with this lead.</p>
+                    {% endif %}
+                    <!--
+                    <div class="mt-3">
+                        <a href="{{ url_for('new_opportunity', account=lead.Account.AccountID, lead=lead.LeadID) }}" class="btn btn-outline-primary animate-up-2 me-1">
+                            New Opportunity
+                        </a>
+                    </div>
+                -->
+                </div>
+            </div>
         </div>
     </div>
 </div>
