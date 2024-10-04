@@ -93,13 +93,6 @@ model  = 'gpt-4o-mini'
 assistant_id = 'asst_MkWTjEDWaQ8N4RQ7TRj9RyEl'
 
 assistant = client.beta.assistants.retrieve(assistant_id=assistant_id)
-
-instructions = 'You are a CRM assistant whose function is to analyze a leads\
-    profile and interactions to generate personalized sales scripts\
-    tailored to their specific needs/characteristics.'
-    
-thread = client.beta.threads.create()
-
 ##############################################################################
 # Routes
 
@@ -262,8 +255,8 @@ def smart_leads():
             assistant_id=assistant.id,
             instructions=f'A lead is an employee associated with an account/company. \
                 Potential leads in list should be relevant and useful. Use all information \
-                available about the lead when analyzing. Header should be in the format: \
-                "Potential leads for {current_user.Client.Client}:".'
+                available about the lead when analyzing. Title should be in the format: \
+                "Potential leads for {current_user.Client.Client}" with a markdown line underneath it.'
             )
             return run
         
@@ -305,12 +298,12 @@ def smart_leads():
     output = None
     
     if form.validate_on_submit():
-        # try:
-        output = generate_leads()
-        return render_template('smart_insights/smart_leads.html', output=output, form=form)
-        # except:
-        #     flash('Error generating leads list.', 'danger')
-        #     return redirect(url_for('smart_leads'))
+        try:
+            output = generate_leads()
+            return render_template('smart_insights/smart_leads.html', output=output, form=form)
+        except:
+            flash('Error generating leads list.', 'danger')
+            return redirect(url_for('smart_leads'))
 
     return render_template('smart_insights/smart_leads.html', form=form, output=output)
         
@@ -339,7 +332,7 @@ def sales_script():
             client.beta.threads.messages.create(
                 thread_id=thread.id,
                 role='user',
-                content=f'My name is {current_user.FirstName}, I work for \
+                content=f'My name is {current_user.FirstName} {current_user.LastName}, I work for \
                     {current_user.Client.Client}, and my company email is {current_user.Email}. \
                     Generate a sales script to approach the following lead with. \
                     Lead Information:\n{lead}\n\
@@ -353,8 +346,9 @@ def sales_script():
             thread_id=thread.id,
             assistant_id=assistant.id,
             instructions='Script should be professional and relevant. Use all information\
-                available about the lead when creating the script. Header of script\
-                should be in the format: Sales Script for *lead name* - *lead company*.\
+                available about the lead when creating the script. Title of script\
+                should be in the format: "Sales Script for *lead name* - *lead company*" \
+                with a markdown line underneath it. There should be markdown lines between each section. \
                 There should also be a closing part of the script which includes the users \
                 name, company, etc.'
             )
@@ -385,7 +379,7 @@ def sales_script():
                     # formatted_elapsed_time = time.strftime(
                     # "%H:%M:%S", time.gmtime(elapsed_time))
                     response = get_response()
-                    return response
+                    break
                     # return f"Run completed in {formatted_elapsed_time}\n{response}"
                 elif run_status.status == 'requires_action':
                     break
