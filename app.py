@@ -210,7 +210,6 @@ def logout():
 @cache.cached(timeout=60 * 5)
 @login_required
 def index():
-
     leads = len(Leads.query.all())
     accounts = db.session.query(Accounts.CompanyRevenue).filter_by(ClientID=current_user.ClientID)\
         .filter(Accounts.CompanyRevenue > 0).all()
@@ -261,9 +260,10 @@ def smart_leads():
             run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant.id,
-            instructions='A lead is an employee associated with an account/company. \
+            instructions=f'A lead is an employee associated with an account/company. \
                 Potential leads in list should be relevant and useful. Use all information \
-                available about the lead when analyzing.'
+                available about the lead when analyzing. Header should be in the format: \
+                "Potential leads for {current_user.Client.Client}:".'
             )
             return run
         
@@ -300,6 +300,7 @@ def smart_leads():
                     break
         
         return response 
+    
     form = GenerateLeadsForm()
     output = None
     
@@ -322,7 +323,7 @@ def sales_script():
     def generate_script(lead_id):
         lead = pd.read_sql(con=engine, sql=f'SELECT * FROM Leads WHERE\
             ClientID={current_user.ClientID} AND LeadID={lead_id}')
-        if lead.iloc[0] is None:
+        if lead.empty:
             flash('Lead with specified ID not found.', 'danger')
             return redirect(url_for('sales_script'))
         account_id = int(lead['AccountID'][0])
@@ -399,13 +400,19 @@ def sales_script():
     regenerate_id = request.args.get('lead_id')
     if regenerate_id:
         form.lead_id.data = regenerate_id
+        try:
+            output = generate_script(form.lead_id.data)
+            return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
+        except:
+            flash('Error generating script. Please try again.', 'danger')
+            return redirect(url_for('sales_script'))
     
     if form.validate_on_submit():
         try:
             output = generate_script(form.lead_id.data)
             return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
         except:
-            flash('Error generating script', 'danger')
+            flash('Error generating script. Please try again.', 'danger')
             return redirect(url_for('sales_script'))
 
     return render_template('smart_insights/sales_script.html', form=form, output=output)
