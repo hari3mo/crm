@@ -1,7 +1,7 @@
 .vscode/
 env/
 __pycache__/
-migrations/
+migrations/*
 static/files/*
 ERP/
 .DS_Store
