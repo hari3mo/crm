@@ -404,12 +404,12 @@ def sales_script():
             return redirect(url_for('sales_script'))
     
     if form.validate_on_submit():
-        # try:
-        output = generate_script(form.lead_id.data)
-        return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
-        # except:
-        #     flash('Error generating script. Please try again.', 'danger')
-        #     return redirect(url_for('sales_script'))
+        try:
+            output = generate_script(form.lead_id.data)
+            return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
+        except Exception as e:
+            flash(f'{e}\nError generating script. Please try again.', 'danger')
+            return redirect(url_for('sales_script'))
 
     return render_template('smart_insights/sales_script.html', form=form, output=output)
 
