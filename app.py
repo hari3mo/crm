@@ -203,18 +203,18 @@ def logout():
 @cache.cached(timeout=60)
 @login_required
 def index():
-    leads = len(Leads.query.all())
-    accounts = db.session.query(Accounts.CompanyRevenue).filter_by(ClientID=current_user.ClientID)\
-        .filter(Accounts.CompanyRevenue > 0).all()
-    leads_start = Leads.query.filter_by(ClientID=current_user.ClientID)\
-        .order_by(Leads.DateCreated.desc()).first().DateCreated.strftime('%b %d')
-    accounts_start = Accounts.query.filter_by(ClientID=current_user.ClientID)\
-        .order_by(Accounts.DateCreated.desc()).first().DateCreated.strftime('%b %d')
-    opportunities = len(Opportunities.query.filter_by(ClientID=current_user.ClientID).all())
-    now = datetime.datetime.now().strftime('%b %d')
-    mean_revenue = np.round(np.mean(accounts),2)
-    return render_template('index.html', leads=leads, mean_revenue=mean_revenue, \
-        opportunities=opportunities, now=now, leads_start=leads_start, accounts_start=accounts_start)
+    # leads = len(Leads.query.all())
+    # accounts = db.session.query(Accounts.CompanyRevenue).filter_by(ClientID=current_user.ClientID)\
+    #     .filter(Accounts.CompanyRevenue > 0).all()
+    # leads_start = Leads.query.filter_by(ClientID=current_user.ClientID)\
+    #     .order_by(Leads.DateCreated.desc()).first().DateCreated.strftime('%b %d')
+    # accounts_start = Accounts.query.filter_by(ClientID=current_user.ClientID)\
+    #     .order_by(Accounts.DateCreated.desc()).first().DateCreated.strftime('%b %d')
+    # opportunities = len(Opportunities.query.filter_by(ClientID=current_user.ClientID).all())
+    # now = datetime.datetime.now().strftime('%b %d')
+    # mean_revenue = np.round(np.mean(accounts),2)
+    return render_template('index.html')#, leads=leads, mean_revenue=mean_revenue, \
+        #opportunities=opportunities, now=now, leads_start=leads_start, accounts_start=accounts_start)
 
 # Smart insights
 @app.route('/smart-insights/') 
