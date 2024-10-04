@@ -13,7 +13,6 @@
     <td>{{ lead.Email if lead.Email }}</td>
     <td>{{ lead.Position if lead.Position }}</td>
     <td>{{ lead.Account.City if lead.Account.City }}</td>
-    <td>{{ lead.Status if lead.Status }}</td>
     <td>{{ lead.Owner if lead.Owner else 'Not assigned' }}</td>
     <form id="followUp_{{ lead.LeadID }}" action="{{ url_for('follow_up', id=lead.LeadID) }}" method="POST">
         <td>

@@ -200,7 +200,7 @@ def logout():
 
 
 @app.route('/')
-@cache.cached(timeout=60 * 5)
+@cache.cached(timeout=60)
 @login_required
 def index():
     leads = len(Leads.query.all())
@@ -210,10 +210,11 @@ def index():
         .order_by(Leads.DateCreated.desc()).first().DateCreated.strftime('%b %d')
     accounts_start = Accounts.query.filter_by(ClientID=current_user.ClientID)\
         .order_by(Accounts.DateCreated.desc()).first().DateCreated.strftime('%b %d')
+    opportunities = len(Opportunities.query.filter_by(ClientID=current_user.ClientID).all())
     now = datetime.datetime.now().strftime('%b %d')
     mean_revenue = np.round(np.mean(accounts),2)
     return render_template('index.html', leads=leads, mean_revenue=mean_revenue, \
-        now=now, leads_start=leads_start, accounts_start=accounts_start)
+        opportunities=opportunities, now=now, leads_start=leads_start, accounts_start=accounts_start)
 
 # Smart insights
 @app.route('/smart-insights/') 
@@ -244,7 +245,7 @@ def smart_leads():
                     provided leads and provide me with list of strong potential\
                     leads and their information. List should contain \
                     lead name, position, contact (if any), reason why this lead \
-                    is strong potential client, etc. Ensure list numbering is correct. \
+                    is strong potential client, etc. \
                     Your response should not address me directly.\n\
                     Leads: {leads}'
             )
@@ -256,7 +257,8 @@ def smart_leads():
             instructions=f'A lead is an employee associated with an account/company. \
                 Potential leads in list should be relevant and useful. Use all information \
                 available about the lead when analyzing. Title should be in the format: \
-                "Potential leads for {current_user.Client.Client}" with a markdown line underneath it.'
+                "Potential leads for {current_user.Client.Client}" with a markdown line underneath it. \
+                Separate each lead with a markdown line break'
             )
             return run
         
@@ -298,12 +300,12 @@ def smart_leads():
     output = None
     
     if form.validate_on_submit():
-        try:
-            output = generate_leads()
-            return render_template('smart_insights/smart_leads.html', output=output, form=form)
-        except:
-            flash('Error generating leads list.', 'danger')
-            return redirect(url_for('smart_leads'))
+        # try:
+        output = generate_leads()
+        return render_template('smart_insights/smart_leads.html', output=output, form=form)
+        # except:
+        #     flash('Error generating leads list. Please try again.', 'danger')
+        #     return redirect(url_for('smart_leads'))
 
     return render_template('smart_insights/smart_leads.html', form=form, output=output)
         
@@ -1455,7 +1457,6 @@ def search_leads():
             Leads.LastName.icontains(query) |
             Leads.Position.icontains(query) |
             Leads.Email.icontains(query) |
-            Leads.Status.icontains(query) |
             Leads.Owner.icontains(query) |
             Accounts.CompanyName.icontains(query) |
             Accounts.City.icontains(query))
@@ -1615,7 +1616,7 @@ class Leads(db.Model):
     Email = db.Column(db.String(50))
     # CompanyName =  db.Column(db.String(100), nullable=False)
     Owner = db.Column(db.Integer, db.ForeignKey(Users.UserID)) # Foreign key to UserID
-    Status = db.Column(db.String(50))
+    # Status = db.Column(db.String(50))
     FollowUp = db.Column(db.Boolean)
     CreatedBy = db.Column(db.String(50)) 
     DateCreated = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc))
