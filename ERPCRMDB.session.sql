@@ -36,7 +36,6 @@ ADD FOREIGN KEY (LeadID) REFERENCES Leads(LeadID),
 ADD FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
 MODIFY OpportunityID INT AUTO_INCREMENT;
 
-
 --@block
 -- Sales --
 ALTER TABLE Sales

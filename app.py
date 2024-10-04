@@ -242,7 +242,7 @@ def smart_leads():
                 thread_id=thread.id,
                 role='user',
                 content=f'I work for {current_user.Client.Client}. Analyze the\
-                    provided leads and provide me with list of strong potential\
+                    provided leads and provide me with list of 10 strong potential\
                     leads and their information. List should contain \
                     lead name, position, contact (if any), reason why this lead \
                     is strong potential client, etc. \
@@ -520,10 +520,6 @@ def leads_list():
     city = request.args.get('city')
     if city:
         leads = leads.join(Accounts, Leads.AccountID == Accounts.AccountID).filter(Accounts.City == city)
-
-    status = request.args.get('status')
-    if status:
-        leads = leads.filter_by(Status=status)
             
     owners = db.session.query(Leads.Owner).filter_by(ClientID=current_user.ClientID)\
         .distinct().filter(Leads.Owner.isnot(None)).all()
@@ -1111,7 +1107,7 @@ def lead(id):
     if lead is None:
         flash('Lead not found.', 'danger')
         return redirect(url_for('leads_list'))
-    form = LeadUpdateForm(status=lead.Status, owner=lead.Owner)
+    form = LeadUpdateForm(owner=lead.Owner)
     users = Users.query.filter_by(ClientID=current_user.ClientID).all()
     owners = [(0, 'Not assigned')] + [(user.UserID, f'{user.FirstName} {user.LastName}')\
         for user in users]
