@@ -1,5 +1,6 @@
 .vscode/
 env/
+migrations/*
 __pycache__/
 static/files/*
 ERP/
