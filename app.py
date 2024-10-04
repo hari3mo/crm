@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 from dotenv import load_dotenv
 import openai
-
+import markdown
 import datetime
 import time
 import json
@@ -28,7 +28,7 @@ import openai
 # Forms
 from forms import LoginForm, SearchForm, UserForm, FileForm, \
     UserUpdateForm, AccountForm, LeadForm, OpportunityForm, \
-    AdminUpdateForm, GenerateForm, LeadUpdateForm, OpportunityUpdateForm,\
+    AdminUpdateForm, GenerateLeadsForm, GenerateScriptForm, LeadUpdateForm, OpportunityUpdateForm,\
     SaleForm, SaleUpdateForm, InteractionForm
 
 ##############################################################################
@@ -223,20 +223,24 @@ def index():
     return render_template('index.html', leads=leads, mean_revenue=mean_revenue, \
         now=now, leads_start=leads_start, accounts_start=accounts_start)
 
-# Analytics
-@app.route('/analytics/', methods=['POST', 'GET'])
-def analytics():
-    @cache.memoize(60 * 5)
-    def generate(lead_id):
-        
-        lead = pd.read_sql(con=engine, sql=f'SELECT * FROM Leads WHERE\
-            ClientID={current_user.ClientID} AND LeadID={lead_id}')
-        account_id = int(lead['AccountID'][0])
-        lead = lead.to_json(orient='records')
-        account = pd.read_sql(con=engine, sql=f'SELECT * FROM Accounts WHERE\
-            ClientID={current_user.ClientID} AND AccountID={account_id}')
-        interactions = pd.read_sql(con=engine, sql=f'SELECT * FROM Interactions WHERE\
-            ClientID={current_user.ClientID} AND LeadID={lead_id}').to_json(orient='records')
+# Smart insights
+@app.route('/smart-insights/') 
+@login_required
+def smart_insights():
+    return render_template('smart_insights/smart_insights.html')
+
+# Smart leads
+@app.route('/smart-insights/smart-leads', methods=['POST', 'GET']) 
+@login_required
+def smart_leads():
+    def generate_leads():
+        response = None
+        leads = pd.read_sql(con=engine, sql=f'SELECT * FROM Leads WHERE\
+            ClientID={current_user.ClientID}')
+        accounts = pd.read_sql(con=engine, sql=f'SELECT AccountID, CompanyName \
+            FROM Accounts WHERE ClientID={current_user.ClientID}')
+        leads = pd.merge(leads, accounts, on='AccountID', how='left')
+        leads = leads.loc[:,'Position':'CompanyName'].drop(columns=['CreatedBy']).to_csv()
         
         thread = client.beta.threads.create()
 
@@ -244,20 +248,22 @@ def analytics():
             client.beta.threads.messages.create(
                 thread_id=thread.id,
                 role='user',
-                content=f'My name is {current_user.FirstName} and I work for \
-                    {current_user.Client.Client}. Generate a sales script to \
-                    approach the following lead with. Lead Information:\n{lead}\
-                    \nLead Account Information:\n{account}\nInteractions with Lead:\
-                    \n{interactions}. Your response should not address me directly.'
+                content=f'I work for {current_user.Client.Client}. Analyze the\
+                    provided leads and provide me with list of strong potential\
+                    leads and their information. List should contain \
+                    lead name, position, contact (if any), reason why this lead \
+                    is strong potential client, etc. Ensure list numbering is correct. \
+                    Your response should not address me directly.\n\
+                    Leads: {leads}'
             )
             
         def create_run():
             run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant.id,
-            instructions='Script should be professional and relevant. Use all information\
-                available about the lead when creating the script. Header of script\
-                should be in the format: Sales Script for *lead name* - *lead company*'
+            instructions='A lead is an employee associated with an account/company. \
+                Potential leads in list should be relevant and useful. Use all information \
+                available about the lead when analyzing.'
             )
             return run
         
@@ -268,16 +274,14 @@ def analytics():
             last_message = messages.data[0]
             role = last_message.role
             response = last_message.content[0].text.value
-            response = response.replace('\n', '<br>')
-            response = re.sub("\*\*(.*?)\*\*", '<b>\\1</b>', response)
-            response = response.replace('*', '')
+            # response = response.replace('\n', '<br>')
+            response = markdown.markdown(response)
             
             return response
             # return f'{role.capitalize()}:\n{response}'
 
         create_message()
         run = create_run()
-        
         if run:
             while True:
                 time.sleep(1)
@@ -294,14 +298,117 @@ def analytics():
                     break
                 elif run_status.status == 'failed':
                     break
-    
-    form = GenerateForm()
+        
+        return response 
+    form = GenerateLeadsForm()
     output = None
+    
     if form.validate_on_submit():
-        output = generate(form.lead_id.data)
-        return render_template('generate.html', output=output, form=form)
+        # try:
+        output = generate_leads()
+        return render_template('smart_insights/smart_leads.html', output=output, form=form)
+        # except:
+        #     flash('Error generating leads list.', 'danger')
+        #     return redirect(url_for('smart_leads'))
 
-    return render_template('generate.html', form=form, output=output)
+    return render_template('smart_insights/smart_leads.html', form=form, output=output)
+        
+        
+
+# Sales script
+@app.route('/smart-insights/sales-script', methods=['POST', 'GET'])
+@login_required
+def sales_script():
+    def generate_script(lead_id):
+        lead = pd.read_sql(con=engine, sql=f'SELECT * FROM Leads WHERE\
+            ClientID={current_user.ClientID} AND LeadID={lead_id}')
+        if lead.iloc[0] is None:
+            flash('Lead with specified ID not found.', 'danger')
+            return redirect(url_for('sales_script'))
+        account_id = int(lead['AccountID'][0])
+        lead = lead.to_json(orient='records')
+        account = pd.read_sql(con=engine, sql=f'SELECT * FROM Accounts WHERE\
+            ClientID={current_user.ClientID} AND AccountID={account_id}').to_json(orient='records')
+        interactions = pd.read_sql(con=engine, sql=f'SELECT * FROM Interactions WHERE\
+            ClientID={current_user.ClientID} AND LeadID={lead_id}').to_json(orient='records')
+        
+        thread = client.beta.threads.create()
+
+        def create_message():
+            client.beta.threads.messages.create(
+                thread_id=thread.id,
+                role='user',
+                content=f'My name is {current_user.FirstName}, I work for \
+                    {current_user.Client.Client}, and my company email is {current_user.Email}. \
+                    Generate a sales script to approach the following lead with. \
+                    Lead Information:\n{lead}\n\
+                    Lead Account Information:\n{account}\n\
+                    Interactions with Lead:\n{interactions}\n\
+                    Your response should not address me directly.'
+            )
+            
+        def create_run():
+            run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id,
+            instructions='Script should be professional and relevant. Use all information\
+                available about the lead when creating the script. Header of script\
+                should be in the format: Sales Script for *lead name* - *lead company*.\
+                There should also be a closing part of the script which includes the users \
+                name, company, etc.'
+            )
+            return run
+        
+        def get_response():
+            messages = client.beta.threads.messages.list(
+                thread_id=thread.id
+            )
+            last_message = messages.data[0]
+            role = last_message.role
+            response = last_message.content[0].text.value
+            # response = response.replace('\n', '<br>')
+            response = markdown.markdown(response)
+            
+            return response
+            # return f'{role.capitalize()}:\n{response}'
+
+        create_message()
+        run = create_run()
+        if run:
+            while True:
+                time.sleep(1)
+                run_status = client.beta.threads.runs.retrieve(thread_id=thread.id,
+                                                        run_id=run.id)
+                if run_status.status == 'completed':
+                    # elapsed_time = run_status.completed_at - run_status.created_at
+                    # formatted_elapsed_time = time.strftime(
+                    # "%H:%M:%S", time.gmtime(elapsed_time))
+                    response = get_response()
+                    return response
+                    # return f"Run completed in {formatted_elapsed_time}\n{response}"
+                elif run_status.status == 'requires_action':
+                    break
+                elif run_status.status == 'failed':
+                    break
+        
+        return response 
+    
+    form = GenerateScriptForm()
+    output = None
+    
+    regenerate_id = request.args.get('lead_id')
+    if regenerate_id:
+        form.lead_id.data = regenerate_id
+    
+    if form.validate_on_submit():
+        try:
+            output = generate_script(form.lead_id.data)
+            return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
+        except:
+            flash('Error generating script', 'danger')
+            return redirect(url_for('sales_script'))
+
+    return render_template('smart_insights/sales_script.html', form=form, output=output)
 
 
 # Accounts list

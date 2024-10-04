@@ -141,8 +141,12 @@ class InteractionForm(FlaskForm):
     interaction = TextAreaField('Interaction:', validators=[DataRequired()])
     submit = SubmitField()
     
-# Generate analytics form
-class GenerateForm(FlaskForm):
+# Generate leads list form
+class GenerateLeadsForm(FlaskForm):
+    submit = SubmitField('Submit')
+
+# Generate sales script form
+class GenerateScriptForm(FlaskForm):
     lead_id = IntegerField('LeadID:', validators=[DataRequired()])
     submit = SubmitField('Submit')
 

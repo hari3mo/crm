@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block route %}{{ url_for('smart_insights') }}{% endblock %}
+
+{% block path %}Insights{% endblock %}
+
+{% block page %}Home{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <a href="{{ url_for('smart_leads') }}">
+                        <button class="btn btn-lg btn-info animate-up-2" type="button">Smart Leads</button>
+                    </a>
+                    <a href="{{ url_for('sales_script') }}">
+                        <button class="btn btn-lg btn-info animate-up-2" type="button">Smart Sales</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

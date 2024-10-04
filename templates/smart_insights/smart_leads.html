@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block route %}{{ url_for('smart_insights') }}{% endblock %}
+
+{% block path %}Insights{% endblock %}
+
+{% block page %}Smart{% endblock %}
+
+{% block title %}Smart Leads{% endblock %}
+
+{% block content %}
+
+{% if output %}
+
+{% autoescape false %}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    {{ output }}
+                    <form method="POST" id="salesForm">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-info animate-up-2 me-1" id="submitButton" onclick="this.innerHTML='<span class=&quot;spinner-border spinner-border-sm&quot; role=&quot;status&quot;></span><span class=&quot;visually-hidden&quot;>Loading...</span>'; this.disabled=true; this.form.submit();">
+                            Regenerate
+                        </button>
+                        {{ leads }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endautoescape %}
+
+{% else %}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <form method="POST" id="salesForm">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-lg btn-info animate-up-2 me-1" id="submitButton" onclick="this.innerHTML='<span class=&quot;spinner-border spinner-border-sm&quot; role=&quot;status&quot;></span><span class=&quot;visually-hidden&quot;>Loading...</span>'; this.disabled=true; this.form.submit();">
+                            Generate Leads
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+
+{% endblock %}

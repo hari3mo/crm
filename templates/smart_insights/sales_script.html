@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block route %}{{ url_for('smart_insights') }}{% endblock %}
+
+{% block path %}Insights{% endblock %}
+
+{% block page %}Sales{% endblock %}
+
+{% block title %}Smart Sales{% endblock %}
+
+{% block content %}
+
+{% if output %}
+
+{% autoescape false %}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    {{ output }}
+
+                    <a href="{{ url_for('sales_script', lead_id=lead) }}">
+                        <button class="btn btn-info animate-up-2 me-1">
+                            Regenerate
+                        </button>
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endautoescape %}
+
+{% else %}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+
+                    <form method="POST" id="salesForm">
+                        {{ form.hidden_tag() }}
+                        
+                        {{ form.lead_id.label(class="form-label") }}
+                        {{ form.lead_id(class="form-control") }}
+                        <br>
+                        <button type="submit" class="btn btn-info animate-up-2 me-1" id="submitButton" onclick="this.innerHTML='<span class=&quot;spinner-border spinner-border-sm&quot; role=&quot;status&quot;></span><span class=&quot;visually-hidden&quot;>Loading...</span>'; this.disabled=true; this.form.submit();">
+                            Generate
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
