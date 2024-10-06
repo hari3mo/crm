@@ -1366,8 +1366,8 @@ def clear_accounts():
         Accounts.query.delete()
         db.session.commit()
         flash('Accounts cleared successfully.', 'success')
-    except:
-        flash('Accounts clear failed. Foreign key relationships may exist.', 'danger')
+    except Exception as e:
+        flash(f'{e}\nAccounts clear failed. Foreign key relationships may exist.', 'danger')
     return redirect(url_for('accounts_list'))
 
 # Clear leads
