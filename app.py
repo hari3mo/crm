@@ -1363,7 +1363,7 @@ def delete_interaction(id):
 @login_required
 def clear_accounts():
     try:
-        Accounts.query.delete()
+        Accounts.query.filter_by(ClientID=current_user.ClientID).delete()
         db.session.commit()
         flash('Accounts cleared successfully.', 'success')
     except Exception as e:
@@ -1375,7 +1375,7 @@ def clear_accounts():
 @login_required
 def clear_leads():
     try:
-        Leads.query.delete()
+        Leads.query.filter_by(ClientID=current_user.ClientID).delete()
         db.session.commit()
         flash('Leads cleared successfully.', 'success')
     except:
@@ -1387,7 +1387,7 @@ def clear_leads():
 @login_required
 def clear_opportunities():  
     try:
-        Opportunities.query.delete()
+        Opportunities.query.filter_by(ClientID=current_user.ClientID).delete()
         db.session.commit()
         flash('Opportunities cleared successfully.', 'success')
     except:
@@ -1400,7 +1400,7 @@ def clear_opportunities():
 @login_required
 def clear_sales():
     try:
-        Sales.query.delete()
+        Sales.query.filter_by(ClientID=current_user.ClientID).delete()
         db.session.commit()
         flash('Sales cleared successfully.', 'success')
     except:
@@ -1413,7 +1413,7 @@ def clear_sales():
 @login_required
 def clear_interactions():
     try:
-        Interactions.query.delete()
+        Interactions.query.filter_by(ClientID=current_user.ClientID).delete()
         db.session.commit()
         flash('Interactions cleared successfully.', 'success')
     except:
