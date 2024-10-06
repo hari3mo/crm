@@ -54,11 +54,9 @@
                     <input type="text" class="form-control" name="query" hx-get="/search_leads" hx-trigger="keyup changed delay:250ms" hx-target="#results" id="topbarInputIconLeft" placeholder="Search leads" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
-            {% if session['admin'] %}
             <a href="{{ url_for('clear_leads') }}">
                 <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all leads?');" type="button">Clear</button>
             </a>
-            {% endif %}
             <a href="{{ url_for('leads_list') }}">
                 <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
             </a>
