@@ -123,7 +123,7 @@ def login():
                 # Check if user is an admin
                 admin = Admins.query.filter_by(User=current_user.Email).first()
                 session['admin'] = True if admin else False
-                flash('Successfully logged in.', 'success')
+                # flash('Successfully logged in.', 'success')
                 return redirect(url_for('index'))
             else:
                 flash('Incorrect password.', 'danger')
@@ -200,7 +200,7 @@ def logout():
 
 
 @app.route('/')
-@cache.cached(timeout=60)
+# @cache.cached(timeout=60)
 @login_required
 def index():
     # leads = len(Leads.query.all())
@@ -303,8 +303,8 @@ def smart_leads():
         try:
             output = generate_leads()
             return render_template('smart_insights/smart_leads.html', output=output, form=form)
-        except:
-            flash('Error generating leads list. Please try again.', 'danger')
+        except Exception as e:
+            flash(f'{e}\nError generating leads list. Please try again.', 'danger')
             return redirect(url_for('smart_leads'))
 
     return render_template('smart_insights/smart_leads.html', form=form, output=output)
