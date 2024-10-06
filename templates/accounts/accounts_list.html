@@ -53,11 +53,9 @@
                     <input type="text" class="form-control" name="query" hx-get="/search_accounts" hx-trigger="keyup changed" hx-target="#results" id="topbarInputIconLeft" placeholder="Search accounts" aria-label="Search" aria-describedby="topbar-addon" style="width: 215px;">
                 </div>
             </form>
-            {% if session['admin'] %}
             <a href="{{ url_for('clear_accounts') }}">
                 <button class="btn btn-sm btn-danger animate-up-2 me-1" onclick="return confirm('Are you sure you want to clear all accounts?');" type="button">Clear</button>
             </a>
-            {% endif %}
             <a href="{{ url_for('accounts_list') }}">
                 <button class="btn btn-sm btn-info animate-up-2 me-1" type="button">Refresh</button>
             </a>

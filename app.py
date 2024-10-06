@@ -221,7 +221,7 @@ def index():
 @login_required
 def smart_insights():
     return render_template('smart_insights/smart_insights.html')
-
+                  
 # Smart leads
 @app.route('/smart-insights/smart-leads', methods=['POST', 'GET']) 
 @login_required
@@ -718,9 +718,9 @@ def import_accounts():
             flash('Accounts import successful.', 'success')
             return redirect(url_for('accounts_list'))    
                 
-        except:
+        except Exception as e:
             db.session.rollback()
-            flash('Import failed. Please ensure .csv file is ordered as \
+            flash(f'{e}\nImport failed. Please ensure .csv file is ordered as \
                 follows: Company Name, Company Revenue, Employee Head Count, \
                 Company Industry, Company Specialties, Company Type, Country, \
                 City, Timezone.', 'danger')
