@@ -789,9 +789,9 @@ def import_leads():
             flash('Import successful.', 'success')
             return redirect(url_for('leads_list'))    
 
-        except:
+        except Exception as e:
             db.session.rollback()
-            flash('Import failed. Please ensure .csv file is ordered as \
+            flash(f'{e}\nImport failed. Please ensure .csv file is ordered as \
                 follows: Company Name, Position, First Name, Last Name, \
                     Email', 'danger')
             return redirect(url_for('import_leads'))
