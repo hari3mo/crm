@@ -304,6 +304,7 @@ def smart_leads():
             output = generate_leads()
             return render_template('smart_insights/smart_leads.html', output=output, form=form)
         except Exception as e:
+            db.session.rollback()
             flash(f'{e}\nError generating leads list. Please try again.', 'danger')
             return redirect(url_for('smart_leads'))
 
@@ -408,6 +409,7 @@ def sales_script():
             output = generate_script(form.lead_id.data)
             return render_template('smart_insights/sales_script.html', output=output, form=form, lead=form.lead_id.data)
         except Exception as e:
+            db.session.rollback()
             flash(f'{e}\nError generating script. Please try again.', 'danger')
             return redirect(url_for('sales_script'))
 
